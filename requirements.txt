@@ -1,0 +1,3 @@
+#pytorch
+python-dotenv==1.2.2
+transformers==5.13.1
