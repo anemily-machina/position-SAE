@@ -1,0 +1,8 @@
+{
+    "K": 32000, 
+    "N": 1000000,
+    "max_length":250,
+    "subsample_type": "random",
+    "subsample_k":25,
+    "layers":[-1]
+}
