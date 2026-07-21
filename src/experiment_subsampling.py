@@ -160,8 +160,6 @@ def make_embeddings(ai_config, dataset_config, batch_size):
         # save file safely so that the cache check works
         save_torch(emb_buffer, cs_fname)
 
-    exit()
-
     tracking_json["embeddings_made"] = True
 
     save_json(tracking_json)
