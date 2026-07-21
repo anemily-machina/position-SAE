@@ -140,8 +140,6 @@ def make_embeddings(ai_config, dataset_config, batch_size):
 
             sent_buffer += batch_sents
 
-            print(len(sent_buffer), curr_cs)
-
         chunk_sents = sent_buffer[:curr_cs]
         sent_buffer = sent_buffer[curr_cs:]
 
@@ -159,8 +157,6 @@ def make_embeddings(ai_config, dataset_config, batch_size):
 
             emb_buffer += embs
 
-            print(len(emb_buffer), curr_cs)
-
         # save file safely so that the cache check works
         save_torch(emb_buffer, cs_fname)
 
@@ -174,10 +170,6 @@ def make_embeddings(ai_config, dataset_config, batch_size):
 def main():
 
     args = parse_args()
-
-    print(args)
-
-    exit()
 
     global device
     device = torch.device(args.device)
