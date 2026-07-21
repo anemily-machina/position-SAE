@@ -85,7 +85,8 @@ def _make_basic_emb_fn(
     ai_model,
     config,
     layers,
-    device="cpu",
+    input_device="cpu",
+    output_device="cpu",
     tokenizer_kwargs={},
     model_kwargs={},
 ):
@@ -101,7 +102,8 @@ def _make_basic_emb_fn(
         if k in mk_default:
             mk_default.pop(k)
 
-    device = torch.device(device)
+    input_device = torch.device(input_device)
+    output_device = torch.device(output_device)
 
     def emb_fn(
         batch,
@@ -117,7 +119,7 @@ def _make_basic_emb_fn(
             batch_dims = [am.nonzero(as_tuple=True) for am in attention_mask]
 
             # process batch
-            batch_t = {k: v.to(device) for k, v in batch_t.items()}
+            batch_t = {k: v.to(input_device) for k, v in batch_t.items()}
             output = ai_model(**batch_t, **mk_default, **model_kwargs)
             hidden_states = output.hidden_states
 
@@ -131,6 +133,8 @@ def _make_basic_emb_fn(
                 for bd, re in zip(batch_dims, raw_embs):
 
                     e = re[bd]
+
+                    e = e.to(output_device)
 
                     embs.append(e)
 
@@ -172,23 +176,14 @@ def load_model(config):
     return ai_model
 
 
-def get_emb_fn(
-    tokenizer,
-    ai_model,
-    config,
-    layers,
-    device="cpu",
-    tokenizer_kwargs={},
-    model_kwargs={},
-):
+def get_emb_fn(**kwargs):
 
+    config = kwargs["config"]
     model_family = config["model_family"]
 
     make_emb_fn = family2info[model_family]["make_emb_fn"]
 
-    emb_fn = make_emb_fn(
-        tokenizer, ai_model, config, layers, device, tokenizer_kwargs, model_kwargs
-    )
+    emb_fn = make_emb_fn(**kwargs)
 
     return emb_fn
 
@@ -203,7 +198,9 @@ def main():
 
     ai_model = load_model(config)
 
-    emb_fn = get_emb_fn(tokenizer, ai_model, layers=[-1], config=config)
+    emb_fn = get_emb_fn(
+        tokenizer=tokenizer, ai_model=ai_model, layers=[-1], config=config
+    )
 
     batch = [
         "this is a sentence",

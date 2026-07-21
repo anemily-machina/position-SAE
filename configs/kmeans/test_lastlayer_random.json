@@ -1,8 +1,11 @@
 {
     "K": 32000, 
-    "N": 1000000,
+    "N": 300000,
+    "D": 512,
+    "chunk_size":5000,
+    "emb_folder":"../data/positional-SAE/lastlayer_random",
     "max_length":250,
     "subsample_type": "random",
-    "subsample_k":25,
+    "subsample_k":125,
     "layers":[-1]
 }

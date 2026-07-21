@@ -1,8 +1,12 @@
 import json
 import os
 import pathlib
-from random import randint
+from random import randint, seed as python_seed
 import shutil
+
+from numpy.random import seed as numpy_seed
+import torch
+from torch.random import seed as pytorch_seed
 
 
 def _make_temp_file(base_file, max_range=1000000):
@@ -68,3 +72,17 @@ def save_json(json_data, fname, keep_tmp_on_fail=False, **kwargs):
             json.dump(d, f_out, **k)
 
     _save_file(save_fn, json_data, fname, keep_tmp_on_fail, **kwargs)
+
+
+def save_torch(torch_data, fname, keep_tmp_on_fail=False, **kwargs):
+
+    def save_fn(d, f, **k):
+        torch.save(d, f, **k)
+
+    _save_file(save_fn, torch_data, fname, keep_tmp_on_fail, **kwargs)
+
+
+def set_random_seeds(seed):
+    numpy_seed(seed)
+    python_seed(seed)
+    pytorch_seed(seed)
