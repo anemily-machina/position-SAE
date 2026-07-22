@@ -6,7 +6,7 @@ import shutil
 
 from numpy.random import seed as numpy_seed
 import torch
-from torch.random import seed as pytorch_seed
+from torch.random import manual_seed as pytorch_seed
 
 
 def _make_temp_file(base_file, max_range=1000000):
