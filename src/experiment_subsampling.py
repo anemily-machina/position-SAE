@@ -173,7 +173,7 @@ def make_embeddings(ai_config, dataset_config, batch_size):
     save_json(tracking_json)
 
 
-def do_mean_std_exp(subsample_rate):
+def do_mean_std_exp(subsample_rate=1.0):
 
     emb_cache_folder = os.path.join(output_folder, "emb_cache")
 
