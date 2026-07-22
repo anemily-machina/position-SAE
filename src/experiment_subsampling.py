@@ -233,9 +233,9 @@ def main():
     ai_config = load_json(args.ai_config)
     dataset_config = load_json(args.dataset_config)
 
-    # make_embeddings(ai_config, dataset_config, args.batch_size)
+    make_embeddings(ai_config, dataset_config, args.batch_size)
 
-    do_mean_std_exp()
+    # do_mean_std_exp()
 
 
 if __name__ == "__main__":
