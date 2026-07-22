@@ -74,6 +74,13 @@ def save_json(json_data, fname, keep_tmp_on_fail=False, **kwargs):
     _save_file(save_fn, json_data, fname, keep_tmp_on_fail, **kwargs)
 
 
+def load_torch(fname):
+
+    torch_data = torch.load(fname)
+
+    return torch_data
+
+
 def save_torch(torch_data, fname, keep_tmp_on_fail=False, **kwargs):
 
     def save_fn(d, f, **k):

@@ -7,7 +7,14 @@ python src\\experiment_subsampling.py -o "../data/positional-SAE/experiments_sub
 """
 
 from ai_models import load_model, load_tokenizer, get_emb_fn
-from utils import make_folder, load_json, save_json, save_torch
+from utils import (
+    make_folder,
+    load_json,
+    load_torch,
+    save_json,
+    save_torch,
+    set_random_seeds,
+)
 
 from argparse import ArgumentParser
 import os
@@ -51,6 +58,7 @@ def parse_args():
     )
     parser.add_argument("-l", "--layer", required=False, default=-1, type=int)
     parser.add_argument("-b", "--batch-size", required=False, default=32, type=int)
+    parser.add_argument("-seed", "--rng-seed", required=False, default=4321, type=int)
 
     args = parser.parse_args()
 
@@ -165,9 +173,39 @@ def make_embeddings(ai_config, dataset_config, batch_size):
     save_json(tracking_json)
 
 
+def do_mean_std_exp(subsample_rate):
+
+    emb_cache_folder = os.path.join(output_folder, "emb_cache")
+
+    chunk_files = os.listdir(emb_cache_folder)
+    chunk_files = sorted(chunk_files, key=lambda x: int(x.split(".")[0]))
+    chunk_fnames = [os.path.join(emb_cache_folder, fn) for fn in chunk_files]
+
+    total_embs = 0
+    c_i = 0
+    curr_chunk = load_torch(chunk_fnames[c_i])
+    # first embedding of first tensor of embeddings in a list of tensors
+    d = len(curr_chunk[0][0])
+
+    print(curr_chunk[0][0])
+
+    print(d)
+
+    exit()
+
+    # TODO arg or config
+    iter_depth = 2
+
+    print()
+    print(f"performing serial ")
+    print()
+
+
 def main():
 
     args = parse_args()
+
+    set_random_seeds(args.rng_seed)
 
     global device
     device = torch.device(args.device)
@@ -195,7 +233,9 @@ def main():
     ai_config = load_json(args.ai_config)
     dataset_config = load_json(args.dataset_config)
 
-    make_embeddings(ai_config, dataset_config, args.batch_size)
+    # make_embeddings(ai_config, dataset_config, args.batch_size)
+
+    do_mean_std_exp()
 
 
 if __name__ == "__main__":
