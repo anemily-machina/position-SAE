@@ -173,7 +173,9 @@ def make_embeddings(ai_config, dataset_config, batch_size):
     save_json(tracking_json)
 
 
-def do_mean_std_exp(subsample_rate=1.0):
+def calc_mean_std(subsample_rate):
+
+    assert 0 < subsample_rate and subsample_rate <= 1.0
 
     emb_cache_folder = os.path.join(output_folder, "emb_cache")
 
@@ -184,7 +186,7 @@ def do_mean_std_exp(subsample_rate=1.0):
     total_embs = 0
     c_i = 0
     curr_chunk = load_torch(chunk_fnames[c_i])
-    # first embedding of first tensor of embeddings in a list of tensors
+    # first embedding of first tensor in a list of tensors
     d = len(curr_chunk[0][0])
 
     print(curr_chunk[0][0])
@@ -197,8 +199,19 @@ def do_mean_std_exp(subsample_rate=1.0):
     iter_depth = 2
 
     print()
-    print(f"performing serial ")
+    print(f"Mean std calculation: {subsample_rate}")
+    print(f"performing serial KahanBabushkaKleinSum of depth {iter_depth}")
+    print(
+        "https://en.wikipedia.org/wiki/Kahan_summation_algorithm#Further_enhancements"
+    )
     print()
+
+    acc = torch.zeros((iter_depth + 1, d), dtype=torch.float64)
+
+
+def do_mean_std_exp():
+
+    mean, std = calc_mean_std(1.0)
 
 
 def main():
