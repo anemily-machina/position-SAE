@@ -16,6 +16,7 @@ from utils import (
     save_torch,
     set_random_seeds,
 )
+from torch_custom_fns import one_pass_mean_std
 
 from argparse import ArgumentParser
 import os
@@ -183,6 +184,7 @@ def supsample_mean_std(sub_rate=1.0):
 
     emb_cache_folder = os.path.join(output_folder, "emb_cache")
     emb_files = os.listdir(emb_cache_folder)
+    emb_files = emb_files[:10]
     emb_files = sorted(emb_files, key=lambda x: int(x.split(".")[0]))
     emb_files = [os.path.join(emb_cache_folder, f) for f in emb_files]
 
@@ -205,13 +207,14 @@ def supsample_mean_std(sub_rate=1.0):
 
                 batch_embs = torch.cat(batch_embs, dim=0)
 
-                print(batch_embs.size())
+                yield batch_embs
 
-                exit()
+                batch_i = next_batch_i
 
-    data_iter()
+    mean, std = one_pass_mean_std(data_iter(), num_batches=num_batches)
 
-    exit()
+    print(mean)
+    print(std)
 
 
 def main():
