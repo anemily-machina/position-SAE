@@ -189,7 +189,6 @@ def supsample_mean_std(sub_rate=1.0):
 
     emb_cache_folder = os.path.join(output_folder, "emb_cache")
     emb_files = os.listdir(emb_cache_folder)
-    emb_files = emb_files[:1]
     emb_files = sorted(emb_files, key=lambda x: int(x.split(".")[0]))
     emb_files = [os.path.join(emb_cache_folder, f) for f in emb_files]
 
@@ -241,13 +240,26 @@ def mean_std_experiments():
 
     subsample_rates = [(20 - k) / 20 for k in range(0, 20)]
 
-    print(subsample_rates)
+    for sub_rate in subsample_rates:
 
-    exit()
+        print()
+        print(f"mean std experiement with subsample rate: {sub_rate}")
+        print()
 
-    mean, std = supsample_mean_std(sub_rate=1.0)
+        if sub_rate in tracking_json[exp_key]:
+            print()
+            print(f"experiment already completed.. skipping...")
+            print()
 
-    print(mean, std)
+            continue
+
+        mean, std = supsample_mean_std(sub_rate=sub_rate)
+
+        exp_entry = {"mean": mean, "std": std}
+
+        tracking_json[exp_key][sub_rate] = exp_entry
+
+        save_tracking_json(tracking_json)
 
 
 def main():
