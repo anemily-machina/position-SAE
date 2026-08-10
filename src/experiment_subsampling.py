@@ -232,6 +232,19 @@ def supsample_mean_std(sub_rate=1.0):
 
 def mean_std_experiments():
 
+    exp_key = "mean_std_exp"
+
+    tracking_json = get_tracking_json()
+
+    if exp_key not in tracking_json:
+        tracking_json[exp_key] = {}
+
+    subsample_rates = [(20 - k) / 20 for k in range(0, 20)]
+
+    print(subsample_rates)
+
+    exit()
+
     mean, std = supsample_mean_std(sub_rate=1.0)
 
     print(mean, std)
