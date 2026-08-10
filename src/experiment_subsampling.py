@@ -113,7 +113,7 @@ def make_embeddings(ai_config, dataset_config, batch_size):
         config=ai_config,
         layers=[layer],
         input_device=device,
-        output_device="cpu",
+        output_device="cuda",
         tokenizer_kwargs=tokenizer_kwargs,
     )
 
@@ -178,47 +178,6 @@ def make_embeddings(ai_config, dataset_config, batch_size):
     save_tracking_json(tracking_json)
 
 
-def calc_mean_std(subsample_rate):
-
-    assert 0 < subsample_rate and subsample_rate <= 1.0
-
-    emb_cache_folder = os.path.join(output_folder, "emb_cache")
-
-    chunk_files = os.listdir(emb_cache_folder)
-    chunk_files = sorted(chunk_files, key=lambda x: int(x.split(".")[0]))
-    chunk_fnames = [os.path.join(emb_cache_folder, fn) for fn in chunk_files]
-
-    total_embs = 0
-    c_i = 0
-    curr_chunk = load_torch(chunk_fnames[c_i])
-    # first embedding of first tensor in a list of tensors
-    d = len(curr_chunk[0][0])
-
-    print(curr_chunk[0][0])
-
-    print(d)
-
-    exit()
-
-    # TODO arg or config
-    iter_depth = 2
-
-    print()
-    print(f"Mean std calculation: {subsample_rate}")
-    print(f"performing serial KahanBabushkaKleinSum of depth {iter_depth}")
-    print(
-        "https://en.wikipedia.org/wiki/Kahan_summation_algorithm#Further_enhancements"
-    )
-    print()
-
-    acc = torch.zeros((iter_depth + 1, d), dtype=torch.float64)
-
-
-def do_mean_std_exp():
-
-    mean, std = calc_mean_std(1.0)
-
-
 def main():
 
     args = parse_args()
@@ -252,8 +211,6 @@ def main():
     dataset_config = load_json(args.dataset_config)
 
     make_embeddings(ai_config, dataset_config, args.batch_size)
-
-    # do_mean_std_exp()
 
 
 if __name__ == "__main__":
