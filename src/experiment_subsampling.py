@@ -242,7 +242,7 @@ def supsample_mean_std(sub_rate=1.0):
 
 def mean_std_experiments():
 
-    mean, std = supsample_mean_std(sub_rate=0.5)
+    mean, std = supsample_mean_std(sub_rate=1.0)
 
 
 def main():
