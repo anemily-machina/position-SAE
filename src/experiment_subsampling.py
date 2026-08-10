@@ -232,6 +232,8 @@ def supsample_mean_std(sub_rate=1.0):
 def mean_std_experiments():
 
     exp_key = "mean_std_exp"
+    exp_folder = os.path.join(output_folder, "mean_std_exp")
+    make_folder(exp_folder)
 
     tracking_json = get_tracking_json()
 
@@ -246,16 +248,23 @@ def mean_std_experiments():
         print(f"mean std experiement with subsample rate: {sub_rate}")
         print()
 
-        if sub_rate in tracking_json[exp_key]:
+        exp_fname = os.path.join(exp_folder, f"{sub_rate}.pt")
+
+        if os.path.isfile(exp_fname):
+
             print()
             print(f"experiment already completed.. skipping...")
             print()
 
-            continue
+            mean, std = load_torch(exp_fname)
 
-        mean, std = supsample_mean_std(sub_rate=sub_rate)
+        else:
 
-        exp_entry = {"mean": mean, "std": std}
+            mean, std = supsample_mean_std(sub_rate=sub_rate)
+
+            save_torch((mean, std), exp_fname)
+
+        exp_entry = {"mean": [float(m) for m in mean], "std": [float(s) for s in std]}
 
         tracking_json[exp_key][sub_rate] = exp_entry
 
