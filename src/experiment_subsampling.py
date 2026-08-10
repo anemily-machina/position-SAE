@@ -1,5 +1,6 @@
 """
 python src/experiment_subsampling.py -o "../data/positional-SAE/experiments_subsampling" --total-sents 1000000 --sents-per-chunk 10000 --max-sent-length 100 --batch-size 32
+python src/experiment_subsampling.py -o "../data/positional-SAE/experiments_subsampling" --total-sents 1000000 --sents-per-chunk 10000 --max-sent-length 100 --batch-size 32  --device "cuda"
 
 python src\\experiment_subsampling.py -o "../data/positional-SAE/experiments_subsampling"
 python src\\experiment_subsampling.py -o "../data/positional-SAE/experiments_subsampling"
@@ -113,7 +114,7 @@ def make_embeddings(ai_config, dataset_config, batch_size):
         config=ai_config,
         layers=[layer],
         input_device=device,
-        output_device="cuda",
+        output_device="cpu",
         tokenizer_kwargs=tokenizer_kwargs,
     )
 
@@ -178,6 +179,27 @@ def make_embeddings(ai_config, dataset_config, batch_size):
     save_tracking_json(tracking_json)
 
 
+def supsample_mean_std(sub_rate=1.0):
+
+    emb_cache_folder = os.path.join(output_folder, "emb_cache")
+    emb_files = os.listdir(emb_cache_folder)
+    emb_files = sorted(emb_files, key=lambda x: int(x.split(".")[0]))
+    emb_files = [os.path.join(emb_cache_folder, f) for f in emb_files]
+
+    batch_size = 1000
+    num_batches = total_sents / batch_size
+
+    def data_iter():
+
+        for fname in emb_files:
+
+            print(fname)
+
+    data_iter()
+
+    exit()
+
+
 def main():
 
     args = parse_args()
@@ -210,7 +232,7 @@ def main():
     ai_config = load_json(args.ai_config)
     dataset_config = load_json(args.dataset_config)
 
-    make_embeddings(ai_config, dataset_config, args.batch_size)
+    # make_embeddings(ai_config, dataset_config, args.batch_size)
 
 
 if __name__ == "__main__":
