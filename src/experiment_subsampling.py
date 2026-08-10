@@ -2,7 +2,7 @@
 python src/experiment_subsampling.py -o "../data/positional-SAE/experiments_subsampling" --total-sents 1000000 --sents-per-chunk 10000 --max-sent-length 100 --batch-size 32
 
 python src\\experiment_subsampling.py -o "../data/positional-SAE/experiments_subsampling"
-python src\\experiment_subsampling.py -o "../data/positional-SAE/experiments_subsampling" -
+python src\\experiment_subsampling.py -o "../data/positional-SAE/experiments_subsampling" 
 
 """
 
@@ -175,7 +175,7 @@ def make_embeddings(ai_config, dataset_config, batch_size):
 
     tracking_json["embeddings_made"] = True
 
-    save_tracking_json(tracking_json)
+    save_tracking_json(tracking_json)f
 
 
 def calc_mean_std(subsample_rate):
