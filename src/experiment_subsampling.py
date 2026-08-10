@@ -213,11 +213,11 @@ def supsample_mean_std(sub_rate=1.0):
 
             batch_i = 0
 
-            while batch_i < len(file_embs):
+            while batch_i < len(subsample_embs):
 
                 next_batch_i = batch_i + batch_size
 
-                batch_embs = file_embs[batch_i:next_batch_i]
+                batch_embs = subsample_embs[batch_i:next_batch_i]
 
                 batch_embs = torch.cat(batch_embs, dim=0)
 
@@ -229,7 +229,8 @@ def supsample_mean_std(sub_rate=1.0):
 
                 batch_i = next_batch_i
 
-    data_iter()
+    for x in data_iter():
+        pass
 
     exit()
 
