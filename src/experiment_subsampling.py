@@ -19,7 +19,10 @@ from utils import (
 from torch_custom_fns import one_pass_mean_std
 
 from argparse import ArgumentParser
+import math
 import os
+from random import sample
+
 
 from datasets import load_dataset
 import torch
@@ -182,9 +185,11 @@ def make_embeddings(ai_config, dataset_config, batch_size):
 
 def supsample_mean_std(sub_rate=1.0):
 
+    assert 0 < sub_rate <= 1.0
+
     emb_cache_folder = os.path.join(output_folder, "emb_cache")
     emb_files = os.listdir(emb_cache_folder)
-    emb_files = emb_files[:10]
+    emb_files = emb_files[:1]
     emb_files = sorted(emb_files, key=lambda x: int(x.split(".")[0]))
     emb_files = [os.path.join(emb_cache_folder, f) for f in emb_files]
 
@@ -197,6 +202,15 @@ def supsample_mean_std(sub_rate=1.0):
 
             file_embs = load_torch(fname)
 
+            subsample_embs = []
+            for embs in file_embs:
+
+                num_embs = len(embs)
+                subsample_num = math.ceil(num_embs * sub_rate)
+                keep_idx = sample(range(num_embs), k=subsample_num)
+                sub_embs = embs[keep_idx]
+                subsample_embs.append(sub_embs)
+
             batch_i = 0
 
             while batch_i < len(file_embs):
@@ -207,14 +221,27 @@ def supsample_mean_std(sub_rate=1.0):
 
                 batch_embs = torch.cat(batch_embs, dim=0)
 
+                print(batch_embs.size())
+
+                exit()
+
                 yield batch_embs
 
                 batch_i = next_batch_i
+
+    data_iter()
+
+    exit()
 
     mean, std = one_pass_mean_std(data_iter(), num_batches=num_batches)
 
     print(mean)
     print(std)
+
+
+def mean_std_experiments():
+
+    mean, std = supsample_mean_std(sub_rate=0.5)
 
 
 def main():
@@ -251,7 +278,7 @@ def main():
 
     # make_embeddings(ai_config, dataset_config, args.batch_size)
 
-    supsample_mean_std()
+    mean_std_experiments()
 
 
 if __name__ == "__main__":
