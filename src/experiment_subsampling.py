@@ -234,6 +234,8 @@ def main():
 
     # make_embeddings(ai_config, dataset_config, args.batch_size)
 
+    supsample_mean_std()
+
 
 if __name__ == "__main__":
     with torch.no_grad():
