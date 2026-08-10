@@ -227,6 +227,8 @@ def supsample_mean_std(sub_rate=1.0):
 
     mean, std = one_pass_mean_std(data_iter(), num_batches=num_batches)
 
+    return mean, std
+
 
 def mean_std_experiments():
 
