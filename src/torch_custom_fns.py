@@ -39,53 +39,22 @@ def _mag_sort(t: torch.Tensor) -> torch.Tensor:
     return sorted_t
 
 
-def two_sum_reduce(
-    acc: list[torch.Tensor] = None, acc_t: torch.Tensor = None
-) -> torch.Tensor:
-    """
-    reduces an accumilator list as best as possible
+def two_sum_reduce(acc: list[torch.Tensor], minmum=False):
 
-    """
-    assert acc is None or acc_t is None
+    acc = iter_two_sum(vecs=acc, acc=None)
 
-    if acc_t is None:
+    prev_size = None
+    next_size = len(acc)
 
-        d = len(acc[0])
+    # until there is no more compacting
+    while minmum and prev_size != next_size:
 
-        acc_t = torch.stack(acc)
+        acc = iter_two_sum(vecs=acc, acc=None)
 
-    else:
+        prev_size = next_size
+        next_size = len(acc)
 
-        d = acc_t.size(1)
-
-    acc_t = _mag_sort(acc_t)
-
-    # row is the set of accumilators for each dimension now
-    acc_t = acc_t.t()
-
-    reduced = []
-
-    for v in acc_t:
-
-        # reduce
-        v_r = iter_two_sum(v, None)
-
-        reduced.append(v_r)
-
-    max_r_size = max([len(r) for r in reduced])
-
-    acc_r = [
-        torch.zeros([d], device=acc_t.device, dtype=acc_t.dtype)
-        for _ in range(max_r_size)
-    ]
-
-    for i, v_r in enumerate(reduced):
-
-        for j, value in enumerate(v_r):
-
-            acc_r[j][i] = value
-
-    return acc_r
+    return acc
 
 
 def iter_two_sum(vecs: list[torch.Tensor], acc: list[torch.Tensor]) -> torch.Tensor:
@@ -195,72 +164,28 @@ def _test_tensor_two_sum():
 
 def one_pass_mean_std(batch_iter, num_batches=None):
 
-    acc_cap = 1
-    acc_cap2 = 1
-
     total_iters = 0
 
-    compact_iters = 10000
-    ci = compact_iters
-
-    acc = None
-    acc2 = None
+    acc = []
+    acc2 = []
     for batch in tqdm(batch_iter, total=num_batches, ncols=60):
 
         batch_size = len(batch)
 
         total_iters += batch_size
-        ci -= batch_size
 
         batch = batch.to(torch.float64)
 
         batch2 = batch * batch
 
-        acc = iter_two_sum(batch, acc)
+        a = two_sum_reduce(batch)
+        acc += a
 
-        acc2 = iter_two_sum(batch2, acc2)
+        a2 = two_sum_reduce(batch2)
+        acc2 += a2
 
-        if len(acc) > acc_cap:
-            print()
-            print(f"accumilator 1 too large {len(acc)} > {acc_cap}")
-            print()
-
-            acc = two_sum_reduce(acc=acc)
-            reduced = True
-
-            if len(acc) > acc_cap:
-
-                print()
-                print(f"accumilator 1 too large after reduction size > {acc_cap}")
-
-                acc_cap = math.ceil(acc_cap * 1.1)
-
-                print(f"expanding acc cap 1 to {acc_cap}")
-                print()
-
-        if len(acc2) > acc_cap2:
-
-            print()
-            print(f"accumilator 2 too large {len(acc2)} > {acc_cap2}")
-            print()
-
-            acc2 = two_sum_reduce(acc=acc2)
-
-            if len(acc2) > acc_cap2:
-
-                print()
-                print(f"accumilator 2 too large after reduction size > {acc_cap2}")
-
-                acc_cap2 = math.ceil(acc_cap2 * 1.1)
-
-                print(f"expanding acc cap 2 to {acc_cap2}")
-                print()
-
-        if ci <= 0:
-            ci = compact_iters
-
-            acc = two_sum_reduce(acc=acc)
-            acc2 = two_sum_reduce(acc=acc2)
+    acc = two_sum_reduce(acc, minmum=True)
+    acc2 = two_sum_reduce(acc2, minmum=True)
 
     mean_acc = [a / total_iters for a in acc]
     mean_acc = two_sum_reduce(acc=mean_acc)
@@ -287,47 +212,20 @@ def one_pass_mean_std(batch_iter, num_batches=None):
 
 def two_pass_mean_std(batch_iter, num_batches=None):
 
-    acc_cap = 1
-
-    compact_iters = 10000
-    ci = compact_iters
-
     total_iters = 0
 
-    acc = None
+    acc = []
     for batch in tqdm(batch_iter, total=num_batches, ncols=60):
 
         batch_size = len(batch)
         total_iters += batch_size
 
-        ci -= batch_size
-
         batch = batch.to(torch.float64)
 
-        acc = iter_two_sum(batch, acc)
+        a = two_sum_reduce(batch)
+        acc += a
 
-        if len(acc) > acc_cap:
-
-            print()
-            print(f"accumilator too large {len(acc)} > {acc_cap}")
-            print()
-
-            acc = two_sum_reduce(acc=acc)
-
-            if len(acc) > acc_cap:
-
-                print()
-                print(f"accumilator too large after reduction size > {acc_cap}")
-
-                acc_cap = math.ceil(acc_cap * 1.1)
-
-                print(f"expanding acc cap to {acc_cap}")
-                print()
-
-        if ci <= 0:
-            ci = compact_iters
-
-            acc = two_sum_reduce(acc=acc)
+    acc = two_sum_reduce(acc, minmum=True)
 
     mean_acc = [a / total_iters for a in acc]
     mean_acc = two_sum_reduce(acc=mean_acc)
@@ -336,41 +234,17 @@ def two_pass_mean_std(batch_iter, num_batches=None):
 
     mean = mean_acc_t[-1]
 
-    acc_cap = 1
-    ci = compact_iters
-    acc = None
+    acc = []
     for batch in tqdm(batch_iter, total=num_batches, ncols=60):
-
-        ci -= len(batch)
 
         batch = batch - mean
 
         batch = batch * batch
 
-        acc = iter_two_sum(batch, acc)
+        a = two_sum_reduce(batch)
+        acc += a
 
-        if len(acc) > acc_cap:
-
-            print()
-            print(f"accumilator too large {len(acc)} > {acc_cap}")
-            print()
-
-            acc = two_sum_reduce(acc=acc)
-
-            if len(acc) > acc_cap:
-
-                print()
-                print(f"accumilator too large after reduction size > {acc_cap}")
-
-                acc_cap = math.ceil(acc_cap * 1.1)
-
-                print(f"expanding acc cap to {acc_cap}")
-                print()
-
-        if ci <= 0:
-            ci = compact_iters
-
-            acc = two_sum_reduce(acc=acc)
+    acc = two_sum_reduce(acc, minmum=True)
 
     std_2_acc = [a / total_iters for a in acc]
     std_2_acc = two_sum_reduce(acc=std_2_acc)
@@ -442,8 +316,10 @@ def _test_one_pass_mean_std(all_values):
 
 def _test_mean_std():
 
+    d = 4
+
     display_iters = 1000
-    total_iters = 300000  # 0
+    total_iters = 3000000
 
     ti = total_iters
     all_values = []
@@ -452,7 +328,16 @@ def _test_mean_std():
 
         di = min(ti, display_iters)
 
-        values = torch.rand([di, 3], dtype=torch.float16)
+        half_d = d // 2
+
+        v1 = torch.rand([di, half_d], dtype=torch.float16)
+        v2 = torch.rand([di, half_d], dtype=torch.float16)
+
+        v1 = v1 - 0.5
+        v2 = v2 + 1.0
+
+        values = torch.cat([v1, v2], dim=1)
+
         values = values.to(torch.float64)
 
         all_values.append(values)

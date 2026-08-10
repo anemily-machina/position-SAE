@@ -75,6 +75,11 @@ def get_tracking_json():
     return tracking_json
 
 
+def save_tracking_json(tracking_json):
+
+    save_json(tracking_json, tracking_json_fname)
+
+
 def make_embeddings(ai_config, dataset_config, batch_size):
 
     tracking_json = get_tracking_json()
@@ -170,7 +175,7 @@ def make_embeddings(ai_config, dataset_config, batch_size):
 
     tracking_json["embeddings_made"] = True
 
-    save_json(tracking_json)
+    save_tracking_json(tracking_json)
 
 
 def calc_mean_std(subsample_rate):
