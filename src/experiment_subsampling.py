@@ -221,28 +221,18 @@ def supsample_mean_std(sub_rate=1.0):
 
                 batch_embs = torch.cat(batch_embs, dim=0)
 
-                print(batch_embs.size())
-
-                exit()
-
                 yield batch_embs
 
                 batch_i = next_batch_i
 
-    for x in data_iter():
-        pass
-
-    exit()
-
     mean, std = one_pass_mean_std(data_iter(), num_batches=num_batches)
-
-    print(mean)
-    print(std)
 
 
 def mean_std_experiments():
 
     mean, std = supsample_mean_std(sub_rate=1.0)
+
+    print(mean, std)
 
 
 def main():
