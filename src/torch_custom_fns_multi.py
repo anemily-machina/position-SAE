@@ -7,7 +7,7 @@ import torch
 from tqdm import tqdm
 
 
-def _one_pass_mean_std_multi(*args):
+def _one_pass_mean_std_multi(args):
 
     bi, batch_iter_fn, i = args
     batch_iter = batch_iter_fn(bi)
