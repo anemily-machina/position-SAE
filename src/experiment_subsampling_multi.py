@@ -1,6 +1,6 @@
 """
-python src/experiment_subsampling.py -o "../data/positional-SAE/experiments_subsampling" --device "cpu" -p 16
-python src/experiment_subsampling.py -o "../data/positional-SAE/experiments_subsampling" --device "cuda" -p 16
+python src/experiment_subsampling_multi.py -o "../data/positional-SAE/experiments_subsampling" --device "cpu" -p 16
+python src/experiment_subsampling_multi.py -o "../data/positional-SAE/experiments_subsampling" --device "cuda" -p 16
 
 python src\\experiment_subsampling.py -o "../data/positional-SAE/experiments_subsampling"
 python src\\experiment_subsampling.py -o "../data/positional-SAE/experiments_subsampling"
@@ -46,7 +46,7 @@ def parse_args():
     parser.add_argument("-o", "--output-folder", required=True)
 
     parser.add_argument("-d", "--device", required=False, default="cpu")
-    parser.add_argument("-p", "--num_procs", required=False, default=16)
+    parser.add_argument("-p", "--num_procs", required=False, default=16, type=int)
     parser.add_argument(
         "-ai", "--ai-config", required=False, default="configs/ai/pythia-70m.json"
     )
