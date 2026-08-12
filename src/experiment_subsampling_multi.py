@@ -260,12 +260,33 @@ def data_iter(args):
 
         file_queue.add(i)
 
+        if i == 0:
+            print()
+            print("request to load in queue")
+            print(file_queue._get_queue)
+            print()
+
         while not file_queue.is_front(i):
+            if i == 0:
+                print()
+                print("not at front of queue")
+                print(file_queue._get_queue)
+                print()
             sleep(wait_time)
+
+        print()
+        print("at front of queue")
+        print(file_queue._get_queue)
+        print()
 
         file_embs = load_torch(fname, map_location="cpu")
 
         file_queue.remove(i)
+
+        print()
+        print("removed from queue")
+        print(file_queue._get_queue)
+        print()
 
         subsample_embs = []
         for embs in file_embs:
