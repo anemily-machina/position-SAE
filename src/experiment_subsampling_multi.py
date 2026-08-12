@@ -193,6 +193,7 @@ def supsample_mean_std(sub_rate=1.0):
         next_d_i = d_i + data_size
         fc = emb_files[d_i:next_d_i]
         fname_chunks.append(fc)
+        d_i = next_d_i
 
     batch_size = 1000
     num_batches = total_sents / batch_size
