@@ -177,6 +177,38 @@ def make_embeddings(ai_config, dataset_config, batch_size):
     save_tracking_json(tracking_json)
 
 
+def data_iter(files, sub_rate):
+
+    batch_size = 1000
+
+    for fname in files:
+
+        file_embs = load_torch(fname)
+
+        subsample_embs = []
+        for embs in file_embs:
+
+            num_embs = len(embs)
+            subsample_num = math.ceil(num_embs * sub_rate)
+            keep_idx = sample(range(num_embs), k=subsample_num)
+            sub_embs = embs[keep_idx]
+            subsample_embs.append(sub_embs)
+
+        batch_i = 0
+
+        while batch_i < len(subsample_embs):
+
+            next_batch_i = batch_i + batch_size
+
+            batch_embs = subsample_embs[batch_i:next_batch_i]
+
+            batch_embs = torch.cat(batch_embs, dim=0)
+
+            yield batch_embs
+
+            batch_i = next_batch_i
+
+
 def supsample_mean_std(sub_rate=1.0):
 
     assert 0 < sub_rate <= 1.0
@@ -195,42 +227,12 @@ def supsample_mean_std(sub_rate=1.0):
         fname_chunks.append(fc)
         d_i = next_d_i
 
-    batch_size = 1000
     num_batches = total_sents / batch_size
 
-    def data_iter(files):
-
-        for fname in files:
-
-            file_embs = load_torch(fname)
-
-            subsample_embs = []
-            for embs in file_embs:
-
-                num_embs = len(embs)
-                subsample_num = math.ceil(num_embs * sub_rate)
-                keep_idx = sample(range(num_embs), k=subsample_num)
-                sub_embs = embs[keep_idx]
-                subsample_embs.append(sub_embs)
-
-            batch_i = 0
-
-            while batch_i < len(subsample_embs):
-
-                next_batch_i = batch_i + batch_size
-
-                batch_embs = subsample_embs[batch_i:next_batch_i]
-
-                batch_embs = torch.cat(batch_embs, dim=0)
-
-                yield batch_embs
-
-                batch_i = next_batch_i
-
-    data_iters = [data_iter(fc) for fc in fname_chunks]
+    data_iter_input = [(fc, sub_rate) for fc in fname_chunks]
 
     mean, std, total_iters = one_pass_mean_std_multi(
-        fname_chunks, data_iter, num_procs=num_procs
+        data_iter_input, data_iter, num_procs=num_procs
     )
 
     return mean, std, total_iters
