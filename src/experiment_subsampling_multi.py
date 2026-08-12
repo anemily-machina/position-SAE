@@ -262,9 +262,12 @@ def data_iter(args):
         file_queue.add(i)
 
         while not file_queue.is_front(i):
+            print()
+            print(f"waiting... {i} {file_queue._get_queue()}")
+            print()
             sleep(wait_time)
 
-        file_embs = load_torch(fname, map_location="cpu", mmap=False)
+        file_embs = load_torch(fname, map_location="cpu")
 
         file_queue.remove(i)
 
