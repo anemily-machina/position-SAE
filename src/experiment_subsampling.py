@@ -199,7 +199,7 @@ def supsample_mean_std(sub_rate=1.0):
 
         for fname in emb_files:
 
-            file_embs = load_torch(fname)
+            file_embs = load_torch(fname, map_location="cpu")
 
             subsample_embs = []
             for embs in file_embs:
