@@ -177,7 +177,9 @@ def make_embeddings(ai_config, dataset_config, batch_size):
     save_tracking_json(tracking_json)
 
 
-def data_iter(files, sub_rate):
+def data_iter(args):
+
+    files, sub_rate = args
 
     batch_size = 1000
 
