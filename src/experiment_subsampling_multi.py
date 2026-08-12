@@ -185,7 +185,7 @@ def data_iter(args):
 
     for fname in files:
 
-        file_embs = load_torch(fname)
+        file_embs = load_torch(fname, map_location="cpu")
 
         subsample_embs = []
         for embs in file_embs:
