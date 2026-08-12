@@ -56,6 +56,7 @@ class FileQueue:
 
         # sort queue by time
         queue_files = sorted(queue_files, key=lambda x: int(x.split("_")[1]))
+        print(queue_files)
         queue = []
         for qf in queue_files:
             v = qf.split("_")
