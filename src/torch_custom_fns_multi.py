@@ -47,6 +47,7 @@ def one_pass_mean_std_multi(batch_iter_inputs, batch_iter_fn, num_procs):
 
     print()
     print("multiprocessing mean/std")
+    print("multithreading mean/std")
     print()
 
     start_time = time()
