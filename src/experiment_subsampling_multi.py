@@ -79,7 +79,7 @@ class FileQueue:
                 raise ValueError(err_msg)
 
         # add to queue
-        now = time()
+        now = int(time() * 100)
         new_file = f"{number}_{now}"
         new_fname = os.path.join(self.queue_folder, new_file)
         # touch file

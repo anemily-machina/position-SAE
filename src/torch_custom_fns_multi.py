@@ -13,7 +13,7 @@ def _one_pass_mean_std_multi(args):
     bi, batch_iter_fn, i = args
 
     # so they don't block each other loading stuff
-    sleep(i * 10)
+    sleep(i * 5)
     batch_iter = batch_iter_fn(bi)
 
     if i == 0:
