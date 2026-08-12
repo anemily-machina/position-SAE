@@ -3,9 +3,15 @@ from torch_custom_fns import _mag_sort, two_sum_reduce
 from multiprocessing import Pool
 
 import torch
+from tqdm import tqdm
 
 
-def _one_pass_mean_std_multi(batch_iter):
+def _one_pass_mean_std_multi(*args):
+
+    batch_iter, i = args
+
+    if i == 0:
+        batch_iter = tqdm(batch_iter, "worker 0", ncols=60)
 
     total_iters = 0
 
@@ -35,8 +41,10 @@ def _one_pass_mean_std_multi(batch_iter):
 
 def one_pass_mean_std_multi(batch_iters, num_procs):
 
+    proc_input = [(bi, i) for i, bi in enumerate(batch_iters)]
+
     with Pool(num_procs) as p:
-        all_acc_data = p.map(_one_pass_mean_std_multi, batch_iters)
+        all_acc_data = p.map(_one_pass_mean_std_multi, proc_input)
 
     # collapse all results
     acc = []

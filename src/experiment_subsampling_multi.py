@@ -230,7 +230,7 @@ def supsample_mean_std(sub_rate=1.0):
 
     mean, std, total_iters = one_pass_mean_std_multi(data_iters, num_procs=num_procs)
 
-    return mean, std
+    return mean, std, total_iters
 
 
 def mean_std_experiments():
@@ -268,7 +268,11 @@ def mean_std_experiments():
 
             save_torch((mean, std, total_iters), exp_fname)
 
-        exp_entry = {"mean": [float(m) for m in mean], "std": [float(s) for s in std]}
+        exp_entry = {
+            "mean": [float(m) for m in mean],
+            "std": [float(s) for s in std],
+            "total_iters": total_iters,
+        }
 
         tracking_json[exp_key][sub_rate] = exp_entry
 
