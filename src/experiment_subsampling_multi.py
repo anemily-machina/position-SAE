@@ -22,6 +22,7 @@ from argparse import ArgumentParser
 import math
 import os
 from random import sample
+from time import time, sleep
 
 
 from datasets import load_dataset
@@ -37,6 +38,77 @@ output_folder = None
 total_sents = None
 tracking_json_fname = None
 num_procs = None
+
+
+class FileQueue:
+    """
+    My file are large so this keeps the runtime smooth
+    """
+
+    queue_folder = None
+
+    def __init__(self, queue_folder):
+        self.queue_folder = queue_folder
+
+    def _get_queue(self):
+
+        queue_files = os.listdir(self.queue_folder)
+
+        # sort queue by time
+        queue_files = sorted(queue_files, key=lambda x: int(x.split("_")[1]))
+        queue = []
+        for qf in queue_files:
+            v = qf.split("_")
+            q = {"number": v[0], "number": v[1], "file": qf}
+            queue.append(q)
+
+        return queue
+
+    def add(self, number):
+        """
+        add something to the end of the queue
+        """
+
+        queue = self._get_queue()
+
+        # validate addition
+        for q in queue:
+
+            if q["number"] == number:
+                err_msg = f"trying to add somethign to the queue twice {number} {queue}"
+                raise ValueError(err_msg)
+
+        # add to queue
+        now = time()
+        new_file = f"{number}_{now}"
+        new_fname = os.path.join(self.queue_folder, new_file)
+        # touch file
+        with open(new_fname, "w") as f_out:
+            pass
+
+    def remove(self, number):
+        """
+        remove number from the queue if it is first, otherwise error
+        """
+
+        queue = self._get_queue()
+
+        if queue[0]["number"] != number:
+            err_msg = f"trying to remove somethign not at the front of the queue {number} {queue}"
+            raise ValueError(err_msg)
+
+        del_file = queue[0]["file"]
+        del_fname = os.path.join(self.queue_folder, del_file)
+
+        os.remove(del_fname)
+
+    def is_front(self, number):
+
+        queue = self._get_queue()
+
+        is_f = queue[0]["number"] == number
+
+        return is_f
 
 
 def parse_args():
@@ -179,13 +251,21 @@ def make_embeddings(ai_config, dataset_config, batch_size):
 
 def data_iter(args):
 
-    files, sub_rate = args
+    files, sub_rate, file_queue, i = args
 
     batch_size = 1000
+    wait_time = 1
 
     for fname in files:
 
+        file_queue.add(i)
+
+        while not file_queue.is_front(i):
+            sleep(wait_time)
+
         file_embs = load_torch(fname, map_location="cpu")
+
+        file_queue.remove(i)
 
         subsample_embs = []
         for embs in file_embs:
@@ -211,7 +291,17 @@ def data_iter(args):
             batch_i = next_batch_i
 
 
-def supsample_mean_std(sub_rate=1.0):
+def supsample_mean_std(exp_folder, sub_rate=1.0):
+
+    queue_folder = os.path.join(exp_folder, "loading_queue")
+    make_folder(queue_folder)
+
+    # clear out old values
+    for file in os.listdir(queue_folder):
+        fname = os.path.join(queue_folder, file)
+        os.remove(fname)
+
+    file_queue = FileQueue(queue_folder)
 
     assert 0 < sub_rate <= 1.0
 
@@ -229,11 +319,16 @@ def supsample_mean_std(sub_rate=1.0):
         fname_chunks.append(fc)
         d_i = next_d_i
 
-    data_iter_input = [(fc, sub_rate) for fc in fname_chunks]
+    data_iter_input = [
+        (fc, sub_rate, file_queue, i) for i, fc in enumerate(fname_chunks)
+    ]
 
     mean, std, total_iters = one_pass_mean_std_multi(
         data_iter_input, data_iter, num_procs=num_procs
     )
+
+    # clean up temporary files (should be empty here)
+    os.rmdir(queue_folder)
 
     return mean, std, total_iters
 
@@ -269,7 +364,7 @@ def mean_std_experiments():
 
         else:
 
-            mean, std, total_iters = supsample_mean_std(sub_rate=sub_rate)
+            mean, std, total_iters = supsample_mean_std(exp_folder, sub_rate=sub_rate)
 
             save_torch((mean, std, total_iters), exp_fname)
 
