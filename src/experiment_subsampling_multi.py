@@ -334,7 +334,9 @@ def supsample_mean_std(exp_folder, sub_rate=1.0):
     # clean up temporary files (should be empty here)
     os.rmdir(queue_folder)
 
-    return mean, std, total_iters
+    result = {"mean": mean, "std": std, "total_iters": total_iters}
+
+    return result
 
 
 def mean_std_experiments():
@@ -349,38 +351,66 @@ def mean_std_experiments():
         tracking_json[exp_key] = {}
 
     subsample_rates = [(20 - k) / 20 for k in range(0, 20)]
+    number_of_trials = [1] + [20] * (len(subsample_rates) - 1)
 
-    for sub_rate in subsample_rates:
+    baseline_result = None
 
-        print()
-        print(f"mean std experiement with subsample rate: {sub_rate}")
-        print()
+    for sub_rate, num_trials in zip(subsample_rates, number_of_trials):
 
-        exp_fname = os.path.join(exp_folder, f"{sub_rate}.pt")
+        sub_results = []
 
-        if os.path.isfile(exp_fname):
+        for nt_i in range(num_trials):
 
             print()
-            print(f"experiment already completed.. skipping...")
+            print(f"mean std experiement with subsample rate: {sub_rate}")
+            print(f"Trial number: {nt_i}")
             print()
 
-            mean, std, total_iters = load_torch(exp_fname)
+            exp_fname = os.path.join(exp_folder, f"{sub_rate}_{nt_i}.pt")
 
-        else:
+            if os.path.isfile(exp_fname):
 
-            mean, std, total_iters = supsample_mean_std(exp_folder, sub_rate=sub_rate)
+                print()
+                print(f"experiment already completed.. skipping...")
+                print()
 
-            save_torch((mean, std, total_iters), exp_fname)
+                result = load_torch(exp_fname)
 
-        exp_entry = {
-            "mean": [float(m) for m in mean],
-            "std": [float(s) for s in std],
-            "total_iters": total_iters,
-        }
+            else:
 
-        tracking_json[exp_key][sub_rate] = exp_entry
+                result = supsample_mean_std(exp_folder, sub_rate=sub_rate)
 
-        save_tracking_json(tracking_json)
+                save_torch(result, exp_fname)
+
+            if baseline_results is None:
+                baseline_results = result
+
+            sub_results.append(result)
+
+        # mean_err = []
+        # std_err = []
+        # total_iters = []
+
+        # b_mean = baseline_results["mean"]
+        # b_std = baseline_results["std"]
+
+        # for result in sub_results:
+
+        #     t = torch.Tensor([123])
+
+        #     t.abs().mean()
+
+        #     r_mean = baseline_results["mean"]
+        #     r_std = baseline_results["std"]
+        #     r_iters = baseline_results["total_iters"]
+
+        #     err_mean = (r_mean-b_mean).abs().mean()
+
+        #     total_iters.append(r_iters)
+
+        # tracking_json[exp_key][sub_rate] = exp_entry
+
+        # save_tracking_json(tracking_json)
 
 
 def main():
