@@ -259,13 +259,13 @@ def data_iter(args):
 
     for fname in files:
 
-        file_queue.add(i)
+        # file_queue.add(i)
 
-        while not file_queue.is_front(i):
-            # print()
-            # print(f"waiting... {i} {file_queue._get_queue()}")
-            # print()
-            sleep(wait_time)
+        # while not file_queue.is_front(i):
+        #     # print()
+        #     # print(f"waiting... {i} {file_queue._get_queue()}")
+        #     # print()
+        #     sleep(wait_time)
 
         file_embs = load_torch(fname, map_location="cpu")
 
@@ -278,7 +278,7 @@ def data_iter(args):
             sub_embs = embs[keep_idx]
             subsample_embs.append(sub_embs)
 
-        file_queue.remove(i)
+        # file_queue.remove(i)
 
         batch_i = 0
 
