@@ -1,6 +1,7 @@
 from torch_custom_fns import _mag_sort, two_sum_reduce
 
 from multiprocessing import Pool
+from time import time
 
 import torch
 from tqdm import tqdm
@@ -41,10 +42,20 @@ def _one_pass_mean_std_multi(*args):
 
 def one_pass_mean_std_multi(batch_iters, num_procs):
 
+    print()
+    print("multiprocessing mean/std")
+    print()
+
+    start_time = time()
+
     proc_input = [(bi, i) for i, bi in enumerate(batch_iters)]
 
     with Pool(num_procs) as p:
         all_acc_data = p.map(_one_pass_mean_std_multi, proc_input)
+
+    print()
+    print("combining each child results ")
+    print()
 
     # collapse all results
     acc = []
@@ -78,5 +89,11 @@ def one_pass_mean_std_multi(batch_iters, num_procs):
     std_2_acc_t = _mag_sort(std_2_acc_t)
     std_2 = std_2_acc_t[-1]
     std = std_2.sqrt()
+
+    total_time = (time() - start_time) / 60
+
+    print()
+    print(f"multiprocessing mean/std took {total_time} minutes")
+    print()
 
     return mean, std, total_iters
