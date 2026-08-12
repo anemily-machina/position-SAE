@@ -269,8 +269,6 @@ def data_iter(args):
 
         file_embs = load_torch(fname, map_location="cpu")
 
-        file_queue.remove(i)
-
         subsample_embs = []
         for embs in file_embs:
 
@@ -279,6 +277,8 @@ def data_iter(args):
             keep_idx = sample(range(num_embs), k=subsample_num)
             sub_embs = embs[keep_idx]
             subsample_embs.append(sub_embs)
+
+        file_queue.remove(i)
 
         batch_i = 0
 
