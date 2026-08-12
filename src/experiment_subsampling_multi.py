@@ -1,0 +1,320 @@
+"""
+python src/experiment_subsampling.py -o "../data/positional-SAE/experiments_subsampling" --device "cpu" -p 16
+python src/experiment_subsampling.py -o "../data/positional-SAE/experiments_subsampling" --device "cuda" -p 16
+
+python src\\experiment_subsampling.py -o "../data/positional-SAE/experiments_subsampling"
+python src\\experiment_subsampling.py -o "../data/positional-SAE/experiments_subsampling"
+
+"""
+
+from ai_models import load_model, load_tokenizer, get_emb_fn
+from utils import (
+    make_folder,
+    load_json,
+    load_torch,
+    save_json,
+    save_torch,
+    set_random_seeds,
+)
+from torch_custom_fns_multi import one_pass_mean_std_multi
+
+from argparse import ArgumentParser
+import math
+import os
+from random import sample
+
+
+from datasets import load_dataset
+import torch
+from torch.utils.data import DataLoader
+from tqdm import tqdm
+
+chunk_size = None
+device = None
+layer = None
+max_sent_length = None
+output_folder = None
+total_sents = None
+tracking_json_fname = None
+num_procs = None
+
+
+def parse_args():
+
+    parser = ArgumentParser()
+
+    parser.add_argument("-o", "--output-folder", required=True)
+
+    parser.add_argument("-d", "--device", required=False, default="cpu")
+    parser.add_argument("-p", "--num_procs", required=False, default=16)
+    parser.add_argument(
+        "-ai", "--ai-config", required=False, default="configs/ai/pythia-70m.json"
+    )
+    parser.add_argument(
+        "-ds",
+        "--dataset-config",
+        required=False,
+        default="configs/datasets/the_pile.json",
+    )
+
+    parser.add_argument("-seed", "--rng-seed", required=False, default=4321, type=int)
+
+    args = parser.parse_args()
+
+    return args
+
+
+def get_tracking_json():
+
+    if os.path.isfile(tracking_json_fname):
+        tracking_json = load_json(tracking_json_fname)
+    else:
+        tracking_json = {}
+
+    return tracking_json
+
+
+def save_tracking_json(tracking_json):
+
+    save_json(tracking_json, tracking_json_fname)
+
+
+def make_embeddings(ai_config, dataset_config, batch_size):
+
+    tracking_json = get_tracking_json()
+    embeddings_made = tracking_json.get("embeddings_made", False)
+
+    if embeddings_made:
+        return
+
+    emb_cache_folder = os.path.join(output_folder, "emb_cache")
+    make_folder(emb_cache_folder)
+
+    chunk_sizes = []
+    chunk_i = 0
+    while chunk_i < total_sents:
+        next_chunk_i = chunk_i + chunk_size
+        next_chunk_i = min(next_chunk_i, total_sents)
+
+        chunk_sizes.append(next_chunk_i - chunk_i)
+
+        chunk_i = next_chunk_i
+
+    tokenizer = load_tokenizer(ai_config)
+    ai_model = load_model(ai_config)
+    ai_model.to(device)
+
+    tokenizer_kwargs = {"max_length": max_sent_length}
+
+    emb_fn = get_emb_fn(
+        tokenizer=tokenizer,
+        ai_model=ai_model,
+        config=ai_config,
+        layers=[layer],
+        input_device=device,
+        output_device="cpu",
+        tokenizer_kwargs=tokenizer_kwargs,
+    )
+
+    data = load_dataset(**dataset_config)
+
+    dataloader = DataLoader(data, batch_size=batch_size)
+
+    sent_buffer = []
+    cs_i = 0
+
+    data_iter = iter(dataloader)
+
+    for cs_i in tqdm(range(len(chunk_sizes)), total=len(chunk_sizes), ncols=50):
+
+        curr_cs = chunk_sizes[cs_i]
+        cs_fname = os.path.join(emb_cache_folder, f"{cs_i}.pt")
+
+        # fill sent buffer if needed
+        while len(sent_buffer) < curr_cs:
+
+            # get a new batch
+            batch = None
+            while batch is None:
+                try:
+                    batch = next(data_iter)
+                except StopIteration:
+                    # it doesn't make a lot of sense for this to happen for this experiment
+                    print()
+                    print("End of input reached, restaring dataloader")
+                    print(
+                        "it doesn't make a lot of sense for this to happen for this experiment"
+                    )
+                    print()
+                    data_iter = iter(dataloader)
+
+            batch_sents = batch["text"]
+
+            sent_buffer += batch_sents
+
+        chunk_sents = sent_buffer[:curr_cs]
+        sent_buffer = sent_buffer[curr_cs:]
+
+        # if the chunk file exists the chunk has been saved. no embedding needed (cache check)
+        if os.path.isfile(cs_fname):
+            continue
+
+        # embed the chunk sentences
+        chunk_data = DataLoader(chunk_sents, batch_size=batch_size)
+        emb_buffer = []
+        for batch_sents in chunk_data:
+
+            emb_dict = emb_fn(batch_sents)
+            embs = emb_dict[layer]
+
+            emb_buffer += embs
+
+        # save file safely so that the cache check works
+        save_torch(emb_buffer, cs_fname)
+
+    tracking_json["embeddings_made"] = True
+
+    save_tracking_json(tracking_json)
+
+
+def supsample_mean_std(sub_rate=1.0):
+
+    assert 0 < sub_rate <= 1.0
+
+    emb_cache_folder = os.path.join(output_folder, "emb_cache")
+    emb_files = os.listdir(emb_cache_folder)
+    emb_files = sorted(emb_files, key=lambda x: int(x.split(".")[0]))
+    emb_files = [os.path.join(emb_cache_folder, f) for f in emb_files]
+
+    data_size = 1 + len(emb_files) // num_procs
+    d_i = 0
+    fname_chunks = []
+    while d_i < len(emb_files):
+        next_d_i = d_i + data_size
+        fc = emb_files[d_i:next_d_i]
+        fname_chunks.append(fc)
+
+    batch_size = 1000
+    num_batches = total_sents / batch_size
+
+    def data_iter(files):
+
+        for fname in files:
+
+            file_embs = load_torch(fname)
+
+            subsample_embs = []
+            for embs in file_embs:
+
+                num_embs = len(embs)
+                subsample_num = math.ceil(num_embs * sub_rate)
+                keep_idx = sample(range(num_embs), k=subsample_num)
+                sub_embs = embs[keep_idx]
+                subsample_embs.append(sub_embs)
+
+            batch_i = 0
+
+            while batch_i < len(subsample_embs):
+
+                next_batch_i = batch_i + batch_size
+
+                batch_embs = subsample_embs[batch_i:next_batch_i]
+
+                batch_embs = torch.cat(batch_embs, dim=0)
+
+                yield batch_embs
+
+                batch_i = next_batch_i
+
+    data_iters = [data_iter(fc) for fc in fname_chunks]
+
+    mean, std, total_iters = one_pass_mean_std_multi(data_iters, num_procs=num_procs)
+
+    return mean, std
+
+
+def mean_std_experiments():
+
+    exp_key = "mean_std_exp_multi"
+    exp_folder = os.path.join(output_folder, "mean_std_exp_multi")
+    make_folder(exp_folder)
+
+    tracking_json = get_tracking_json()
+
+    if exp_key not in tracking_json:
+        tracking_json[exp_key] = {}
+
+    subsample_rates = [(20 - k) / 20 for k in range(0, 20)]
+
+    for sub_rate in subsample_rates:
+
+        print()
+        print(f"mean std experiement with subsample rate: {sub_rate}")
+        print()
+
+        exp_fname = os.path.join(exp_folder, f"{sub_rate}.pt")
+
+        if os.path.isfile(exp_fname):
+
+            print()
+            print(f"experiment already completed.. skipping...")
+            print()
+
+            mean, std, total_iters = load_torch(exp_fname)
+
+        else:
+
+            mean, std, total_iters = supsample_mean_std(sub_rate=sub_rate)
+
+            save_torch((mean, std, total_iters), exp_fname)
+
+        exp_entry = {"mean": [float(m) for m in mean], "std": [float(s) for s in std]}
+
+        tracking_json[exp_key][sub_rate] = exp_entry
+
+        save_tracking_json(tracking_json)
+
+
+def main():
+
+    args = parse_args()
+
+    set_random_seeds(args.rng_seed)
+
+    global device
+    device = torch.device(args.device)
+
+    global output_folder
+    output_folder = args.output_folder
+
+    global chunk_size
+    chunk_size = 10000
+
+    global total_sents
+    total_sents = 1000000
+
+    global max_sent_length
+    max_sent_length = 100
+
+    global layer
+    layer = -1
+
+    global num_procs
+    num_procs = args.num_procs
+
+    make_folder(output_folder)
+
+    global tracking_json_fname
+    tracking_json_fname = os.path.join(output_folder, "tracking.json")
+
+    ai_config = load_json(args.ai_config)
+    dataset_config = load_json(args.dataset_config)
+
+    # make_embeddings(ai_config, dataset_config, args.batch_size)
+
+    mean_std_experiments()
+
+
+if __name__ == "__main__":
+    with torch.no_grad():
+        main()

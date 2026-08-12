@@ -207,7 +207,7 @@ def one_pass_mean_std(batch_iter, num_batches=None):
     std_2 = std_2_acc_t[-1]
     std = std_2.sqrt()
 
-    return mean, std
+    return mean, std, total_iters
 
 
 def two_pass_mean_std(batch_iter, num_batches=None):
@@ -287,7 +287,7 @@ def _test_two_pass_mean_std(all_values):
 
 def _test_one_pass_mean_std(all_values):
 
-    mean, std = one_pass_mean_std(all_values)
+    mean, std, total_iters = one_pass_mean_std(all_values)
 
     print()
     print(mean)
@@ -306,7 +306,7 @@ def _test_one_pass_mean_std(all_values):
 
         norm_values.append(v)
 
-    mean, std = one_pass_mean_std(norm_values)
+    mean, std, total_iters = one_pass_mean_std(norm_values)
 
     print()
     print(mean)
