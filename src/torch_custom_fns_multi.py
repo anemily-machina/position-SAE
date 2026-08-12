@@ -9,7 +9,8 @@ from tqdm import tqdm
 
 def _one_pass_mean_std_multi(*args):
 
-    batch_iter, i = args
+    bi, batch_iter_fn, i = args
+    batch_iter = batch_iter_fn(bi)
 
     if i == 0:
         batch_iter = tqdm(batch_iter, "worker 0", ncols=60)
@@ -40,7 +41,7 @@ def _one_pass_mean_std_multi(*args):
     return {"acc": acc, "acc2": acc2, "total_iters": total_iters}
 
 
-def one_pass_mean_std_multi(batch_iters, num_procs):
+def one_pass_mean_std_multi(batch_iter_inputs, batch_iter_fn, num_procs):
 
     print()
     print("multiprocessing mean/std")
@@ -48,7 +49,7 @@ def one_pass_mean_std_multi(batch_iters, num_procs):
 
     start_time = time()
 
-    proc_input = [(bi, i) for i, bi in enumerate(batch_iters)]
+    proc_input = [(bi, batch_iter_fn, i) for i, bi in enumerate(batch_iter_inputs)]
 
     with Pool(num_procs) as p:
         all_acc_data = p.map(_one_pass_mean_std_multi, proc_input)

@@ -229,7 +229,9 @@ def supsample_mean_std(sub_rate=1.0):
 
     data_iters = [data_iter(fc) for fc in fname_chunks]
 
-    mean, std, total_iters = one_pass_mean_std_multi(data_iters, num_procs=num_procs)
+    mean, std, total_iters = one_pass_mean_std_multi(
+        fname_chunks, data_iter, num_procs=num_procs
+    )
 
     return mean, std, total_iters
 
