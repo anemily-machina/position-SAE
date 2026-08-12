@@ -1,8 +1,8 @@
 from torch_custom_fns import _mag_sort, two_sum_reduce
 
-from concurrent.futures import ThreadPoolExecutor
+# from concurrent.futures import ThreadPoolExecutor
 
-# from multiprocessing import Pool
+from multiprocessing import Pool
 from time import time
 
 import torch
@@ -54,12 +54,12 @@ def one_pass_mean_std_multi(batch_iter_inputs, batch_iter_fn, num_procs):
 
     proc_input = [(bi, batch_iter_fn, i) for i, bi in enumerate(batch_iter_inputs)]
 
-    # with Pool(num_procs) as p:
-    #     all_acc_data = p.map(_one_pass_mean_std_multi, proc_input)
+    with Pool(num_procs) as p:
+        all_acc_data = p.map(_one_pass_mean_std_multi, proc_input)
 
-    with ThreadPoolExecutor(max_workers=num_procs) as executor:
-        all_acc_data = executor.map(_one_pass_mean_std_multi, proc_input)
-        all_acc_data = list(all_acc_data)
+    # with ThreadPoolExecutor(max_workers=num_procs) as executor:
+    #     all_acc_data = executor.map(_one_pass_mean_std_multi, proc_input)
+    #     all_acc_data = list(all_acc_data)
 
     print()
     print("combining each child results ")
