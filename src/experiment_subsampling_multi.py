@@ -227,8 +227,6 @@ def supsample_mean_std(sub_rate=1.0):
         fname_chunks.append(fc)
         d_i = next_d_i
 
-    num_batches = total_sents / batch_size
-
     data_iter_input = [(fc, sub_rate) for fc in fname_chunks]
 
     mean, std, total_iters = one_pass_mean_std_multi(
