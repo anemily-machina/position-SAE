@@ -264,7 +264,7 @@ def data_iter(args):
         while not file_queue.is_front(i):
             sleep(wait_time)
 
-        file_embs = load_torch(fname, map_location="cpu")
+        file_embs = load_torch(fname, map_location="cpu", mmap=False)
 
         file_queue.remove(i)
 
