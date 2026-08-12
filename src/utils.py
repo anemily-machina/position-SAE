@@ -75,9 +75,9 @@ def save_json(json_data, fname, keep_tmp_on_fail=False, **kwargs):
     _save_file(save_fn, json_data, fname, keep_tmp_on_fail, **kwargs)
 
 
-def load_torch(fname):
+def load_torch(fname, **kwargs):
 
-    torch_data = torch.load(fname)
+    torch_data = torch.load(fname, **kwargs)
 
     return torch_data
 
