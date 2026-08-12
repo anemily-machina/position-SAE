@@ -60,7 +60,7 @@ class FileQueue:
         queue = []
         for qf in queue_files:
             v = qf.split("_")
-            q = {"number": v[0], "number": v[1], "file": qf}
+            q = {"number": int(v[0]), "position": int(v[1]), "file": qf}
             queue.append(q)
 
         return queue
