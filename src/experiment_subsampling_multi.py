@@ -382,8 +382,8 @@ def mean_std_experiments():
 
                 save_torch(result, exp_fname)
 
-            if baseline_results is None:
-                baseline_results = result
+            if baseline_result is None:
+                baseline_result = result
 
             sub_results.append(result)
 
