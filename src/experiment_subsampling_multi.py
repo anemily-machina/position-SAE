@@ -387,30 +387,46 @@ def mean_std_experiments():
 
             sub_results.append(result)
 
-        # mean_err = []
-        # std_err = []
-        # total_iters = []
+        mean_errs = []
+        std_errs = []
+        total_iters = []
 
-        # b_mean = baseline_results["mean"]
-        # b_std = baseline_results["std"]
+        b_mean = baseline_result["mean"]
+        b_std = baseline_result["std"]
 
-        # for result in sub_results:
+        for result in sub_results:
 
-        #     t = torch.Tensor([123])
+            t = torch.Tensor([123])
 
-        #     t.abs().mean()
+            t.abs().mean()
 
-        #     r_mean = baseline_results["mean"]
-        #     r_std = baseline_results["std"]
-        #     r_iters = baseline_results["total_iters"]
+            r_mean = result["mean"]
+            r_std = result["std"]
+            r_iters = result["total_iters"]
 
-        #     err_mean = (r_mean-b_mean).abs().mean()
+            err_mean = float((r_mean - b_mean).abs().mean())
+            mean_errs.append(err_mean)
 
-        #     total_iters.append(r_iters)
+            err_std = float((r_std - b_std).abs().mean())
+            std_errs.append(err_std)
 
-        # tracking_json[exp_key][sub_rate] = exp_entry
+            total_iters.append(r_iters)
 
-        # save_tracking_json(tracking_json)
+        stat_keys = ["mean_stats", "std_stats", "iter_stats"]
+        stat_vecs = [mean_errs, std_errs, total_iters]
+        stat_iter = zip(stat_keys, stat_vecs)
+
+        for stat_key, stat_vec in stat_iter:
+
+            m = sum(stat_vec) / len(stat_vec)
+
+            std = sum([(v - m) ** 2 for v in stat_vec]) / len(stat_vec)
+
+            stat_enty = {"mean": m, "std": std}
+
+            tracking_json[exp_key][sub_rate][stat_key] = stat_enty
+
+        save_tracking_json(tracking_json, indent=2)
 
 
 def main():
