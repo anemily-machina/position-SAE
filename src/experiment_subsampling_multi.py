@@ -149,7 +149,7 @@ def get_tracking_json():
 
 def save_tracking_json(tracking_json):
 
-    save_json(tracking_json, tracking_json_fname)
+    save_json(tracking_json, tracking_json_fname, indent=2)
 
 
 def make_embeddings(ai_config, dataset_config, batch_size):
@@ -427,7 +427,7 @@ def mean_std_experiments():
 
             tracking_json[exp_key][sub_rate][stat_key] = stat_enty
 
-        save_tracking_json(tracking_json, indent=2)
+        save_tracking_json(tracking_json)
 
 
 def main():
