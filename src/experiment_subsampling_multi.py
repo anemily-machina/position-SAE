@@ -416,6 +416,7 @@ def mean_std_experiments():
         stat_vecs = [mean_errs, std_errs, total_iters]
         stat_iter = zip(stat_keys, stat_vecs)
 
+        tracking_json[exp_key][sub_rate] = {}
         for stat_key, stat_vec in stat_iter:
 
             m = sum(stat_vec) / len(stat_vec)
