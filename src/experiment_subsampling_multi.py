@@ -252,7 +252,18 @@ def make_embeddings(ai_config, dataset_config, batch_size):
 
 def data_iter(args):
 
-    files, sub_rate, file_queue, i = args
+    if len(args) == 4:
+        files, sub_rate, file_queue, i = args
+        mean = None
+        std = None
+    elif len(args) == 6:
+        files, sub_rate, file_queue, i, mean, std = args
+        inv_std = std.reciprocal()
+
+    assert 0 < sub_rate <= 1.0
+
+    # can't divide by std if mean is not provided
+    assert std is None or mean is not None
 
     batch_size = 1000
     wait_time = 1
@@ -272,10 +283,21 @@ def data_iter(args):
         subsample_embs = []
         for embs in file_embs:
 
-            num_embs = len(embs)
-            subsample_num = math.ceil(num_embs * sub_rate)
-            keep_idx = sample(range(num_embs), k=subsample_num)
-            sub_embs = embs[keep_idx]
+            if sub_rate == 1.0:
+                sub_embs = embs
+                continue
+            else:
+                num_embs = len(embs)
+                subsample_num = math.ceil(num_embs * sub_rate)
+                keep_idx = sample(range(num_embs), k=subsample_num)
+                sub_embs = embs[keep_idx]
+
+            if mean is not None:
+                sub_embs = sub_embs - mean
+
+                if std is not None:
+                    sub_embs = sub_embs * inv_std
+
             subsample_embs.append(sub_embs)
 
         # file_queue.remove(i)
@@ -295,7 +317,9 @@ def data_iter(args):
             batch_i = next_batch_i
 
 
-def supsample_mean_std(exp_folder, sub_rate=1.0):
+def supsample_mean_std(exp_folder, sub_rate=1.0, standardization_p=None):
+
+    assert 0 < sub_rate <= 1.0
 
     queue_folder = os.path.join(exp_folder, "loading_queue")
     make_folder(queue_folder)
@@ -306,8 +330,6 @@ def supsample_mean_std(exp_folder, sub_rate=1.0):
         os.remove(fname)
 
     file_queue = FileQueue(queue_folder)
-
-    assert 0 < sub_rate <= 1.0
 
     emb_cache_folder = os.path.join(output_folder, "emb_cache")
     emb_files = os.listdir(emb_cache_folder)
@@ -323,8 +345,16 @@ def supsample_mean_std(exp_folder, sub_rate=1.0):
         fname_chunks.append(fc)
         d_i = next_d_i
 
+    if standardization_p is not None:
+        stan_mean = standardization_p["mean"]
+        stan_std = standardization_p["std"]
+    else:
+        stan_mean = None
+        stan_std = None
+
     data_iter_input = [
-        (fc, sub_rate, file_queue, i) for i, fc in enumerate(fname_chunks)
+        (fc, sub_rate, file_queue, i, stan_mean, stan_std)
+        for i, fc in enumerate(fname_chunks)
     ]
 
     mean, std, total_iters = one_pass_mean_std_multi(
@@ -337,6 +367,25 @@ def supsample_mean_std(exp_folder, sub_rate=1.0):
     result = {"mean": mean, "std": std, "total_iters": total_iters}
 
     return result
+
+
+def _confirm_baseline(baseline_result):
+
+    print()
+    print("Confirming baseline result")
+    print()
+
+    result = supsample_mean_std("./", sub_rate=1.0, standardization_p=baseline_result)
+
+    print()
+    print()
+    print("mean")
+    print(result["mean"])
+    print("std")
+    print(result["std"])
+    print()
+
+    exit()
 
 
 def mean_std_experiments():
@@ -384,6 +433,7 @@ def mean_std_experiments():
 
             if baseline_result is None:
                 baseline_result = result
+                _confirm_baseline(baseline_result)
 
             sub_results.append(result)
 
