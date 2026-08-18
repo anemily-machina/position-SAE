@@ -343,11 +343,10 @@ class EmbIter:
             self.file_i += 1
             self.emb_buffer += self._load_embs()
 
-        print()
-        print(f"emb buffer has size {len(self.emb_buffer)}")
-        print()
-
-        exit()
+        if self.i == 0:
+            print()
+            print(f"emb buffer has size {len(self.emb_buffer)}")
+            print()
 
         # if the buffer is ever empty after an expansion check we are done
         if len(self.emb_buffer) == 0:
