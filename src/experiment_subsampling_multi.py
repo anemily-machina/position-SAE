@@ -307,6 +307,8 @@ class EmbIter:
             print(f"embeddings loaded")
             print()
 
+        print(len(file_embs))
+
         subsample_embs = []
         for embs in file_embs:
 
@@ -332,6 +334,8 @@ class EmbIter:
             print(f"subsampling and standardization completed")
             print()
 
+        print(len(subsample_embs))
+
         return subsample_embs
 
     def __next__(self):
@@ -344,6 +348,8 @@ class EmbIter:
         print()
         print(f"emb buffer has size {len(self.emb_buffer)}")
         print()
+
+        exit()
 
         # if the buffer is ever empty after an expansion check we are done
         if len(self.emb_buffer) == 0:
