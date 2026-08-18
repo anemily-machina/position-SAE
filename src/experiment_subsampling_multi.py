@@ -1,6 +1,6 @@
 """
-python src/experiment_subsampling_multi.py -o "../data/positional-SAE/experiments_subsampling" --device "cpu" -p 16
-python src/experiment_subsampling_multi.py -o "../data/positional-SAE/experiments_subsampling" --device "cuda" -p 16
+python src/experiment_subsampling_multi.py -o "../data/positional-SAE/experiments_subsampling" --device "cpu" -p 6
+python src/experiment_subsampling_multi.py -o "../data/positional-SAE/experiments_subsampling" --device "cuda" -p 6
 
 python src\\experiment_subsampling.py -o "../data/positional-SAE/experiments_subsampling"
 python src\\experiment_subsampling.py -o "../data/positional-SAE/experiments_subsampling"
@@ -258,7 +258,10 @@ def data_iter(args):
         std = None
     elif len(args) == 6:
         files, sub_rate, file_queue, i, mean, std = args
+    if std is not None:
         inv_std = std.reciprocal()
+    else:
+        inv_std = None
 
     assert 0 < sub_rate <= 1.0
 
@@ -295,7 +298,7 @@ def data_iter(args):
             if mean is not None:
                 sub_embs = sub_embs - mean
 
-                if std is not None:
+                if inv_std is not None:
                     sub_embs = sub_embs * inv_std
 
             subsample_embs.append(sub_embs)
