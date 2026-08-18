@@ -263,6 +263,12 @@ def data_iter(args):
     else:
         inv_std = None
 
+    if i == 0:
+        print()
+        print("worker 0 loaded with args")
+        print(args)
+        print()
+
     assert 0 < sub_rate <= 1.0
 
     # can't divide by std if mean is not provided
@@ -273,6 +279,11 @@ def data_iter(args):
 
     for fname in files:
 
+        if i == 0:
+            print()
+            print(f"loading {fname}")
+            print()
+
         # file_queue.add(i)
 
         # while not file_queue.is_front(i):
@@ -282,6 +293,11 @@ def data_iter(args):
         #     sleep(wait_time)
 
         file_embs = load_torch(fname, map_location="cpu")
+
+        if i == 0:
+            print()
+            print(f"embeddings loaded")
+            print()
 
         subsample_embs = []
         for embs in file_embs:
@@ -302,6 +318,11 @@ def data_iter(args):
                     sub_embs = sub_embs * inv_std
 
             subsample_embs.append(sub_embs)
+
+        if i == 0:
+            print()
+            print(f"subsampling and standardization completed")
+            print()
 
         # file_queue.remove(i)
 
