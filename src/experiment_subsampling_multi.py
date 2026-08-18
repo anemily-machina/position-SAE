@@ -278,13 +278,16 @@ class EmbIter:
         self.inv_std = inv_std
 
         self.batch_size = 1000
-        self.file_i = -1
+        self.file_i = 0
         self.emb_buffer = []
 
     def __iter__(self):
         return self
 
     def _load_embs(self):
+
+        if self.file_i >= len(self.files):
+            return []
 
         fname = self.files[self.file_i]
 
@@ -310,13 +313,14 @@ class EmbIter:
 
             subsample_embs.append(sub_embs)
 
+        self.file_i += 1
+
         return subsample_embs
 
     def __next__(self):
 
         # if the buffer is too small expand it if we can
-        if self.batch_size > len(self.emb_buffer) and self.file_i < len(self.files):
-            self.file_i += 1
+        if self.batch_size > len(self.emb_buffer):
             self.emb_buffer += self._load_embs()
 
         # if the buffer is ever empty after an expansion check we are done
