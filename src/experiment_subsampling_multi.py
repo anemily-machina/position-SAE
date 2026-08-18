@@ -297,6 +297,9 @@ def data_iter(args):
         if i == 0:
             print()
             print(f"embeddings loaded")
+            print([e.size() for e in file_embs])
+            print(len(file_embs))
+
             print()
 
         subsample_embs = []
