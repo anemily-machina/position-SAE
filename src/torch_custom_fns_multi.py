@@ -25,9 +25,6 @@ def _one_pass_mean_std_multi(args):
     acc2 = []
     for batch in batch_iter:
 
-        print()
-        print(batch.size())
-
         batch_size = len(batch)
 
         total_iters += batch_size
@@ -42,16 +39,13 @@ def _one_pass_mean_std_multi(args):
         a2 = two_sum_reduce(batch2)
         acc2 += a2
 
-        print(a)
-        print()
-
     acc = two_sum_reduce(acc, minmum=True)
     acc2 = two_sum_reduce(acc2, minmum=True)
 
     return {"acc": acc, "acc2": acc2, "total_iters": total_iters}
 
 
-def one_pass_mean_std_multi(batch_iter_inputs, batch_iter_fn, num_procs):
+def one_pass_mean_std_multi(batch_iter_inputs, batch_iter_clas, num_procs):
 
     print()
     print("multiprocessing mean/std")
@@ -59,7 +53,7 @@ def one_pass_mean_std_multi(batch_iter_inputs, batch_iter_fn, num_procs):
 
     start_time = time()
 
-    proc_input = [(bi, batch_iter_fn, i) for i, bi in enumerate(batch_iter_inputs)]
+    proc_input = [(bi, batch_iter_clas, i) for i, bi in enumerate(batch_iter_inputs)]
 
     with Pool(num_procs) as p:
         all_acc_data = p.map(_one_pass_mean_std_multi, proc_input)
