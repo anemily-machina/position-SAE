@@ -305,16 +305,15 @@ class EmbIter:
         if self.i == 0:
             print()
             print(f"embeddings loaded")
+            print(len(file_embs))
             print()
-
-        print(len(file_embs))
 
         subsample_embs = []
         for embs in file_embs:
 
             if self.sub_rate == 1.0:
                 sub_embs = embs
-                continue
+
             else:
                 num_embs = len(embs)
                 subsample_num = math.ceil(num_embs * self.sub_rate)
@@ -332,9 +331,8 @@ class EmbIter:
         if self.i == 0:
             print()
             print(f"subsampling and standardization completed")
+            print(len(subsample_embs))
             print()
-
-        print(len(subsample_embs))
 
         return subsample_embs
 
