@@ -288,12 +288,6 @@ class EmbIter:
 
         fname = self.files[self.file_i]
 
-        if self.i == 0:
-            print()
-            print()
-            print(f"loading files embs from {fname}")
-            print()
-
         file_embs = load_torch(fname, map_location="cpu")
 
         subsample_embs = []
