@@ -250,87 +250,90 @@ def make_embeddings(ai_config, dataset_config, batch_size):
     save_tracking_json(tracking_json)
 
 
-def data_iter(args):
+class EmbIter:
 
-    if len(args) == 4:
-        files, sub_rate, file_queue, i = args
-        mean = None
-        std = None
-    elif len(args) == 6:
-        files, sub_rate, file_queue, i, mean, std = args
-    if std is not None:
-        inv_std = std.reciprocal()
-    else:
-        inv_std = None
+    def __init__(self, args):
 
-    if i == 0:
-        print()
-        print("worker 0 loaded with args")
-        print(args)
-        print()
+        if len(args) == 4:
+            files, sub_rate, file_queue, i = args
+            mean = None
+            std = None
+        elif len(args) == 6:
+            files, sub_rate, file_queue, i, mean, std = args
+        if std is not None:
+            inv_std = std.reciprocal()
+        else:
+            inv_std = None
 
-    assert 0 < sub_rate <= 1.0
+        assert 0 < sub_rate <= 1.0
 
-    # can't divide by std if mean is not provided
-    assert std is None or mean is not None
+        # can't divide by std if mean is not provided
+        assert std is None or mean is not None
 
-    batch_size = 1000
-    wait_time = 1
+        self.giles = files
+        self.sub_rate = sub_rate
+        self.file_queue = file_queue
+        self.i = i
+        self.mean = mean
+        self.inv_std = inv_std
 
-    for fname in files:
-
-        if i == 0:
-            print()
-            print(f"loading {fname}")
-            print()
-
-        # file_queue.add(i)
-
-        # while not file_queue.is_front(i):
-        #     # print()
-        #     # print(f"waiting... {i} {file_queue._get_queue()}")
-        #     # print()
-        #     sleep(wait_time)
-
-        file_embs = load_torch(fname, map_location="cpu")
+        self.batch_size = 1000
 
         if i == 0:
             print()
-            print(f"embeddings loaded")
+            print("worker 0 loaded with data iterator with args")
+            print(args)
             print()
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+
+        for fname in self.files:
+
+            if self.i == 0:
+                print()
+                print(f"loading {fname}")
+                print()
+
+            file_embs = load_torch(fname, map_location="cpu")
+
+            if self.i == 0:
+                print()
+                print(f"embeddings loaded")
+                print()
 
         subsample_embs = []
         for embs in file_embs:
 
-            if sub_rate == 1.0:
+            if self.sub_rate == 1.0:
                 sub_embs = embs
                 continue
             else:
                 num_embs = len(embs)
-                subsample_num = math.ceil(num_embs * sub_rate)
+                subsample_num = math.ceil(num_embs * self.sub_rate)
                 keep_idx = sample(range(num_embs), k=subsample_num)
                 sub_embs = embs[keep_idx]
 
-            if mean is not None:
-                sub_embs = sub_embs - mean
+            if self.mean is not None:
+                sub_embs = sub_embs - self.mean
 
-                if inv_std is not None:
-                    sub_embs = sub_embs * inv_std
+                if self.inv_std is not None:
+                    sub_embs = sub_embs * self.inv_std
 
             subsample_embs.append(sub_embs)
 
-        if i == 0:
+        if self.i == 0:
             print()
             print(f"subsampling and standardization completed")
             print()
-
-        # file_queue.remove(i)
 
         batch_i = 0
 
         while batch_i < len(subsample_embs):
 
-            next_batch_i = batch_i + batch_size
+            next_batch_i = batch_i + self.batch_size
 
             batch_embs = subsample_embs[batch_i:next_batch_i]
 
@@ -339,6 +342,9 @@ def data_iter(args):
             yield batch_embs
 
             batch_i = next_batch_i
+
+        # else:
+        #     raise StopIteration
 
 
 def subsample_mean_std(exp_folder, sub_rate=1.0, standardization_p=None):
@@ -382,7 +388,7 @@ def subsample_mean_std(exp_folder, sub_rate=1.0, standardization_p=None):
     ]
 
     mean, std, total_iters = one_pass_mean_std_multi(
-        data_iter_input, data_iter, num_procs=num_procs
+        data_iter_input, EmbIter, num_procs=num_procs
     )
 
     # clean up temporary files (should be empty here)
