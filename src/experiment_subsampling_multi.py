@@ -284,7 +284,7 @@ class EmbIter:
     def __iter__(self):
         return self
 
-    def _load_embs(self):
+    def _load_next_embs(self):
 
         if self.file_i >= len(self.files):
             return []
@@ -321,7 +321,7 @@ class EmbIter:
 
         # if the buffer is too small expand it if we can
         if self.batch_size > len(self.emb_buffer):
-            self.emb_buffer += self._load_embs()
+            self.emb_buffer += self._load_next_embs()
 
         # if the buffer is ever empty after an expansion check we are done
         if len(self.emb_buffer) == 0:
@@ -403,8 +403,6 @@ def _confirm_baseline(baseline_result):
     print(result["std"])
     print()
 
-    exit()
-
 
 def mean_std_experiments():
 
@@ -421,6 +419,7 @@ def mean_std_experiments():
     number_of_trials = [1] + [20] * (len(subsample_rates) - 1)
 
     baseline_result = None
+    smallest_result = None
 
     for sub_rate, num_trials in zip(subsample_rates, number_of_trials):
 
@@ -451,7 +450,9 @@ def mean_std_experiments():
 
             if baseline_result is None:
                 baseline_result = result
-                _confirm_baseline(baseline_result)
+
+            if sub_rate == 0.05 and smallest_result is None:
+                smallest_result = result
 
             sub_results.append(result)
 
@@ -496,6 +497,9 @@ def mean_std_experiments():
             tracking_json[exp_key][sub_rate][stat_key] = stat_enty
 
         save_tracking_json(tracking_json)
+
+    _confirm_baseline(baseline_result)
+    _confirm_baseline(smallest_result)
 
 
 def main():
