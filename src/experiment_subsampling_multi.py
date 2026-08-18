@@ -270,7 +270,7 @@ class EmbIter:
         # can't divide by std if mean is not provided
         assert std is None or mean is not None
 
-        self.giles = files
+        self.files = files
         self.sub_rate = sub_rate
         self.file_queue = file_queue
         self.i = i
@@ -278,6 +278,8 @@ class EmbIter:
         self.inv_std = inv_std
 
         self.batch_size = 1000
+        self.file_i = -1
+        self.emb_buffer = []
 
         if i == 0:
             print()
@@ -288,21 +290,21 @@ class EmbIter:
     def __iter__(self):
         return self
 
-    def __next__(self):
+    def _load_embs(self):
 
-        for fname in self.files:
+        fname = self.files[self.file_i]
 
-            if self.i == 0:
-                print()
-                print(f"loading {fname}")
-                print()
+        if self.i == 0:
+            print()
+            print(f"loading files embs from {fname}")
+            print()
 
-            file_embs = load_torch(fname, map_location="cpu")
+        file_embs = load_torch(fname, map_location="cpu")
 
-            if self.i == 0:
-                print()
-                print(f"embeddings loaded")
-                print()
+        if self.i == 0:
+            print()
+            print(f"embeddings loaded")
+            print()
 
         subsample_embs = []
         for embs in file_embs:
@@ -329,22 +331,25 @@ class EmbIter:
             print(f"subsampling and standardization completed")
             print()
 
-        batch_i = 0
+        return subsample_embs
 
-        while batch_i < len(subsample_embs):
+    def __next__(self):
 
-            next_batch_i = batch_i + self.batch_size
+        # if the buffer is too small expand it if we can
+        if self.batch_size > len(self.emb_buffer) and self.file_i < len(self.files):
+            self.file_i += 1
+            self.emb_buffer += self._load_embs()
 
-            batch_embs = subsample_embs[batch_i:next_batch_i]
+        # if the buffer is ever empty after an expansion check we are done
+        if len(self.emb_buffer):
+            raise StopIteration
 
-            batch_embs = torch.cat(batch_embs, dim=0)
+        batch_embs = self.emb_buffer[: self.batch_size]
+        self.emb_buffer = self.emb_buffer[self.batch_size :]
 
-            yield batch_embs
+        batch_embs = torch.cat(batch_embs, dim=0)
 
-            batch_i = next_batch_i
-
-        # else:
-        #     raise StopIteration
+        return batch_embs
 
 
 def subsample_mean_std(exp_folder, sub_rate=1.0, standardization_p=None):
