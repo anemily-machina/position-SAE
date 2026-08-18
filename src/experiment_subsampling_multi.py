@@ -281,12 +281,6 @@ class EmbIter:
         self.file_i = -1
         self.emb_buffer = []
 
-        if i == 0:
-            print()
-            print("worker 0 loaded with data iterator with args")
-            print(args)
-            print()
-
     def __iter__(self):
         return self
 
@@ -301,12 +295,6 @@ class EmbIter:
             print()
 
         file_embs = load_torch(fname, map_location="cpu")
-
-        if self.i == 0:
-            print()
-            print(f"embeddings loaded")
-            print(len(file_embs))
-            print()
 
         subsample_embs = []
         for embs in file_embs:
@@ -327,12 +315,6 @@ class EmbIter:
                     sub_embs = sub_embs * self.inv_std
 
             subsample_embs.append(sub_embs)
-
-        if self.i == 0:
-            print()
-            print(f"subsampling and standardization completed")
-            print(len(subsample_embs))
-            print()
 
         return subsample_embs
 
