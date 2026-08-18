@@ -344,7 +344,7 @@ def data_iter(args):
             batch_i = next_batch_i
 
 
-def supsample_mean_std(exp_folder, sub_rate=1.0, standardization_p=None):
+def subsample_mean_std(exp_folder, sub_rate=1.0, standardization_p=None):
 
     assert 0 < sub_rate <= 1.0
 
@@ -402,7 +402,7 @@ def _confirm_baseline(baseline_result):
     print("Confirming baseline result")
     print()
 
-    result = supsample_mean_std("./", sub_rate=1.0, standardization_p=baseline_result)
+    result = subsample_mean_std("./", sub_rate=1.0, standardization_p=baseline_result)
 
     print()
     print()
@@ -454,7 +454,7 @@ def mean_std_experiments():
 
             else:
 
-                result = supsample_mean_std(exp_folder, sub_rate=sub_rate)
+                result = subsample_mean_std(exp_folder, sub_rate=sub_rate)
 
                 save_torch(result, exp_fname)
 

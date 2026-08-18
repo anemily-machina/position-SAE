@@ -25,6 +25,9 @@ def _one_pass_mean_std_multi(args):
     acc2 = []
     for batch in batch_iter:
 
+        print()
+        print(batch.size())
+
         batch_size = len(batch)
 
         total_iters += batch_size
@@ -38,6 +41,9 @@ def _one_pass_mean_std_multi(args):
 
         a2 = two_sum_reduce(batch2)
         acc2 += a2
+
+        print(a)
+        print()
 
     acc = two_sum_reduce(acc, minmum=True)
     acc2 = two_sum_reduce(acc2, minmum=True)
