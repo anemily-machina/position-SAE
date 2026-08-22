@@ -495,10 +495,6 @@ def test_kmeans():
 
         for i, emb_batch in tqdm(enumerate(data_iter)):
 
-            print()
-            print(len(emb_batch))
-            print()
-
             kmeans.partial_fit(emb_batch)
 
             # initialization takes a long time so will dominate the timing if included
