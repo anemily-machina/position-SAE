@@ -467,7 +467,7 @@ def test_kmeans():
 
     data_iter_args = {
         "files": emb_files,
-        "sub_rate": 1.0,
+        "sub_rate": 0.05,
         "worker_i": 0,
         "stan_mean": baseline["mean"],
         "stan_std": baseline["std"],
