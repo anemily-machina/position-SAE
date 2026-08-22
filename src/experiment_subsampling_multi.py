@@ -445,7 +445,7 @@ def test_kmeans():
 
     max_iter = 10
     # timing tests
-    for b_size_i in range(20):
+    for b_size_i in range(1, 20):
 
         batch_size = b_size_i * 256
 
