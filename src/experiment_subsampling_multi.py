@@ -26,6 +26,7 @@ from time import time, sleep
 
 
 from datasets import load_dataset
+from sklearn.cluster import MiniBatchKMeans
 import torch
 from torch.utils.data import DataLoader
 from tqdm import tqdm
@@ -183,10 +184,10 @@ class EmbIter:
     def __init__(self, args_dict):
 
         files = args_dict["files"]
-        sub_rate = args_dict["sub_rate"]
-        worker_i = args_dict["worker_i"]
-        stan_mean = args_dict["stan_mean"]
-        stan_std = args_dict["stan_std"]
+        sub_rate = args_dict.get("sub_rate", 1.0)
+        worker_i = args_dict.get("worker_i", None)
+        stan_mean = args_dict.get("stan_mean", None)
+        stan_std = args_dict.get("stan_std", None)
 
         if stan_std is not None:
             stan_std[stan_std == 0] = 1
@@ -424,7 +425,37 @@ def mean_std_experiments():
 
 
 def test_kmenas():
-    pass
+
+    mean_exp_folder = os.path.join(output_folder, "mean_std_exp_multi")
+    baseline_fname = os.path.join(mean_exp_folder, f"1.0_0.pt")
+    baseline = torch.load(baseline_fname)
+
+    emb_cache_folder = os.path.join(output_folder, "emb_cache")
+    emb_files = os.listdir(emb_cache_folder)
+    emb_files = sorted(emb_files, key=lambda x: int(x.split(".")[0]))
+    emb_files = [os.path.join(emb_cache_folder, f) for f in emb_files]
+
+    data_iter_args = {
+        "files": emb_files,
+        "sub_rate": 1.0,
+        "worker_i": 0,
+        "stan_mean": baseline["mean"],
+        "stan_std": baseline["std"],
+    }
+
+    # timing tests
+    for b_size_i in range(20):
+        kmeans = MiniBatchKMeans(
+            n_clusters=20000,
+            max_iter=10,
+            batch_size=b_size_i * 256,
+            verbose=True,
+            compute_labels=False,
+        )
+
+        data_iter = EmbIter(data_iter_args)
+        for emb_batch in data_iter:
+            pass
 
 
 def main():
@@ -464,9 +495,9 @@ def main():
 
     # make_embeddings(ai_config, dataset_config, args.batch_size)
 
-    mean_std_experiments()
+    # mean_std_experiments()
 
-    # test_kmenas()
+    test_kmenas()
 
 
 if __name__ == "__main__":
