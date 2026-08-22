@@ -443,6 +443,7 @@ def test_kmeans():
         "stan_std": baseline["std"],
     }
 
+    max_iter = 10
     # timing tests
     for b_size_i in range(20):
 
@@ -456,15 +457,19 @@ def test_kmeans():
 
         kmeans = MiniBatchKMeans(
             n_clusters=20000,
-            max_iter=10,
+            max_iter=max_iter,
             batch_size=batch_size,
             verbose=True,
             compute_labels=False,
         )
 
-        # data_iter = EmbIter(data_iter_args)
-        # for emb_batch in data_iter:
-        #     pass
+        data_iter = EmbIter(data_iter_args)
+        for i, emb_batch in tqdm(enumerate(data_iter)):
+
+            kmeans.partial_fit(emb_batch)
+
+            if i + 1 == max_iter:
+                break
 
         total_time = time() - start_time
         total_time *= 60
