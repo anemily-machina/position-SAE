@@ -23,7 +23,7 @@ def _one_pass_mean_std_multi(args):
 
     total_iters = 0
 
-    mini_batch_size = 10000
+    mini_batch_size = 100000
 
     acc = []
     acc2 = []
