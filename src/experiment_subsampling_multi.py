@@ -424,7 +424,7 @@ def mean_std_experiments():
     _confirm_baseline(smallest_result)
 
 
-def test_kmenas():
+def test_kmeans():
 
     mean_exp_folder = os.path.join(output_folder, "mean_std_exp_multi")
     baseline_fname = os.path.join(mean_exp_folder, f"1.0_0.pt")
@@ -445,17 +445,33 @@ def test_kmenas():
 
     # timing tests
     for b_size_i in range(20):
+
+        batch_size = b_size_i * 256
+
+        print()
+        print(f"kmeans with batch size: {batch_size}")
+        print()
+
+        start_time = time()
+
         kmeans = MiniBatchKMeans(
             n_clusters=20000,
             max_iter=10,
-            batch_size=b_size_i * 256,
+            batch_size=batch_size,
             verbose=True,
             compute_labels=False,
         )
 
-        data_iter = EmbIter(data_iter_args)
-        for emb_batch in data_iter:
-            pass
+        # data_iter = EmbIter(data_iter_args)
+        # for emb_batch in data_iter:
+        #     pass
+
+        total_time = time() - start_time
+        total_time *= 60
+
+        print()
+        print(f"experiment took {total_time:.2f}m")
+        print()
 
 
 def main():
@@ -497,7 +513,7 @@ def main():
 
     # mean_std_experiments()
 
-    test_kmenas()
+    test_kmeans()
 
 
 if __name__ == "__main__":
