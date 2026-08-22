@@ -473,6 +473,10 @@ def test_kmeans():
             if i + 1 == max_iter:
                 break
 
+        print()
+        print(len(kmeans.cluster_centers_))
+        print()
+
         total_time = time() - start_time
         total_time /= 60
 
