@@ -557,9 +557,9 @@ def main():
 
     # make_embeddings(ai_config, dataset_config, args.batch_size)
 
-    mean_std_experiments()
+    # mean_std_experiments()
 
-    # test_kmeans()
+    test_kmeans()
 
 
 if __name__ == "__main__":
