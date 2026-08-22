@@ -16,10 +16,14 @@ def _one_pass_mean_std_multi(args):
     sleep(i * 5)
     batch_iter = batch_iter_fn(bi)
 
+    pbar = None
     if i == 0:
-        batch_iter = tqdm(batch_iter, "worker 0", ncols=60)
+        pbar = tqdm(desc="worker 0")
+        # batch_iter = tqdm(batch_iter, "worker 0", ncols=60)
 
     total_iters = 0
+
+    mini_batch_size = 10000
 
     acc = []
     acc2 = []
@@ -29,15 +33,28 @@ def _one_pass_mean_std_multi(args):
 
         total_iters += batch_size
 
-        batch = batch.to(torch.float64)
+        mb_i = 0
+        while mb_i < len(batch):
+            next_mb_i = mb_i + mini_batch_size
 
-        batch2 = batch * batch
+            mini_batch = batch[mb_i:next_mb_i]
 
-        a = two_sum_reduce(batch)
-        acc += a
+            mini_batch = mini_batch.to(torch.float64)
+            mini_batch2 = mini_batch * mini_batch
 
-        a2 = two_sum_reduce(batch2)
-        acc2 += a2
+            a = two_sum_reduce(mini_batch)
+            acc += a
+
+            a2 = two_sum_reduce(mini_batch2)
+            acc2 += a2
+
+            mb_i = next_mb_i
+
+            if pbar is not None:
+                pbar.update(1)
+
+    if pbar is not None:
+        pbar.close()
 
     acc = two_sum_reduce(acc, minmum=True)
     acc2 = two_sum_reduce(acc2, minmum=True)

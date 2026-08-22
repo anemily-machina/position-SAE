@@ -188,7 +188,7 @@ class EmbIter:
         worker_i = args_dict.get("worker_i", None)
         stan_mean = args_dict.get("stan_mean", None)
         stan_std = args_dict.get("stan_std", None)
-        batch_size = args_dict.get("batch_size", 10000000)
+        batch_size = args_dict.get("batch_size", 1000000)
 
         if stan_std is not None:
             stan_std[stan_std == 0] = 1
@@ -206,8 +206,8 @@ class EmbIter:
         self.worker_i = worker_i
         self.mean = stan_mean
         self.inv_std = inv_stan_std
-
         self.batch_size = batch_size
+
         self.file_i = 0
         self.emb_buffer = []
 
