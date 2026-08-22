@@ -40,78 +40,6 @@ tracking_json_fname = None
 num_procs = None
 
 
-class FileQueue:
-    """
-    My file are large so this keeps the runtime smooth
-    """
-
-    queue_folder = None
-
-    def __init__(self, queue_folder):
-        self.queue_folder = queue_folder
-
-    def _get_queue(self):
-
-        queue_files = os.listdir(self.queue_folder)
-
-        # sort queue by time
-        queue_files = sorted(queue_files, key=lambda x: int(x.split("_")[1]))
-
-        queue = []
-        for qf in queue_files:
-            v = qf.split("_")
-            q = {"number": int(v[0]), "position": int(v[1]), "file": qf}
-            queue.append(q)
-
-        return queue
-
-    def add(self, number):
-        """
-        add something to the end of the queue
-        """
-
-        queue = self._get_queue()
-
-        # validate addition
-        for q in queue:
-
-            if q["number"] == number:
-                err_msg = f"trying to add somethign to the queue twice {number} {queue}"
-                raise ValueError(err_msg)
-
-        # add to queue
-        now = int(time() * 100)
-        new_file = f"{number}_{now}"
-        new_fname = os.path.join(self.queue_folder, new_file)
-        # touch file
-        with open(new_fname, "w") as f_out:
-            pass
-
-    def remove(self, number):
-        """
-        remove number from the queue if it is first, otherwise error
-        """
-
-        queue = self._get_queue()
-
-        if queue[0]["number"] != number:
-            err_msg = f"trying to remove somethign not at the front of the queue {number} {queue}"
-            raise ValueError(err_msg)
-
-        del_file = queue[0]["file"]
-        del_fname = os.path.join(self.queue_folder, del_file)
-
-        os.remove(del_fname)
-
-    def is_front(self, number):
-
-        queue = self._get_queue()
-
-        is_f = queue[0]["number"] == number
-
-        return is_f
-
-
 def parse_args():
 
     parser = ArgumentParser()
@@ -252,30 +180,30 @@ def make_embeddings(ai_config, dataset_config, batch_size):
 
 class EmbIter:
 
-    def __init__(self, args):
+    def __init__(self, args_dict):
 
-        if len(args) == 4:
-            files, sub_rate, file_queue, i = args
-            mean = None
-            std = None
-        elif len(args) == 6:
-            files, sub_rate, file_queue, i, mean, std = args
-        if std is not None:
-            inv_std = std.reciprocal()
+        files = args_dict["files"]
+        sub_rate = args_dict["sub_rate"]
+        worker_i = args_dict["worker_i"]
+        stan_mean = args_dict["stan_mean"]
+        stan_std = args_dict["stan_std"]
+
+        if stan_std is not None:
+            stan_std[stan_std == 0] = 1
+            inv_stan_std = stan_std.reciprocal()
         else:
-            inv_std = None
+            inv_stan_std = None
 
         assert 0 < sub_rate <= 1.0
 
         # can't divide by std if mean is not provided
-        assert std is None or mean is not None
+        assert inv_stan_std is None or stan_mean is not None
 
         self.files = files
         self.sub_rate = sub_rate
-        self.file_queue = file_queue
-        self.i = i
-        self.mean = mean
-        self.inv_std = inv_std
+        self.worker_i = worker_i
+        self.mean = stan_mean
+        self.inv_std = inv_stan_std
 
         self.batch_size = 1000
         self.file_i = 0
@@ -335,19 +263,9 @@ class EmbIter:
         return batch_embs
 
 
-def subsample_mean_std(exp_folder, sub_rate=1.0, standardization_p=None):
+def subsample_mean_std(sub_rate=1.0, standardization_p=None):
 
     assert 0 < sub_rate <= 1.0
-
-    queue_folder = os.path.join(exp_folder, "loading_queue")
-    make_folder(queue_folder)
-
-    # clear out old values
-    for file in os.listdir(queue_folder):
-        fname = os.path.join(queue_folder, file)
-        os.remove(fname)
-
-    file_queue = FileQueue(queue_folder)
 
     emb_cache_folder = os.path.join(output_folder, "emb_cache")
     emb_files = os.listdir(emb_cache_folder)
@@ -371,16 +289,19 @@ def subsample_mean_std(exp_folder, sub_rate=1.0, standardization_p=None):
         stan_std = None
 
     data_iter_input = [
-        (fc, sub_rate, file_queue, i, stan_mean, stan_std)
+        {
+            "files": fc,
+            "sub_rate": sub_rate,
+            "worker_i": i,
+            "stan_mean": stan_mean,
+            "stan_std": stan_std,
+        }
         for i, fc in enumerate(fname_chunks)
     ]
 
     mean, std, total_iters = one_pass_mean_std_multi(
         data_iter_input, EmbIter, num_procs=num_procs
     )
-
-    # clean up temporary files (should be empty here)
-    os.rmdir(queue_folder)
 
     result = {"mean": mean, "std": std, "total_iters": total_iters}
 
@@ -393,7 +314,7 @@ def _confirm_baseline(baseline_result):
     print("Confirming baseline result")
     print()
 
-    result = subsample_mean_std("./", sub_rate=1.0, standardization_p=baseline_result)
+    result = subsample_mean_std(sub_rate=1.0, standardization_p=baseline_result)
 
     print()
     print()
@@ -444,7 +365,7 @@ def mean_std_experiments():
 
             else:
 
-                result = subsample_mean_std(exp_folder, sub_rate=sub_rate)
+                result = subsample_mean_std(sub_rate=sub_rate)
 
                 save_torch(result, exp_fname)
 
@@ -502,6 +423,10 @@ def mean_std_experiments():
     _confirm_baseline(smallest_result)
 
 
+def test_kmenas():
+    pass
+
+
 def main():
 
     args = parse_args()
@@ -540,6 +465,8 @@ def main():
     # make_embeddings(ai_config, dataset_config, args.batch_size)
 
     mean_std_experiments()
+
+    # test_kmenas()
 
 
 if __name__ == "__main__":
