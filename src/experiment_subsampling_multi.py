@@ -474,7 +474,7 @@ def test_kmeans():
                 break
 
         total_time = time() - start_time
-        total_time *= 60
+        total_time /= 60
 
         print()
         print(f"experiment took {total_time:.2f}m")
