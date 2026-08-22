@@ -206,7 +206,7 @@ class EmbIter:
         self.mean = stan_mean
         self.inv_std = inv_stan_std
 
-        self.batch_size = 1000
+        self.batch_size = 100000
         self.file_i = 0
         self.emb_buffer = []
 
@@ -216,7 +216,7 @@ class EmbIter:
     def _load_next_embs(self):
 
         if self.file_i >= len(self.files):
-            return []
+            return
 
         fname = self.files[self.file_i]
 
@@ -244,22 +244,51 @@ class EmbIter:
 
         self.file_i += 1
 
-        return subsample_embs
+        self.emb_buffer += subsample_embs
 
     def __next__(self):
 
-        # if the buffer is too small expand it if we can
-        if self.batch_size > len(self.emb_buffer):
-            self.emb_buffer += self._load_next_embs()
-
-        # if the buffer is ever empty after an expansion check we are done
         if len(self.emb_buffer) == 0:
-            raise StopIteration
+            self._load_next_embs()
+            # if the buffer is ever empty after an expansion check we are done
+            if len(self.emb_buffer) == 0:
+                raise StopIteration
 
-        batch_embs = self.emb_buffer[: self.batch_size]
-        self.emb_buffer = self.emb_buffer[self.batch_size :]
+        batch_buffer = []
+        cur_batch_size = 0
 
-        batch_embs = torch.cat(batch_embs, dim=0)
+        # until the batch is big enough or we've run out of embeddings
+        while cur_batch_size < self.batch_size and len(self.emb_buffer) > 0:
+
+            # find the minimal eb_i that will fill up the batch or we run out of embeddings
+            add_batch_size = 0
+            eb_i = 0
+            while add_batch_size + cur_batch_size < self.batch_size and eb_i < len(
+                self.emb_buffer
+            ):
+                add_batch_size += len(self.emb_buffer[eb_i])
+
+                eb_i += 1
+
+            # update the current batch
+            cur_batch_size += add_batch_size
+            batch_buffer += self.emb_buffer[:eb_i]
+
+            # update the embeddings buffer
+
+            self.emb_buffer = self.emb_buffer[eb_i:]
+
+            if len(self.emb_buffer) == 0:
+                self._load_next_embs()
+
+        # make the batch
+        batch_embs = torch.cat(batch_buffer, dim=0)
+
+        if len(batch_embs) > self.batch_size:
+            remaining = batch_embs[self.batch_size :]
+            batch_embs = batch_embs[: self.batch_size]
+
+            self.emb_buffer = [remaining] + self.emb_buffer
 
         return batch_embs
 
@@ -462,6 +491,7 @@ def test_kmeans():
         )
 
         data_iter = EmbIter(data_iter_args)
+
         for i, emb_batch in tqdm(enumerate(data_iter)):
 
             print()
@@ -526,9 +556,9 @@ def main():
 
     # make_embeddings(ai_config, dataset_config, args.batch_size)
 
-    # mean_std_experiments()
+    mean_std_experiments()
 
-    test_kmeans()
+    # test_kmeans()
 
 
 if __name__ == "__main__":
