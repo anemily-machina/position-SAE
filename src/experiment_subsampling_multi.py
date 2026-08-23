@@ -478,11 +478,11 @@ def test_kmeans():
 
     # for sub_rate, num_trials in zip(subsample_rates, number_of_trials):
 
-    max_iter = 127
+    max_iter = 3
 
     for sub_rate in subsample_rates:
 
-        for ratio in [0.1, 0.01, 0.001, 0.0001, 0.0]:
+        for ratio in [0.1]:  # [0.1, 0.01, 0.001, 0.0001, 0.0]:
 
             data_iter_args["sub_rate"] = sub_rate
 
@@ -518,6 +518,18 @@ def test_kmeans():
             # print("inertia")
             # print(kmeans.)
             print("scoring first 1,000,000 examples")
+
+            labels = kmeans.predict(first_batch)
+            label_clusters = kmeans.cluster_centers_[labels]
+
+            print(len(label_clusters))
+
+            diffs = first_batch - label_clusters
+
+            print(diffs[0])
+
+            exit()
+
             print(kmeans.score(first_batch))
             print()
 
