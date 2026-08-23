@@ -546,14 +546,15 @@ def test_kmeans():
             print(abs_diff)
 
             # ignore division by zero
+            print(first_batch)
             abs_diff[first_batch == 0] = 0
             first_batch[first_batch == 0] = 1
 
-            inv_batch = first_batch.reciprocal()
+            inv_batch = first_batch.reciprocal().abs()
             print(inv_batch)
-            rel_err = abs_diff * inv_batch
+            rel_err = abs_diff * inv_batch * 100
             print(rel_err)
-            rel_err = rel_err.abs().sum() * 100
+            rel_err = rel_err.sum()
             print(rel_err)
             sample_avg_rel_err = rel_err / len(first_batch)
             print(sample_avg_rel_err)
