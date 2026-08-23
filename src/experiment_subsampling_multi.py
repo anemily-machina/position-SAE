@@ -467,26 +467,30 @@ def test_kmeans():
 
     data_iter_args = {
         "files": emb_files,
-        "sub_rate": 0.05,
         "worker_i": 0,
         "stan_mean": baseline["mean"],
         "stan_std": baseline["std"],
     }
 
-    max_iter = 20
-    # timing tests
-    for b_size_i in range(1, 20):
+    subsample_rates = [(20 - k) / 20 for k in range(0, 20)]
+    subsample_rates = [1.0]
+    number_of_trials = [1] + [20] * (len(subsample_rates) - 1)
 
-        batch_size = b_size_i * 256
+    # for sub_rate, num_trials in zip(subsample_rates, number_of_trials):
+
+    max_iter = 3
+
+    for sub_rate in subsample_rates:
+
+        data_iter_args["sub_rate"] = sub_rate
 
         print()
-        print(f"kmeans with batch size: {batch_size}")
+        print(f"kmeans with subsample rate: {sub_rate}")
         print()
 
         kmeans = MiniBatchKMeans(
             n_clusters=20000,
             max_iter=max_iter,
-            batch_size=batch_size,
             verbose=True,
             compute_labels=False,
         )
@@ -504,9 +508,10 @@ def test_kmeans():
             if i + 1 == max_iter:
                 break
 
-        print()
-        print(len(kmeans.cluster_centers_))
-        print()
+        import pickle
+
+        with open("./text.pkl", "w") as f_out:
+            pickle.dump(kmeans, f_out)
 
         total_time = time() - start_time
         total_time /= 60
@@ -514,6 +519,8 @@ def test_kmeans():
         print()
         print(f"experiment took {total_time:.2f}m")
         print()
+
+        exit()
 
 
 def main():
