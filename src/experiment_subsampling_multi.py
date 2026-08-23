@@ -518,19 +518,17 @@ def test_kmeans():
             # print("inertia")
             # print(kmeans.)
             print("scoring first 1,000,000 examples")
+            score = kmeans.score(first_batch)
 
-            labels = kmeans.predict(first_batch)
-            label_clusters = torch.tensor(kmeans.cluster_centers_)[labels]
+            print(f"score: {score}")
 
-            print(len(label_clusters))
+            sample_avg_score = score / len(first_batch)
 
-            diffs = first_batch - label_clusters
-            loss = float(diffs.pow(2).sum())
-            avg_loss = loss / len(first_batch)
+            print(f"avg per sample: {sample_avg_score}")
 
-            print(kmeans.score(first_batch))
-            print(loss)
-            print(avg_loss)
+            dim_avg_score = sample_avg_score / len(first_batch[0])
+
+            print(dim_avg_score)
             print()
 
             exit()
