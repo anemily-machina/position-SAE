@@ -524,7 +524,7 @@ def test_kmeans():
 
             # compute score
             diff = first_batch - label_clusters
-            score = diff.pow(2)
+            score = diff.pow(2).sum()
             sample_avg_score = score / len(first_batch)
             dim_avg_score = sample_avg_score / len(first_batch[0])
 
@@ -537,7 +537,7 @@ def test_kmeans():
 
             inv_batch = first_batch.reciprocal()
             rel_err = abs_diff * inv_batch
-            rel_err = rel_err.abs() * 100
+            rel_err = rel_err.abs().sum() * 100
             sample_avg_rel_err = rel_err / len(first_batch)
             dim_avg_rel_err = sample_avg_rel_err / len(first_batch[0])
 
