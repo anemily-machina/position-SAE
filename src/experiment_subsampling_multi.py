@@ -478,7 +478,7 @@ def test_kmeans():
 
     # for sub_rate, num_trials in zip(subsample_rates, number_of_trials):
 
-    max_iter = 3
+    max_iter = 300
 
     for sub_rate in subsample_rates:
 
@@ -487,7 +487,7 @@ def test_kmeans():
             data_iter_args["sub_rate"] = sub_rate
 
             print()
-            print(f"kmeans with subsample rate: {sub_rate}")
+            print(f"kmeans with subsample rate={sub_rate} ratio={ratio}")
             print()
 
             kmeans = MiniBatchKMeans(
@@ -512,54 +512,31 @@ def test_kmeans():
                     break
 
             print()
-            print(f"reassignment_ratio={ratio}")
-            # print("inertia")
-            # print(kmeans.)
             print("scoring first 1,000,000 examples")
 
             first_batch = next(EmbIter(data_iter_args))
 
-            print("remove this")
-            first_batch = first_batch[:1]
-
             labels = kmeans.predict(first_batch)
-            print()
-            print(labels)
             label_clusters = torch.tensor(kmeans.cluster_centers_)[labels]
-            print(label_clusters[0][:5])
 
             # compute score
             diff = first_batch - label_clusters
-            print(diff[0][:5])
             score = diff.pow(2).sum()
-            print(score)
             sample_avg_score = score / len(first_batch)
-            print(sample_avg_score)
             dim_avg_score = sample_avg_score / len(first_batch[0])
-            print(dim_avg_score)
 
             # compute relative error
             abs_diff = diff.abs()
-            print(abs_diff[0][:5])
 
             # ignore division by zero
-
             abs_diff[first_batch == 0] = 0
             first_batch[first_batch == 0] = 1
 
             inv_batch = first_batch.reciprocal().abs()
-            print(first_batch[0][:5])
-            print(inv_batch[0][:5])
             rel_err = abs_diff * inv_batch * 100
-            print(rel_err[0][:5])
             rel_err = rel_err.sum()
-            print(rel_err)
             sample_avg_rel_err = rel_err / len(first_batch)
-            print(sample_avg_rel_err)
             dim_avg_rel_err = sample_avg_rel_err / len(first_batch[0])
-            print(dim_avg_rel_err)
-
-            exit()
 
             print(f"score: {score}")
             print(f"avg per sample: {sample_avg_score}")
@@ -570,21 +547,19 @@ def test_kmeans():
             print(f"avg per dimension: {dim_avg_rel_err}")
             print()
 
-            exit()
-
         # import pickle
 
         # with open("./text.pkl", "wb") as f_out:
         #     pickle.dump(kmeans, f_out)
 
-        total_time = time() - start_time
-        total_time /= 60
+        # total_time = time() - start_time
+        # total_time /= 60
 
-        print()
-        print(f"experiment took {total_time:.2f}m")
-        print()
+        # print()
+        # print(f"experiment took {total_time:.2f}m")
+        # print()
 
-        exit()
+        # exit()
 
 
 def main():
