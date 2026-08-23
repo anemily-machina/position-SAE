@@ -520,18 +520,20 @@ def test_kmeans():
             print("scoring first 1,000,000 examples")
 
             labels = kmeans.predict(first_batch)
-            label_clusters = kmeans.cluster_centers_[labels]
+            label_clusters = torch.tensor(kmeans.cluster_centers_)[labels]
 
             print(len(label_clusters))
 
             diffs = first_batch - label_clusters
-
-            print(diffs[0])
-
-            exit()
+            loss = float(diffs.pow(2).sum())
+            avg_loss = loss / len(first_batch)
 
             print(kmeans.score(first_batch))
+            print(loss)
+            print(avg_loss)
             print()
+
+            exit()
 
         # import pickle
 
