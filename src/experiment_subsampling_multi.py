@@ -533,10 +533,16 @@ def test_kmeans():
             first_batch[first_batch == 0] = 1
 
             inv_batch = first_batch.reciprocal().abs()
+
             rel_err = abs_diff * inv_batch * 100
             rel_err = rel_err.sum()
             sample_avg_rel_err = rel_err / len(first_batch)
             dim_avg_rel_err = sample_avg_rel_err / len(first_batch[0])
+
+            rel2_err = score * inv_batch * 100
+            rel2_err = rel2_err.sum()
+            sample_avg_rel2_err = rel2_err / len(first_batch)
+            dim_avg_rel2_err = sample_avg_rel2_err / len(first_batch[0])
 
             print(f"score: {score}")
             print(f"avg per sample: {sample_avg_score}")
@@ -545,6 +551,10 @@ def test_kmeans():
             print(f"sum of rel err: {rel_err}")
             print(f"avg per sample: {sample_avg_rel_err}")
             print(f"avg per dimension: {dim_avg_rel_err}")
+            print()
+            print(f"sum of rel sqr err: {rel2_err}")
+            print(f"avg per sample: {sample_avg_rel2_err}")
+            print(f"avg per dimension: {dim_avg_rel2_err}")
             print()
 
         # import pickle
