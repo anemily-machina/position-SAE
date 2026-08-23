@@ -526,11 +526,11 @@ def test_kmeans():
             print()
             print(labels)
             label_clusters = torch.tensor(kmeans.cluster_centers_)[labels]
-            print(label_clusters[0][:10])
+            print(label_clusters[0][:5])
 
             # compute score
             diff = first_batch - label_clusters
-            print(diff[0][:10])
+            print(diff[0][:5])
             score = diff.pow(2).sum()
             print(score)
             sample_avg_score = score / len(first_batch)
@@ -538,11 +538,9 @@ def test_kmeans():
             dim_avg_score = sample_avg_score / len(first_batch[0])
             print(dim_avg_score)
 
-            print(first_batch[0][:10])
-
             # compute relative error
             abs_diff = diff.abs()
-            print(abs_diff[0][:10])
+            print(abs_diff[0][:5])
 
             # ignore division by zero
 
@@ -550,9 +548,10 @@ def test_kmeans():
             first_batch[first_batch == 0] = 1
 
             inv_batch = first_batch.reciprocal().abs()
-            print(inv_batch[0][:10])
+            print(first_batch[0][:5])
+            print(inv_batch[0][:5])
             rel_err = abs_diff * inv_batch * 100
-            print(rel_err[0][:10])
+            print(rel_err[0][:5])
             rel_err = rel_err.sum()
             print(rel_err)
             sample_avg_rel_err = rel_err / len(first_batch)
