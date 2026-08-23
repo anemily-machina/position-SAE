@@ -473,16 +473,16 @@ def test_kmeans():
     }
 
     subsample_rates = [(20 - k) / 20 for k in range(0, 20)]
-    subsample_rates = [1.0]
+    subsample_rates = [1.0, 0.05]
     number_of_trials = [1] + [20] * (len(subsample_rates) - 1)
 
     # for sub_rate, num_trials in zip(subsample_rates, number_of_trials):
 
-    max_iter = 3
+    max_iter = 127
 
     for sub_rate in subsample_rates:
 
-        for ratio in [0.1]:  # [0.1, 0.01, 0.001, 0.0001, 0.0]:
+        for ratio in [0.1, 0.01, 0.001, 0.0001, 0.0]:
 
             data_iter_args["sub_rate"] = sub_rate
 
@@ -518,20 +518,37 @@ def test_kmeans():
             # print("inertia")
             # print(kmeans.)
             print("scoring first 1,000,000 examples")
-            score = kmeans.score(first_batch)
 
-            print(f"score: {score}")
+            labels = kmeans.predict(first_batch)
+            label_clusters = torch.tensor(kmeans.cluster_centers_)[labels]
 
+            # compute score
+            diff = first_batch - label_clusters
+            score = diff.pow(2)
             sample_avg_score = score / len(first_batch)
-
-            print(f"avg per sample: {sample_avg_score}")
-
             dim_avg_score = sample_avg_score / len(first_batch[0])
 
-            print(dim_avg_score)
-            print()
+            # compute relative error
+            abs_diff = diff.abs()
 
-            exit()
+            # ignore division by zero
+            abs_diff[first_batch == 0] = 0
+            first_batch[first_batch == 0] = 1
+
+            inv_batch = first_batch.reciprocal()
+            rel_err = abs_diff * inv_batch
+            rel_err = rel_err.abs() * 100
+            sample_avg_rel_err = rel_err / len(first_batch)
+            dim_avg_rel_err = sample_avg_rel_err / len(first_batch[0])
+
+            print(f"score: {score}")
+            print(f"avg per sample: {sample_avg_score}")
+            print(f"avg per dimension: {dim_avg_score}")
+            print()
+            print(f"rel err: {rel_err}")
+            print(f"avg per sample: {sample_avg_rel_err}")
+            print(f"avg per dimension: {dim_avg_rel_err}")
+            print()
 
         # import pickle
 
