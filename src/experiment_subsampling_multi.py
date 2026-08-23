@@ -493,7 +493,7 @@ def test_kmeans():
             max_iter=max_iter,
             verbose=True,
             compute_labels=False,
-            reassignment_ratio=0.0001,
+            reassignment_ratio=0.1,
         )
 
         data_iter = EmbIter(data_iter_args)
