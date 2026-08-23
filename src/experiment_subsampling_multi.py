@@ -502,6 +502,9 @@ def test_kmeans():
 
             for i, emb_batch in tqdm(enumerate(data_iter)):
 
+                print("remove this")
+                emb_batch = emb_batch[:100000]
+
                 kmeans.partial_fit(emb_batch)
 
                 # initialization takes a long time so will dominate the timing if included
@@ -511,44 +514,64 @@ def test_kmeans():
                 if i + 1 == max_iter:
                     break
 
-            first_batch = next(EmbIter(data_iter_args))
-
             print()
             print(f"reassignment_ratio={ratio}")
             # print("inertia")
             # print(kmeans.)
             print("scoring first 1,000,000 examples")
 
+            first_batch = next(EmbIter(data_iter_args))
+
+            print("remove this")
+            first_batch = first_batch[:1]
+
             labels = kmeans.predict(first_batch)
+            print()
+            print(labels)
             label_clusters = torch.tensor(kmeans.cluster_centers_)[labels]
+            print(label_clusters)
 
             # compute score
             diff = first_batch - label_clusters
+            print(diff)
             score = diff.pow(2).sum()
+            print(score)
             sample_avg_score = score / len(first_batch)
+            print(sample_avg_score)
             dim_avg_score = sample_avg_score / len(first_batch[0])
+            print(dim_avg_score)
 
             # compute relative error
             abs_diff = diff.abs()
+            print(abs_diff)
 
             # ignore division by zero
             abs_diff[first_batch == 0] = 0
             first_batch[first_batch == 0] = 1
 
             inv_batch = first_batch.reciprocal()
+            print(inv_batch)
             rel_err = abs_diff * inv_batch
+            print(rel_err)
             rel_err = rel_err.abs().sum() * 100
+            print(rel_err)
             sample_avg_rel_err = rel_err / len(first_batch)
+            print(sample_avg_rel_err)
             dim_avg_rel_err = sample_avg_rel_err / len(first_batch[0])
+            print(dim_avg_rel_err)
+
+            exit()
 
             print(f"score: {score}")
             print(f"avg per sample: {sample_avg_score}")
             print(f"avg per dimension: {dim_avg_score}")
             print()
-            print(f"rel err: {rel_err}")
+            print(f"sum of rel err: {rel_err}")
             print(f"avg per sample: {sample_avg_rel_err}")
             print(f"avg per dimension: {dim_avg_rel_err}")
             print()
+
+            exit()
 
         # import pickle
 
