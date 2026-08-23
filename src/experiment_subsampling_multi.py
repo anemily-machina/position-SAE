@@ -510,7 +510,7 @@ def test_kmeans():
 
         import pickle
 
-        with open("./text.pkl", "w") as f_out:
+        with open("./text.pkl", "wb") as f_out:
             pickle.dump(kmeans, f_out)
 
         total_time = time() - start_time
