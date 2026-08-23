@@ -478,41 +478,53 @@ def test_kmeans():
 
     # for sub_rate, num_trials in zip(subsample_rates, number_of_trials):
 
-    max_iter = 20
+    max_iter = 3
 
     for sub_rate in subsample_rates:
 
-        data_iter_args["sub_rate"] = sub_rate
+        for ratio in [0.1, 0.01, 0.001, 0.0001, 0.0]:
 
-        print()
-        print(f"kmeans with subsample rate: {sub_rate}")
-        print()
+            data_iter_args["sub_rate"] = sub_rate
 
-        kmeans = MiniBatchKMeans(
-            n_clusters=20000,
-            max_iter=max_iter,
-            verbose=True,
-            compute_labels=False,
-            reassignment_ratio=0.1,
-        )
+            print()
+            print(f"kmeans with subsample rate: {sub_rate}")
+            print()
 
-        data_iter = EmbIter(data_iter_args)
+            kmeans = MiniBatchKMeans(
+                n_clusters=20000,
+                max_iter=max_iter,
+                verbose=True,
+                compute_labels=False,
+                reassignment_ratio=ratio,
+            )
 
-        for i, emb_batch in tqdm(enumerate(data_iter)):
+            data_iter = EmbIter(data_iter_args)
 
-            kmeans.partial_fit(emb_batch)
+            for i, emb_batch in tqdm(enumerate(data_iter)):
 
-            # initialization takes a long time so will dominate the timing if included
-            if i == 0:
-                start_time = time()
+                kmeans.partial_fit(emb_batch)
 
-            if i + 1 == max_iter:
-                break
+                # initialization takes a long time so will dominate the timing if included
+                if i == 0:
+                    start_time = time()
 
-        import pickle
+                if i + 1 == max_iter:
+                    break
 
-        with open("./text.pkl", "wb") as f_out:
-            pickle.dump(kmeans, f_out)
+            first_batch = next(EmbIter(data_iter_args))
+
+            print()
+            print(f"reassignment_ratio={ratio}")
+            print("inertia")
+            print(kmeans.inertia_)
+            print("scoring first 1,000,000 examples")
+            print(kmeans.score(first_batch))
+            print()
+
+        # import pickle
+
+        # with open("./text.pkl", "wb") as f_out:
+        #     pickle.dump(kmeans, f_out)
 
         total_time = time() - start_time
         total_time /= 60
