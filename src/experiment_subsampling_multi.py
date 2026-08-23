@@ -515,8 +515,8 @@ def test_kmeans():
 
             print()
             print(f"reassignment_ratio={ratio}")
-            print("inertia")
-            print(kmeans.inertia_)
+            # print("inertia")
+            # print(kmeans.)
             print("scoring first 1,000,000 examples")
             print(kmeans.score(first_batch))
             print()
