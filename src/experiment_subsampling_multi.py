@@ -19,6 +19,7 @@ from utils import (
 from torch_custom_fns_multi import one_pass_mean_std_multi
 
 from argparse import ArgumentParser
+import json
 import math
 import os
 from random import sample
@@ -478,7 +479,7 @@ def test_kmeans():
 
     # for sub_rate, num_trials in zip(subsample_rates, number_of_trials):
 
-    max_iter = 300
+    max_iter = 3
 
     kmeans_params = {
         "n_clusters": 20000,
@@ -489,6 +490,7 @@ def test_kmeans():
         "init_size": 100000,
     }
 
+    log_strs = []
     for sub_rate in subsample_rates:
 
         for ratio in [0.1, 0.01, 0.001, 0.0001, 0.00001, 0.0]:
@@ -497,14 +499,22 @@ def test_kmeans():
 
             data_iter_args["sub_rate"] = sub_rate
 
-            print()
-            print(f"kmeans with subsample rate={sub_rate}")
-            print()
+            subsample_str = f"kmeans with subsample rate={sub_rate}"
 
             print()
-            print("kmeans params")
-            print(kmeans_params)
+            print(subsample_str)
             print()
+
+            log_str = subsample_str + "\n\n"
+
+            kmeans_param_str = "kmeans params\n"
+            kmeans_param_str += json.dumps(kmeans_params)
+
+            print()
+            print(kmeans_param_str)
+            print()
+
+            log_str += kmeans_param_str + "\n\n"
 
             kmeans = MiniBatchKMeans(**kmeans_params)
 
@@ -521,8 +531,11 @@ def test_kmeans():
                 if i + 1 == max_iter:
                     break
 
+            display_str = "scoring first 1,000,000 examples"
+            log_str += display_str + "\n\n"
+
             print()
-            print("scoring first 1,000,000 examples")
+            print(display_str)
 
             first_batch = next(EmbIter(data_iter_args))
 
@@ -532,11 +545,23 @@ def test_kmeans():
             dim_avg_score = score / len(first_batch[0])
             sample_avg_score = dim_avg_score / len(first_batch)
 
+            score_str = f"""
+score: {score}
+avg per dimension: {dim_avg_score}
+avg per sample: {sample_avg_score}
+"""
+
+            log_str += score_str + "\n\n"
+
             print()
-            print(f"score: {score}")
-            print(f"avg per dimension: {dim_avg_score}")
-            print(f"avg per sample: {sample_avg_score}")
+            print(score_str)
             print()
+
+            print()
+            print()
+            print(log_str)
+
+            exit()
 
     exit()
 
