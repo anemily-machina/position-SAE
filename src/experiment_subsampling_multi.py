@@ -479,7 +479,7 @@ def test_kmeans():
 
     # for sub_rate, num_trials in zip(subsample_rates, number_of_trials):
 
-    max_iter = 300
+    max_iter = 3  # 00
 
     kmeans_params = {
         "n_clusters": 20000,
