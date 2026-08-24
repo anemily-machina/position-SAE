@@ -479,7 +479,7 @@ def test_kmeans():
 
     # for sub_rate, num_trials in zip(subsample_rates, number_of_trials):
 
-    max_iter = 3
+    max_iter = 300
 
     kmeans_params = {
         "n_clusters": 20000,
@@ -493,9 +493,7 @@ def test_kmeans():
     log_strs = []
     for sub_rate in subsample_rates:
 
-        for ratio in [
-            0.01,
-        ]:  # 0.001, 0.0001, 0.00001, 0.0]:
+        for ratio in [0.01, 0.001, 0.0001, 0.00001, 0.0]:
 
             kmeans_params["reassignment_ratio"] = ratio
 
@@ -566,6 +564,8 @@ avg per sample: {sample_avg_score}
     print()
 
     full_log = "\n\n\n".join(log_strs)
+
+    print(full_log)
 
     exit()
 
