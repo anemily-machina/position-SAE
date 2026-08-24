@@ -514,8 +514,6 @@ def test_kmeans():
 
                 kmeans.partial_fit(emb_batch)
 
-                print(kmeans._random_reassign())
-
                 # initialization takes a long time so will dominate the timing if included
                 if i == 0:
                     start_time = time()
