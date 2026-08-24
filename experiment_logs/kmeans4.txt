@@ -1,0 +1,184 @@
+kmeans with subsample rate=1.0 ratio=0.1
+
+0it [00:00, ?it/s][MiniBatchKMeans] Reassigning 19613 cluster centers.
+98it [48:56, 29.96s/it]
+
+scoring first 1,000,000 examples
+score: 273524832.34525275
+avg per sample: 273.5248323452528
+avg per dimension: 0.5342281881743218
+
+sum of rel err: 248514022043.75153
+avg per sample: 248514.02204375152
+avg per dimension: 485.3789493042022
+
+sum of rel sqr err: 2.2541126941807437e+20
+avg per sample: 225411269418074.38
+avg per dimension: 440256385582.1765
+
+
+kmeans with subsample rate=1.0 ratio=0.01
+
+0it [00:00, ?it/s][MiniBatchKMeans] Reassigning 14863 cluster centers.
+98it [48:56, 29.96s/it]
+
+scoring first 1,000,000 examples
+score: 260170431.29081625
+avg per sample: 260.1704312908162
+avg per dimension: 0.5081453736148754
+
+sum of rel err: 246815078119.29556
+avg per sample: 246815.07811929556
+avg per dimension: 482.06069945174914
+
+sum of rel sqr err: 2.1440593411382316e+20
+avg per sample: 214405934113823.16
+avg per dimension: 418761590066.06085
+
+
+kmeans with subsample rate=1.0 ratio=0.001
+
+0it [00:00, ?it/s][MiniBatchKMeans] Reassigning 3326 cluster centers.
+98it [48:55, 29.95s/it]
+
+scoring first 1,000,000 examples
+score: 236477832.22108018
+avg per sample: 236.47783222108018
+avg per dimension: 0.4618707660567972
+
+sum of rel err: 247900330050.55084
+avg per sample: 247900.33005055084
+avg per dimension: 484.1803321299821
+
+sum of rel sqr err: 1.9488091042097752e+20
+avg per sample: 194880910420977.53
+avg per dimension: 380626778165.97174
+
+
+kmeans with subsample rate=1.0 ratio=0.0001
+
+98it [48:35, 29.75s/it]
+
+scoring first 1,000,000 examples
+score: 236256734.1386707
+avg per sample: 236.2567341386707
+avg per dimension: 0.4614389338645912
+
+sum of rel err: 248580504323.73798
+avg per sample: 248580.504323738
+avg per dimension: 485.50879750730076
+
+sum of rel sqr err: 1.9469870393173665e+20
+avg per sample: 194698703931736.66
+avg per dimension: 380270906116.67316
+
+
+kmeans with subsample rate=1.0 ratio=0.0
+
+98it [48:25, 29.65s/it]
+
+scoring first 1,000,000 examples
+score: 235749877.10616386
+avg per sample: 235.74987710616386
+avg per dimension: 0.4604489787229763
+
+sum of rel err: 251488750983.37286
+avg per sample: 251488.75098337285
+avg per dimension: 491.1889667644001
+
+sum of rel sqr err: 1.9428100406101108e+20
+avg per sample: 194281004061011.1
+avg per dimension: 379455086056.6623
+
+
+kmeans with subsample rate=0.05 ratio=0.1
+
+0it [00:00, ?it/s][MiniBatchKMeans] Reassigning 19332 cluster centers.
+5it [06:01, 72.38s/it] 
+
+scoring first 1,000,000 examples
+score: 321807743.42392683
+avg per sample: 321.8077434239268
+avg per dimension: 0.628530748874857
+
+sum of rel err: 257516761575.5578
+avg per sample: 257516.7615755578
+avg per dimension: 502.9624249522613
+
+sum of rel sqr err: 2.6536258487148334e+20
+avg per sample: 265362584871483.34
+avg per dimension: 518286298577.1159
+
+
+kmeans with subsample rate=0.05 ratio=0.01
+
+0it [00:00, ?it/s][MiniBatchKMeans] Reassigning 16278 cluster centers.
+5it [06:05, 73.06s/it] 
+
+scoring first 1,000,000 examples
+score: 293073645.3045719
+avg per sample: 293.0736453045719
+avg per dimension: 0.572409463485492
+
+sum of rel err: 249226645797.58002
+avg per sample: 249226.64579758001
+avg per dimension: 486.77079257339847
+
+sum of rel sqr err: 2.4118536526156517e+20
+avg per sample: 241185365261565.16
+avg per dimension: 471065166526.49445
+
+
+kmeans with subsample rate=0.05 ratio=0.001
+
+0it [00:00, ?it/s][MiniBatchKMeans] Reassigning 4636 cluster centers.
+5it [06:07, 73.44s/it] 
+
+scoring first 1,000,000 examples
+score: 251398685.4264732
+avg per sample: 251.3986854264732
+avg per dimension: 0.4910130574735805
+
+sum of rel err: 254495575483.28644
+avg per sample: 254495.57548328643
+avg per dimension: 497.0616708657938
+
+sum of rel sqr err: 2.0931202163898915e+20
+avg per sample: 209312021638989.16
+avg per dimension: 408812542263.6507
+
+
+kmeans with subsample rate=0.05 ratio=0.0001
+
+5it [05:51, 70.25s/it] 
+
+scoring first 1,000,000 examples
+score: 250950183.2487271
+avg per sample: 250.95018324872711
+avg per dimension: 0.49013707665767015
+
+sum of rel err: 249840999542.90744
+avg per sample: 249840.99954290743
+avg per dimension: 487.9707022322411
+
+sum of rel sqr err: 2.0657188966396953e+20
+avg per sample: 206571889663969.53
+avg per dimension: 403460721999.9405
+
+
+kmeans with subsample rate=0.05 ratio=0.0
+
+5it [05:50, 70.19s/it] 
+
+scoring first 1,000,000 examples
+score: 250485724.67997947
+avg per sample: 250.48572467997948
+avg per dimension: 0.48922993101558493
+
+sum of rel err: 261271999024.1873
+avg per sample: 261271.99902418727
+avg per dimension: 510.29687309411577
+
+sum of rel sqr err: 2.0973345991066773e+20
+avg per sample: 209733459910667.72
+avg per dimension: 409635663888.0229

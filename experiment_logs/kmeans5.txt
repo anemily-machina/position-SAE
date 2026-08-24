@@ -1,0 +1,28 @@
+kmeans with subsample rate=1.0
+
+
+kmeans params
+{'n_clusters': 20000, 'max_iter': 300, 'verbose': True, 'compute_labels': False, 'reassignment_ratio': 1e-05}
+
+98it [48:31, 29.71s/it]
+
+scoring first 1,000,000 examples
+
+score: -236103276.80035636
+avg per dimension: -461139.212500696
+avg per sample: -0.461139212500696
+
+
+kmeans with subsample rate=0.05
+
+
+kmeans params
+{'n_clusters': 20000, 'max_iter': 300, 'verbose': True, 'compute_labels': False, 'reassignment_ratio': 1e-05}
+
+5it [05:50, 70.11s/it] 
+
+scoring first 1,000,000 examples
+
+score: -249749439.03158608
+avg per dimension: -487791.87310856656
+avg per sample: -0.4877918731085666

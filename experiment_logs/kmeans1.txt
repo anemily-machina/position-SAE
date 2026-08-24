@@ -1,0 +1,44 @@
+reassignment_ratio=0.1
+scoring first 1,000,000 examples
+-287124150.24995744
+
+
+kmeans with subsample rate: 1.0
+
+0it [00:00, ?it/s][MiniBatchKMeans] Reassigning 14863 cluster centers.
+29it [16:47, 34.74s/it]
+
+reassignment_ratio=0.01
+scoring first 1,000,000 examples
+-266588442.54882243
+
+
+kmeans with subsample rate: 1.0
+
+0it [00:00, ?it/s][MiniBatchKMeans] Reassigning 3326 cluster centers.
+29it [16:56, 35.04s/it]
+
+reassignment_ratio=0.001
+scoring first 1,000,000 examples
+-238212795.93543583
+
+
+kmeans with subsample rate: 1.0
+
+29it [16:39, 34.47s/it]
+
+reassignment_ratio=0.0001
+scoring first 1,000,000 examples
+-237693942.39913738
+
+
+kmeans with subsample rate: 1.0
+
+29it [17:00, 35.20s/it]
+
+reassignment_ratio=0.0
+scoring first 1,000,000 examples
+-237238689.1922011
+
+
+experiment took 14.44m
