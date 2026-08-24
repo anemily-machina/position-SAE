@@ -491,7 +491,7 @@ def test_kmeans():
 
     for sub_rate in subsample_rates:
 
-        for ratio in [0.99]:
+        for ratio in [0.1, 0.01, 0.001, 0.0001, 0.00001, 0.0]:
 
             kmeans_params["reassignment_ratio"] = ratio
 
