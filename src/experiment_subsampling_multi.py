@@ -486,6 +486,7 @@ def test_kmeans():
         "verbose": True,
         "batch_size": 1000000,
         "compute_labels": False,
+        "init_size": 100000,
     }
 
     for sub_rate in subsample_rates:
