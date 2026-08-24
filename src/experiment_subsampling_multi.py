@@ -484,6 +484,7 @@ def test_kmeans():
         "n_clusters": 20000,
         "max_iter": max_iter,
         "verbose": True,
+        "batch_size": 1000000,
         "compute_labels": False,
     }
 
