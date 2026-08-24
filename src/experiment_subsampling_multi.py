@@ -535,6 +535,7 @@ def test_kmeans():
             inv_batch = first_batch.reciprocal().abs()
 
             rel_err = abs_diff * inv_batch * 100
+            rel2_err = abs_diff.pow(2) * inv_batch * 100
             rel_err = rel_err.sum()
             sample_avg_rel_err = rel_err / len(first_batch)
             dim_avg_rel_err = sample_avg_rel_err / len(first_batch[0])
