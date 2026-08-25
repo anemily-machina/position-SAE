@@ -479,7 +479,7 @@ def test_kmeans():
 
     # for sub_rate, num_trials in zip(subsample_rates, number_of_trials):
 
-    max_iter = 300
+    max_iter = 200
 
     kmeans_params = {
         "n_clusters": 20000,
@@ -520,7 +520,13 @@ def test_kmeans():
 
             data_iter = EmbIter(data_iter_args)
 
-            for i, emb_batch in tqdm(enumerate(data_iter)):
+            for i in tqdm(range(max_iter), total=max_iter, ncols=60):
+
+                try:
+                    emb_batch = next(data_iter)
+                except:
+                    data_iter = EmbIter(data_iter_args)
+                    emb_batch = next(data_iter)
 
                 kmeans.partial_fit(emb_batch)
 
