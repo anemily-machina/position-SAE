@@ -485,7 +485,7 @@ def test_kmeans():
     random_seeds = [10037 * k % 1999 for k in range(total_trials * 2)]
     rng_seed_iter = iter(random_seeds)
 
-    max_iter = 150
+    max_iter = 200
 
     kmeans_params = {
         "n_clusters": 20000,
