@@ -1,6 +1,7 @@
 import json
 import os
 import pathlib
+import pickle
 from random import randint, seed as python_seed
 import shutil
 
@@ -88,6 +89,23 @@ def save_torch(torch_data, fname, keep_tmp_on_fail=False, **kwargs):
         torch.save(d, f, **k)
 
     _save_file(save_fn, torch_data, fname, keep_tmp_on_fail, **kwargs)
+
+
+def save_pickle(pickle_data, fname, keep_tmp_on_fail=False, **kwargs):
+
+    def save_fn(d, f, **k):
+        with open(f, "wb") as f_out:
+            pickle.dump(d, f_out, **k)
+
+    _save_file(save_fn, json_data, fname, keep_tmp_on_fail, **kwargs)
+
+
+def load_pickle(fname):
+
+    with open(fname, "rb") as f_in:
+        pickle_data = pickle.load(f_in)
+
+    return pickle_data
 
 
 def set_random_seeds(seed):

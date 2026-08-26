@@ -11,8 +11,10 @@ from ai_models import load_model, load_tokenizer, get_emb_fn
 from utils import (
     make_folder,
     load_json,
+    load_pickle,
     load_torch,
     save_json,
+    save_pickle,
     save_torch,
     set_random_seeds,
 )
@@ -457,6 +459,10 @@ def mean_std_experiments():
 
 def test_kmeans():
 
+    exp_key = "kmeans_exp_multi"
+    exp_folder = os.path.join(output_folder, exp_key)
+    make_folder(exp_folder)
+
     mean_exp_folder = os.path.join(output_folder, "mean_std_exp_multi")
     baseline_fname = os.path.join(mean_exp_folder, f"1.0_0.pt")
     baseline = torch.load(baseline_fname)
@@ -473,13 +479,13 @@ def test_kmeans():
         "stan_std": baseline["std"],
     }
 
-    subsample_rates = [(20 - k) / 20 for k in range(0, 20)]
-    subsample_rates = [1.0, 0.05]
-    number_of_trials = [1] + [20] * (len(subsample_rates) - 1)
+    subsample_rates = [1.0]
+    number_of_trials = 5
+    total_trials = len(subsample_rates) * number_of_trials
+    random_seeds = [10037 * k % 1999 for k in range(total_trials * 2)]
+    rng_seed_iter = iter(random_seeds)
 
-    # for sub_rate, num_trials in zip(subsample_rates, number_of_trials):
-
-    max_iter = 200
+    max_iter = 150
 
     kmeans_params = {
         "n_clusters": 20000,
@@ -488,18 +494,24 @@ def test_kmeans():
         "batch_size": 1000000,
         "compute_labels": False,
         "init_size": 100000,
+        "reassignment_ratio": 0.001,
     }
+
+    print()
+    print(f"max iterations: {max_iter}")
+    print()
 
     log_strs = []
     for sub_rate in subsample_rates:
 
-        for ratio in [0.01, 0.001, 0.0001, 0.00001, 0.0]:
+        data_iter_args["sub_rate"] = sub_rate
 
-            kmeans_params["reassignment_ratio"] = ratio
+        for t_i in range(number_of_trials):
 
-            data_iter_args["sub_rate"] = sub_rate
+            rng_seed = next(rng_seed_iter)
+            kmeans_params["random_state"] = ratio
 
-            subsample_str = f"kmeans with subsample rate={sub_rate}"
+            subsample_str = f"kmeans with subsample rate={sub_rate}, trial number {t_i}"
 
             print()
             print(subsample_str)
@@ -516,6 +528,20 @@ def test_kmeans():
 
             log_str += kmeans_param_str + "\n\n"
 
+            trial_file_name = f"{sub_rate}_{t_i}.pkl"
+            trial_fname = os.path.join(exp_folder, trial_file_name)
+
+            if os.path.isfile(trial_fname):
+
+                done_str = f"experiment is done skipping"
+                log_str += done_str + "\n\n"
+
+                print()
+                print(done_str)
+                print()
+
+                continue
+
             kmeans = MiniBatchKMeans(**kmeans_params)
 
             data_iter = EmbIter(data_iter_args)
@@ -530,64 +556,10 @@ def test_kmeans():
 
                 kmeans.partial_fit(emb_batch)
 
-                # initialization takes a long time so will dominate the timing if included
-                if i == 0:
-                    start_time = time()
-
                 if i + 1 == max_iter:
                     break
 
-            display_str = "scoring first 1,000,000 examples"
-            log_str += display_str + "\n\n"
-
-            print()
-            print(display_str)
-
-            first_batch = next(EmbIter(data_iter_args))
-
-            score = kmeans.score(first_batch)
-
-            # compute score
-            dim_avg_score = score / len(first_batch[0])
-            sample_avg_score = dim_avg_score / len(first_batch)
-
-            score_str = f"""
-score: {score}
-avg per dimension: {dim_avg_score}
-avg per sample: {sample_avg_score}
-"""
-
-            log_str += score_str + "\n\n"
-
-            print()
-            print(score_str)
-            print()
-
-            log_strs.append(log_str)
-
-    print()
-    print("printing logs without loading bars")
-    print()
-
-    full_log = "\n\n\n".join(log_strs)
-
-    print(full_log)
-
-    exit()
-
-    # import pickle
-
-    # with open("./text.pkl", "wb") as f_out:
-    #     pickle.dump(kmeans, f_out)
-
-    # total_time = time() - start_time
-    # total_time /= 60
-
-    # print()
-    # print(f"experiment took {total_time:.2f}m")
-    # print()
-
-    # exit()
+            save_pickle(kmeans, trial_fname)
 
 
 def main():
