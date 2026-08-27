@@ -97,7 +97,7 @@ def save_pickle(pickle_data, fname, keep_tmp_on_fail=False, **kwargs):
         with open(f, "wb") as f_out:
             pickle.dump(d, f_out, **k)
 
-    _save_file(save_fn, json_data, fname, keep_tmp_on_fail, **kwargs)
+    _save_file(save_fn, pickle_data, fname, keep_tmp_on_fail, **kwargs)
 
 
 def load_pickle(fname):
