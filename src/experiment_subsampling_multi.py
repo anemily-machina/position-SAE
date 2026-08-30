@@ -488,7 +488,7 @@ def test_kmeans():
     max_iter = 200
 
     kmeans_params = {
-        "n_clusters": 20000,
+        "n_clusters": 32000,
         "max_iter": max_iter,
         "verbose": True,
         "batch_size": 1000000,
