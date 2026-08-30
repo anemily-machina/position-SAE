@@ -479,7 +479,7 @@ def test_kmeans():
         "stan_std": baseline["std"],
     }
 
-    subsample_rates = [1.0, 0.8, 0.6, 0.4, 0.2, 0.5]
+    subsample_rates = [1.0, 0.8, 0.6, 0.4, 0.2, 0.05]
     number_of_trials = 5
     total_trials = len(subsample_rates) * number_of_trials
     random_seeds = [10037 * k % 1999 for k in range(total_trials * 2)]
