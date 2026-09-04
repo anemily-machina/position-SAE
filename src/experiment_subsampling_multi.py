@@ -510,8 +510,8 @@ def test_kmeans():
         baseline = baselines[sub_rate]
 
         data_iter_args["sub_rate"] = sub_rate
-        data_iter_args["stan_mean"] = (baseline["mean"],)
-        data_iter_args["stan_std"] = (baseline["std"],)
+        data_iter_args["stan_mean"] = baseline["mean"]
+        data_iter_args["stan_std"] = baseline["std"]
 
         for t_i in range(number_of_trials):
 
