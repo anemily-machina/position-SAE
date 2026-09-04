@@ -459,13 +459,19 @@ def mean_std_experiments():
 
 def test_kmeans():
 
+    subsample_rates = [1.0, 0.8, 0.6, 0.4, 0.2, 0.05]
+
     exp_key = "kmeans_exp_multi"
     exp_folder = os.path.join(output_folder, exp_key)
     make_folder(exp_folder)
 
     mean_exp_folder = os.path.join(output_folder, "mean_std_exp_multi")
-    baseline_fname = os.path.join(mean_exp_folder, f"1.0_0.pt")
-    baseline = torch.load(baseline_fname)
+
+    baselines = {}
+    for sub_rate in subsample_rates:
+        baseline_fname = os.path.join(mean_exp_folder, f"{sub_rate}_0.pt")
+        baseline = torch.load(baseline_fname)
+        baselines[sub_rate] = baseline
 
     emb_cache_folder = os.path.join(output_folder, "emb_cache")
     emb_files = os.listdir(emb_cache_folder)
@@ -475,11 +481,8 @@ def test_kmeans():
     data_iter_args = {
         "files": emb_files,
         "worker_i": 0,
-        "stan_mean": baseline["mean"],
-        "stan_std": baseline["std"],
     }
 
-    subsample_rates = [1.0, 0.8, 0.6, 0.4, 0.2, 0.05]
     number_of_trials = 5
     total_trials = len(subsample_rates) * number_of_trials
     random_seeds = [10037 * k % 1999 for k in range(total_trials * 2)]
@@ -504,7 +507,11 @@ def test_kmeans():
     log_strs = []
     for sub_rate in subsample_rates:
 
+        baseline = baselines[sub_rate]
+
         data_iter_args["sub_rate"] = sub_rate
+        data_iter_args["stan_mean"] = (baseline["mean"],)
+        data_iter_args["stan_std"] = (baseline["std"],)
 
         for t_i in range(number_of_trials):
 
