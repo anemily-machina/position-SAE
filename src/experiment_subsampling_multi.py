@@ -661,6 +661,7 @@ def test_kmeans():
             save_pickle(kmeans, trial_fname)
 
     stats_folder = "kmeans_exp_multi_stats_self"
+    make_folder(stats_folder)
     for sub_rate in subsample_rates + ["random"]:
 
         # compute stability for each sub rate
