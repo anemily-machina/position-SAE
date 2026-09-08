@@ -627,6 +627,8 @@ def test_kmeans():
                 kmeans_j = load_pickle(trial_fname_j)
                 cluster_j = kmeans_j.cluster_centers_
 
+                compare_clusters(cluster1=clusters_i, cluster2=cluster_j)
+
 
 def main():
 
