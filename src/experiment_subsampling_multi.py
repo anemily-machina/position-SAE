@@ -30,7 +30,7 @@ from time import time, sleep
 
 from datasets import load_dataset
 import numpy as np
-import sklearn
+from scipy.optimize import linear_sum_assignment
 from sklearn.cluster import MiniBatchKMeans
 import torch
 from torch.utils.data import DataLoader
@@ -461,6 +461,7 @@ def mean_std_experiments():
 
 def compare_clusters(cluster1, cluster2):
 
+    # tested and torch was faster than numpy (30 vs 28)
     cluster1 = torch.tensor(cluster1)
     cluster2 = torch.tensor(cluster2)
 
@@ -469,25 +470,13 @@ def compare_clusters(cluster1, cluster2):
     cosine = []
 
     norm_cluster_2 = torch.nn.functional.normalize(cluster2, 2, dim=1)
-    # norm_cluster_2 = sklearn.preprocessing.normalize(cluster2)
 
+    t = 0
     for vec_i in tqdm(cluster1, total=len(cluster1), ncols=50):
 
-        # diff = cluster2 - vec_i
-
-        # abs = np.absolute(diff)
-        # l1_i = np.mean(abs, axis=1)
-        # l1.append(l1_i)
-
-        # sqr = np.pow(abs, 2)
-        # l2_i = np.mean(sqr, axis=1)
-        # l2.append(l2_i)
-
-        # vec_i_norm = sklearn.preprocessing.normalize(vec_i.reshape(1, -1))
-        # vec_i_norm_t = vec_i_norm.T
-        # cosine_i = norm_cluster_2 @ vec_i_norm_t
-        # cosine_i = np.squeeze(cosine_i)
-        # cosine.append(cosine_i)
+        t += 1
+        if t == 10:
+            break
 
         diff = cluster2 - vec_i
 
@@ -510,18 +499,27 @@ def compare_clusters(cluster1, cluster2):
             "maximize": False,
         },
         "L2": {
-            "cost_matrix": l1,
+            "cost_matrix": l2,
             "maximize": False,
         },
-        "dot_product": {
-            "cost_matrix": l1,
-            "maximize": True,
-        },
         "cosine_sim": {
-            "cost_matrix": l1,
+            "cost_matrix": cosine,
             "maximize": True,
         },
     }
+
+    for score_key, la_params in score_info.items():
+
+        cost_matrix = la_params.pop("cost_matrix")
+        cost_matrix = torch.stack(cost_matrix)
+
+        row_ind, col_ind = linear_sum_assignment(cost_matrix, **la_params)
+
+        best_match_costs = cost_matrix[row_ind, col_ind]
+        print(best_match_costs)
+        print(best_match_costs.size())
+        print(best_match_costs.sum())
+        print(best_match_costs / min(cost_matrix.size()))
 
     exit()
 
