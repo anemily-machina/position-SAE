@@ -488,18 +488,13 @@ def compare_clusters(cluster1, cluster2):
         dot_i = cluster2 @ vec_i_t
         dot.append(dot_i)
 
-        print(dot_i)
-        print(dot_i.shape)
+        vec_i_norm = sklearn.preprocessing.normalize(cluster2)
+        vec_i_norm_t = vec_i_norm.T
+        cosine_i = norm_cluster_2 @ vec_i_norm_t
+        cosine.append(cosine_i)
 
-        # vec_i_norm = sklearn.preprocessing.normalize(cluster2)
-        # vec_i_norm_t = vec_i_norm.T
-        # print(vec_i)
-        # print(vec_i_norm)
-        # print(vec_i_norm_t)
-        # exit()
-
-        # cosine_i = norm_cluster_2 @ vec_i_norm_t
-        # cosine.append(cosine_i)
+        print(cosine_i)
+        print(cosine_i.shape)
 
         diff = torch.tensor(cluster2) - torch.tensor(vec_i)
 
@@ -515,15 +510,15 @@ def compare_clusters(cluster1, cluster2):
         dot_i = torch.tensor(cluster2) @ vec_i_t
         dot.append(dot_i)
 
-        print(dot_i)
-        print(dot_i.size())
+        vec_i_norm = torch.nn.functional.normalize(torch.tensor(vec_i), 2, dim=0)
+        vec_i_norm_t = vec_i_norm.t()
+        cosine_i = torch.tensor(norm_cluster_2) @ vec_i_norm_t
+        cosine.append(cosine_i)
+
+        print(cosine_i)
+        print(cosine_i.size())
 
         exit()
-
-        # vec_i_norm = torch.nn.functional.normalize(vec_i, 2, dim=0)
-        # vec_i_norm_t = vec_i_norm.t()
-        # cosine_i = norm_cluster_2 @ vec_i_norm_t
-        # cosine.append(cosine_i)
 
     exit()
 
