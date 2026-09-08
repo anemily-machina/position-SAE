@@ -484,12 +484,12 @@ def compare_clusters(cluster1, cluster2):
         l2_i = np.mean(sqr, axis=1)
         l2.append(l2_i)
 
-        print(l2_i)
-        print(l2_i.shape)
+        vec_i_t = vec_i.T
+        dot_i = cluster2 @ vec_i_t
+        dot.append(dot_i)
 
-        # vec_i_t = vec_i.T
-        # dot_i = cluster2 @ vec_i_t
-        # dot.append(dot_i)
+        print(dot_i)
+        print(dot_i.shape)
 
         # vec_i_norm = sklearn.preprocessing.normalize(cluster2)
         # vec_i_norm_t = vec_i_norm.T
@@ -511,13 +511,14 @@ def compare_clusters(cluster1, cluster2):
         l2_i = sqr.mean(dim=1)
         l2.append(l2_i)
 
-        print(l2_i)
-        print(l2_i.size())
+        vec_i_t = vec_i.t()
+        dot_i = cluster2 @ vec_i_t
+        dot.append(dot_i)
+
+        print(dot_i)
+        print(dot_i.size())
 
         exit()
-        # vec_i_t = vec_i.t()
-        # dot_i = cluster2 @ vec_i_t
-        # dot.append(dot_i)
 
         # vec_i_norm = torch.nn.functional.normalize(vec_i, 2, dim=0)
         # vec_i_norm_t = vec_i_norm.t()
