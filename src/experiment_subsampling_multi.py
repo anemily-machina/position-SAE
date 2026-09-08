@@ -465,6 +465,13 @@ def compare_clusters(cluster1, cluster2):
     cluster1 = torch.tensor(cluster1)
     cluster2 = torch.tensor(cluster2)
 
+    cluster1 = torch.randn(cluster1.size())
+    cluster2 = torch.randn(cluster1.size())
+
+    print(cluster1.size())
+
+    exit()
+
     l1 = []
     l2 = []
     cosine = []
