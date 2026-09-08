@@ -463,8 +463,7 @@ def compare_clusters(cluster1, cluster2):
 
     # tested and torch was faster than numpy (30 vs 28)
     cluster1 = torch.tensor(cluster1)
-    # cluster2 = torch.tensor(cluster2)
-    cluster2 = torch.tensor(cluster1)
+    cluster2 = torch.tensor(cluster2)
 
     l1 = []
     l2 = []
@@ -476,7 +475,7 @@ def compare_clusters(cluster1, cluster2):
     for vec_i in tqdm(cluster1, total=len(cluster1), ncols=50):
 
         t += 1
-        if t == 1000:
+        if t == 100:
             break
 
         diff = cluster2 - vec_i
