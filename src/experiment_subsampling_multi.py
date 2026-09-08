@@ -511,8 +511,8 @@ def compare_clusters(cluster1, cluster2):
         l2_i = sqr.mean(dim=1)
         l2.append(l2_i)
 
-        vec_i_t = vec_i.t()
-        dot_i = cluster2 @ vec_i_t
+        vec_i_t = torch.tensor(vec_i).t()
+        dot_i = torch.tensor(cluster2) @ vec_i_t
         dot.append(dot_i)
 
         print(dot_i)
