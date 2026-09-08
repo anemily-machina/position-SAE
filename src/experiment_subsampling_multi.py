@@ -463,7 +463,8 @@ def compare_clusters(cluster1, cluster2):
 
     # tested and torch was faster than numpy (30 vs 28)
     cluster1 = torch.tensor(cluster1)
-    cluster2 = torch.tensor(cluster2)
+    # cluster2 = torch.tensor(cluster2)
+    cluster2 = torch.tensor(cluster1)
 
     l1 = []
     l2 = []
