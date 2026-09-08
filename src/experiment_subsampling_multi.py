@@ -471,12 +471,7 @@ def compare_clusters(cluster1, cluster2):
 
     norm_cluster_2 = torch.nn.functional.normalize(cluster2, 2, dim=1)
 
-    t = 0
     for vec_i in tqdm(cluster1, total=len(cluster1), ncols=50):
-
-        t += 1
-        if t == 100:
-            break
 
         diff = cluster2 - vec_i
 
