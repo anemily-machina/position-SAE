@@ -461,8 +461,6 @@ def mean_std_experiments():
 def compare_clusters(cluster1, cluster2):
 
     cluster1 = torch.tensor(cluster1)
-    print(cluster1.size())
-    exit()
     cluster2 = torch.tensor(cluster2)
 
     l1 = []
@@ -488,8 +486,11 @@ def compare_clusters(cluster1, cluster2):
         dot_i = cluster2 @ vec_i_t
         dot.append(dot_i)
 
-        vec_i_norm = torch.nn.functional.normalize(vec_i, 2, dim=1)
+        vec_i_norm = torch.nn.functional.normalize(vec_i, 2, dim=0)
+
         vec_i_norm_t = vec_i_norm.t()
+        print(vec_i_norm_t @ vec_i_norm_t)
+        exit()
         cosine_i = norm_cluster_2 @ vec_i_norm_t
         cosine.append(cosine_i)
 
