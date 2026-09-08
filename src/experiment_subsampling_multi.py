@@ -29,6 +29,7 @@ from time import time, sleep
 
 
 from datasets import load_dataset
+import numpy as np
 from sklearn.cluster import MiniBatchKMeans
 import torch
 from torch.utils.data import DataLoader
@@ -457,6 +458,40 @@ def mean_std_experiments():
     _confirm_baseline(smallest_result)
 
 
+def compare_clusters(cluster1, cluster2):
+
+    cluster1 = torch.tensor(cluster1)
+    cluster2 = torch.tensor(cluster2)
+
+    l1 = []
+    l2 = []
+    dot = []
+    cosine = []
+
+    norm_cluster_2 = torch.nn.functional.normalize(cluster2, 2, dim=1)
+
+    for vec_i in tqdm(cluster1, total=len(cluster1), ncols=50):
+
+        diff = cluster2 - vec_i
+
+        abs = diff.abs()
+        l1_i = abs.mean(dim=0)
+        l1.append(l1_i)
+
+        sqr = abs.pow(2)
+        l2_i = sqr.mean(dim=0)
+        l2.append(l2_i)
+
+        vec_i_t = vec_i.t()
+        dot_i = cluster2 @ vec_i_t
+        dot.append(dot_i)
+
+        vec_i_norm = torch.nn.functional.normalize(vec_i, 2, dim=1)
+        vec_i_norm_t = vec_i_norm.t()
+        cosine_i = norm_cluster_2 @ vec_i_norm_t
+        cosine.append(cosine_i)
+
+
 def test_kmeans():
 
     subsample_rates = [1.0, 0.8, 0.6, 0.4, 0.2, 0.05]
@@ -513,7 +548,6 @@ def test_kmeans():
     print(f"max iterations: {max_iter}")
     print()
 
-    log_strs = []
     for sub_rate in subsample_rates:
 
         data_iter_args["sub_rate"] = sub_rate
@@ -576,6 +610,22 @@ def test_kmeans():
                     break
 
             save_pickle(kmeans, trial_fname)
+
+    for sub_rate in subsample_rates:
+
+        # compute stability for each sub rate
+        for t_i in range(number_of_trials - 1):
+            trial_file_name_i = f"{sub_rate}_{t_i}.pkl"
+            trial_fname_i = os.path.join(exp_folder, trial_file_name_i)
+            kmeans_i = load_pickle(trial_fname_i)
+            clusters_i = kmeans_i.cluster_centers_
+
+            for t_j in range(t_i + 1, number_of_trials):
+
+                trial_file_name_j = f"{sub_rate}_{t_j}.pkl"
+                trial_fname_j = os.path.join(exp_folder, trial_file_name_j)
+                kmeans_j = load_pickle(trial_fname_j)
+                cluster_j = kmeans_j.cluster_centers_
 
 
 def main():
