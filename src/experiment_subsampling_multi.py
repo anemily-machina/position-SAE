@@ -466,7 +466,6 @@ def compare_clusters(cluster1, cluster2):
 
     l1 = []
     l2 = []
-    dot = []
     cosine = []
 
     norm_cluster_2 = torch.nn.functional.normalize(cluster2, 2, dim=1)
@@ -484,10 +483,6 @@ def compare_clusters(cluster1, cluster2):
         # l2_i = np.mean(sqr, axis=1)
         # l2.append(l2_i)
 
-        # vec_i_t = vec_i.T
-        # dot_i = cluster2 @ vec_i_t
-        # dot.append(dot_i)
-
         # vec_i_norm = sklearn.preprocessing.normalize(vec_i.reshape(1, -1))
         # vec_i_norm_t = vec_i_norm.T
         # cosine_i = norm_cluster_2 @ vec_i_norm_t
@@ -504,14 +499,29 @@ def compare_clusters(cluster1, cluster2):
         l2_i = sqr.mean(dim=1)
         l2.append(l2_i)
 
-        vec_i_t = vec_i.t()
-        dot_i = cluster2 @ vec_i_t
-        dot.append(dot_i)
-
         vec_i_norm = torch.nn.functional.normalize(vec_i, 2, dim=0)
         vec_i_norm_t = vec_i_norm.t()
         cosine_i = norm_cluster_2 @ vec_i_norm_t
         cosine.append(cosine_i)
+
+    score_info = {
+        "L1": {
+            "cost_matrix": l1,
+            "maximize": False,
+        },
+        "L2": {
+            "cost_matrix": l1,
+            "maximize": False,
+        },
+        "dot_product": {
+            "cost_matrix": l1,
+            "maximize": True,
+        },
+        "cosine_sim": {
+            "cost_matrix": l1,
+            "maximize": True,
+        },
+    }
 
     exit()
 
