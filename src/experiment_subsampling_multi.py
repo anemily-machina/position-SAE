@@ -491,6 +491,7 @@ def compare_clusters(cluster1, cluster2):
         vec_i_norm = sklearn.preprocessing.normalize(vec_i.reshape(1, -1))
         vec_i_norm_t = vec_i_norm.T
         cosine_i = norm_cluster_2 @ vec_i_norm_t
+        cosine_i = np.squeeze(cosine_i)
         cosine.append(cosine_i)
 
         print(cosine_i)
