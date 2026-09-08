@@ -489,8 +489,6 @@ def compare_clusters(cluster1, cluster2):
         vec_i_norm = torch.nn.functional.normalize(vec_i, 2, dim=0)
 
         vec_i_norm_t = vec_i_norm.t()
-        print(vec_i_norm_t @ vec_i_norm_t)
-        exit()
         cosine_i = norm_cluster_2 @ vec_i_norm_t
         cosine.append(cosine_i)
 
