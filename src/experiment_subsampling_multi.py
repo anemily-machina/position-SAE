@@ -520,7 +520,7 @@ def compare_clusters(cluster1, cluster2):
         print(best_match_costs)
         print(best_match_costs.size())
         print(best_match_costs.sum())
-        print(best_match_costs / min(cost_matrix.size()))
+        print(best_match_costs / len(row_ind))
         print()
 
     exit()
