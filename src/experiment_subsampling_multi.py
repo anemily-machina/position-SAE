@@ -513,10 +513,23 @@ def compare_clusters(cluster1, cluster2):
 
     for score_key, la_params in score_info.items():
 
+        print()
+        print(score_key)
+
         cost_matrix = la_params.pop("cost_matrix")
         cost_matrix = torch.stack(cost_matrix)
 
+        print(cost_matrix.size())
+        print(cost_matrix.dtype)
+
+        start_time = time()
+
         row_ind, col_ind = linear_sum_assignment(cost_matrix, **la_params)
+
+        total_time = time() - start_time
+        total_time * 60
+
+        print(f"total time: {total_time}m")
 
         best_match_costs = cost_matrix[row_ind, col_ind]
         print()
