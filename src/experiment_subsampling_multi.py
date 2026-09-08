@@ -488,7 +488,7 @@ def compare_clusters(cluster1, cluster2):
         dot_i = cluster2 @ vec_i_t
         dot.append(dot_i)
 
-        vec_i_norm = sklearn.preprocessing.normalize(cluster2)
+        vec_i_norm = sklearn.preprocessing.normalize(vec_i)
         vec_i_norm_t = vec_i_norm.T
         cosine_i = norm_cluster_2 @ vec_i_norm_t
         cosine.append(cosine_i)
