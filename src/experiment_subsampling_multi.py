@@ -475,7 +475,7 @@ def compare_clusters(cluster1, cluster2):
     for vec_i in tqdm(cluster1, total=len(cluster1), ncols=50):
 
         t += 1
-        if t == 10:
+        if t == 100:
             break
 
         diff = cluster2 - vec_i
@@ -516,10 +516,12 @@ def compare_clusters(cluster1, cluster2):
         row_ind, col_ind = linear_sum_assignment(cost_matrix, **la_params)
 
         best_match_costs = cost_matrix[row_ind, col_ind]
+        print()
         print(best_match_costs)
         print(best_match_costs.size())
         print(best_match_costs.sum())
         print(best_match_costs / min(cost_matrix.size()))
+        print()
 
     exit()
 
