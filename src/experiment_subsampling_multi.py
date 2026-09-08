@@ -504,7 +504,7 @@ def compare_clusters(cluster1, cluster2):
         diff = torch.tensor(cluster2) - torch.tensor(vec_i)
 
         abs = diff.abs()
-        l1_i = abs.mean(dim=0)
+        l1_i = abs.mean(dim=1)
 
         l1.append(l1_i)
 
