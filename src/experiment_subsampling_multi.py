@@ -461,6 +461,8 @@ def mean_std_experiments():
 def compare_clusters(cluster1, cluster2):
 
     cluster1 = torch.tensor(cluster1)
+    print(cluster1.size())
+    exit()
     cluster2 = torch.tensor(cluster2)
 
     l1 = []
