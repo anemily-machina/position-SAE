@@ -530,9 +530,7 @@ def compare_clusters(cluster1, cluster2):
 
         scores[score_key] = score
 
-    print(scores)
-
-    exit()
+    return scores
 
 
 def test_kmeans():
@@ -591,6 +589,7 @@ def test_kmeans():
     print(f"max iterations: {max_iter}")
     print()
 
+    # compute kmeans
     for sub_rate in subsample_rates:
 
         data_iter_args["sub_rate"] = sub_rate
@@ -654,23 +653,45 @@ def test_kmeans():
 
             save_pickle(kmeans, trial_fname)
 
-    for sub_rate in subsample_rates:
+    stats_folder = "kmeans_exp_multi_stats_self"
+    for sub_rate in subsample_rates + ["random"]:
 
         # compute stability for each sub rate
         for t_i in range(number_of_trials - 1):
-            trial_file_name_i = f"{sub_rate}_{t_i}.pkl"
-            trial_fname_i = os.path.join(exp_folder, trial_file_name_i)
-            kmeans_i = load_pickle(trial_fname_i)
-            clusters_i = kmeans_i.cluster_centers_
+
+            if sub_rate != "random":
+                trial_file_name_i = f"{sub_rate}_{t_i}.pkl"
+                trial_fname_i = os.path.join(exp_folder, trial_file_name_i)
+                kmeans_i = load_pickle(trial_fname_i)
+                clusters_i = kmeans_i.cluster_centers_
+
+            else:
+                clusters_i = torch.randn((32000, 512))
 
             for t_j in range(t_i + 1, number_of_trials):
 
-                trial_file_name_j = f"{sub_rate}_{t_j}.pkl"
-                trial_fname_j = os.path.join(exp_folder, trial_file_name_j)
-                kmeans_j = load_pickle(trial_fname_j)
-                cluster_j = kmeans_j.cluster_centers_
+                if sub_rate != "random":
+                    trial_file_name_j = f"{sub_rate}_{t_j}.pkl"
+                    trial_fname_j = os.path.join(exp_folder, trial_file_name_j)
+                    kmeans_j = load_pickle(trial_fname_j)
+                    cluster_j = kmeans_j.cluster_centers_
+                else:
+                    clusters_i = torch.randn((32000, 512))
 
-                compare_clusters(cluster1=clusters_i, cluster2=cluster_j)
+                stats_file_name = f"{sub_rate}_{t_i}_{t_j}.pkl"
+                stats_fname = os.path.join(stats_folder, stats_file_name)
+
+                print()
+                print(stats_file_name)
+                print()
+
+                if os.path.isfile(stats_fname):
+                    print()
+                    print("file exists skipping")
+                    print()
+
+                scores = compare_clusters(cluster1=clusters_i, cluster2=cluster_j)
+                save_pickle(scores, stats_fname)
 
 
 def main():
