@@ -469,6 +469,8 @@ def compare_clusters(cluster1, cluster2):
 
     cluster1 = torch.randn((32000, 512), dtype=torch.float16)
     cluster2 = torch.randn((32000, 512), dtype=torch.float16)
+    print(cluster1.size())
+    print(cluster2.size())
 
     l1 = []
     l2 = []
