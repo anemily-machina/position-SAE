@@ -480,12 +480,12 @@ def compare_clusters(cluster1, cluster2):
         l1_i = np.mean(abs, axis=1)
         l1.append(l1_i)
 
-        print(l1_i)
-        print(l1_i.shape)
+        sqr = np.pow(abs, 2)
+        l2_i = np.mean(sqr)
+        l2.append(l2_i)
 
-        # sqr = np.pow(abs, 2)
-        # l2_i = np.mean(sqr)
-        # l2.append(l2_i)
+        print(l2_i)
+        print(l2_i.shape)
 
         # vec_i_t = vec_i.T
         # dot_i = cluster2 @ vec_i_t
@@ -505,18 +505,16 @@ def compare_clusters(cluster1, cluster2):
 
         abs = diff.abs()
         l1_i = abs.mean(dim=1)
-
         l1.append(l1_i)
 
-        print(l1_i)
-        print(l1_i.size())
+        sqr = abs.pow(2)
+        l2_i = sqr.mean(dim=1)
+        l2.append(l2_i)
+
+        print(l2_i)
+        print(l2_i.size())
 
         exit()
-
-        # sqr = abs.pow(2)
-        # l2_i = sqr.mean(dim=0)
-        # l2.append(l2_i)
-
         # vec_i_t = vec_i.t()
         # dot_i = cluster2 @ vec_i_t
         # dot.append(dot_i)
