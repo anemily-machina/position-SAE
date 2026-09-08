@@ -500,7 +500,7 @@ def compare_clusters(cluster1, cluster2):
         # cosine_i = norm_cluster_2 @ vec_i_norm_t
         # cosine.append(cosine_i)
 
-        # diff = cluster2 - vec_i
+        diff = torch.tensor(cluster2) - torch.tensor(vec_i)
 
         abs = diff.abs()
         l1_i = abs.mean(dim=0)
