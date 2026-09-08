@@ -475,7 +475,7 @@ def compare_clusters(cluster1, cluster2):
     for vec_i in tqdm(cluster1, total=len(cluster1), ncols=50):
 
         t += 1
-        if t == 100:
+        if t == 1000:
             break
 
         diff = cluster2 - vec_i
