@@ -480,29 +480,35 @@ def compare_clusters(cluster1, cluster2):
         l1_i = np.mean(abs, axis=1)
         l1.append(l1_i)
 
-        sqr = np.pow(abs, 2)
-        l2_i = np.mean(sqr)
-        l2.append(l2_i)
+        print(l1_i)
 
-        vec_i_t = vec_i.T
-        dot_i = cluster2 @ vec_i_t
-        dot.append(dot_i)
+        # sqr = np.pow(abs, 2)
+        # l2_i = np.mean(sqr)
+        # l2.append(l2_i)
 
-        vec_i_norm = sklearn.preprocessing.normalize(cluster2)
-        vec_i_norm_t = vec_i_norm.T
-        print(vec_i)
-        print(vec_i_norm)
-        print(vec_i_norm_t)
-        exit()
+        # vec_i_t = vec_i.T
+        # dot_i = cluster2 @ vec_i_t
+        # dot.append(dot_i)
 
-        cosine_i = norm_cluster_2 @ vec_i_norm_t
-        cosine.append(cosine_i)
+        # vec_i_norm = sklearn.preprocessing.normalize(cluster2)
+        # vec_i_norm_t = vec_i_norm.T
+        # print(vec_i)
+        # print(vec_i_norm)
+        # print(vec_i_norm_t)
+        # exit()
+
+        # cosine_i = norm_cluster_2 @ vec_i_norm_t
+        # cosine.append(cosine_i)
 
         # diff = cluster2 - vec_i
 
-        # abs = diff.abs()
-        # l1_i = abs.mean(dim=0)
-        # l1.append(l1_i)
+        abs = diff.abs()
+        l1_i = abs.mean(dim=0)
+        l1.append(l1_i)
+
+        print(l1_i)
+
+        exit()
 
         # sqr = abs.pow(2)
         # l2_i = sqr.mean(dim=0)
