@@ -517,9 +517,6 @@ def compare_clusters(cluster1, cluster2):
 
         best_match_costs = cost_matrix[row_ind, col_ind]
         print()
-        print(best_match_costs)
-        print(best_match_costs.size())
-        print(best_match_costs.sum())
         print(best_match_costs.sum() / len(row_ind))
         print()
 
