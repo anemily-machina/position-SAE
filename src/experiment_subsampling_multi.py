@@ -462,8 +462,8 @@ def mean_std_experiments():
 def compare_clusters(cluster1, cluster2):
 
     # tested and torch was faster than numpy (30 vs 28)
-    cluster1 = torch.tensor(cluster1, dtype=torch.float16)
-    cluster2 = torch.tensor(cluster2, dtype=torch.float16)
+    cluster1 = torch.tensor(cluster1, dtype=torch.float32)
+    cluster2 = torch.tensor(cluster2, dtype=torch.float32)
 
     # print(cluster1)
     # print(cluster2)
