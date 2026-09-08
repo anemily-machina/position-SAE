@@ -490,7 +490,9 @@ def compare_clusters(cluster1, cluster2):
 
         vec_i_norm = sklearn.preprocessing.normalize(cluster2)
         vec_i_norm_t = vec_i_norm.T
-        print(vec_i_norm @ vec_i_norm_t)
+        print(vec_i)
+        print(vec_i_norm)
+        print(vec_i_norm_t)
         exit()
 
         cosine_i = norm_cluster_2 @ vec_i_norm_t
