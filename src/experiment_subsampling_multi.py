@@ -30,6 +30,7 @@ from time import time, sleep
 
 from datasets import load_dataset
 import numpy as np
+import sklearn
 from sklearn.cluster import MiniBatchKMeans
 import torch
 from torch.utils.data import DataLoader
@@ -460,37 +461,59 @@ def mean_std_experiments():
 
 def compare_clusters(cluster1, cluster2):
 
-    cluster1 = torch.tensor(cluster1)
-    cluster2 = torch.tensor(cluster2)
+    # cluster1 = torch.tensor(cluster1)
+    # cluster2 = torch.tensor(cluster2)
 
     l1 = []
     l2 = []
     dot = []
     cosine = []
 
-    norm_cluster_2 = torch.nn.functional.normalize(cluster2, 2, dim=1)
+    # norm_cluster_2 = torch.nn.functional.normalize(cluster2, 2, dim=1)
+    norm_cluster_2 = sklearn.preprocessing.normalize(cluster2)
 
     for vec_i in tqdm(cluster1, total=len(cluster1), ncols=50):
 
         diff = cluster2 - vec_i
 
-        abs = diff.abs()
-        l1_i = abs.mean(dim=0)
+        abs = np.absolute(diff)
+        l1_i = np.mean(abs, axis=1)
         l1.append(l1_i)
 
-        sqr = abs.pow(2)
-        l2_i = sqr.mean(dim=0)
+        sqr = np.pow(abs, 2)
+        l2_i = np.mean(sqr)
         l2.append(l2_i)
 
-        vec_i_t = vec_i.t()
+        vec_i_t = vec_i.T
         dot_i = cluster2 @ vec_i_t
         dot.append(dot_i)
 
-        vec_i_norm = torch.nn.functional.normalize(vec_i, 2, dim=0)
+        vec_i_norm = sklearn.preprocessing.normalize(cluster2)
+        vec_i_norm_t = vec_i_norm.T
+        print(vec_i_norm @ vec_i_norm_t)
+        exit()
 
-        vec_i_norm_t = vec_i_norm.t()
         cosine_i = norm_cluster_2 @ vec_i_norm_t
         cosine.append(cosine_i)
+
+        # diff = cluster2 - vec_i
+
+        # abs = diff.abs()
+        # l1_i = abs.mean(dim=0)
+        # l1.append(l1_i)
+
+        # sqr = abs.pow(2)
+        # l2_i = sqr.mean(dim=0)
+        # l2.append(l2_i)
+
+        # vec_i_t = vec_i.t()
+        # dot_i = cluster2 @ vec_i_t
+        # dot.append(dot_i)
+
+        # vec_i_norm = torch.nn.functional.normalize(vec_i, 2, dim=0)
+        # vec_i_norm_t = vec_i_norm.t()
+        # cosine_i = norm_cluster_2 @ vec_i_norm_t
+        # cosine.append(cosine_i)
 
     exit()
 
