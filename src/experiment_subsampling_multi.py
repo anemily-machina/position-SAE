@@ -503,6 +503,7 @@ def compare_clusters(cluster1, cluster2):
         },
     }
 
+    scores = {}
     for score_key, la_params in score_info.items():
 
         print()
@@ -521,9 +522,15 @@ def compare_clusters(cluster1, cluster2):
         print(f"total time: {total_time}m")
 
         best_match_costs = cost_matrix[row_ind, col_ind]
+        score = best_match_costs.sum() / len(row_ind)
+        score = float(score)
         print()
-        print(best_match_costs.sum() / len(row_ind))
+        print(score)
         print()
+
+        scores[score_key] = score
+
+    print(scores)
 
     exit()
 
