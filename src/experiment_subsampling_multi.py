@@ -481,7 +481,7 @@ def compare_clusters(cluster1, cluster2):
         l1.append(l1_i)
 
         sqr = np.pow(abs, 2)
-        l2_i = np.mean(sqr)
+        l2_i = np.mean(sqr, axis=1)
         l2.append(l2_i)
 
         print(l2_i)
