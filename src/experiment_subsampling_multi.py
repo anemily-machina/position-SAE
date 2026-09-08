@@ -494,32 +494,24 @@ def compare_clusters(cluster1, cluster2):
         cosine_i = np.squeeze(cosine_i)
         cosine.append(cosine_i)
 
-        print(cosine_i)
-        print(cosine_i.shape)
+        # diff = torch.tensor(cluster2) - torch.tensor(vec_i)
 
-        diff = torch.tensor(cluster2) - torch.tensor(vec_i)
+        # abs = diff.abs()
+        # l1_i = abs.mean(dim=1)
+        # l1.append(l1_i)
 
-        abs = diff.abs()
-        l1_i = abs.mean(dim=1)
-        l1.append(l1_i)
+        # sqr = abs.pow(2)
+        # l2_i = sqr.mean(dim=1)
+        # l2.append(l2_i)
 
-        sqr = abs.pow(2)
-        l2_i = sqr.mean(dim=1)
-        l2.append(l2_i)
+        # vec_i_t = torch.tensor(vec_i).t()
+        # dot_i = torch.tensor(cluster2) @ vec_i_t
+        # dot.append(dot_i)
 
-        vec_i_t = torch.tensor(vec_i).t()
-        dot_i = torch.tensor(cluster2) @ vec_i_t
-        dot.append(dot_i)
-
-        vec_i_norm = torch.nn.functional.normalize(torch.tensor(vec_i), 2, dim=0)
-        vec_i_norm_t = vec_i_norm.t()
-        cosine_i = torch.tensor(norm_cluster_2) @ vec_i_norm_t
-        cosine.append(cosine_i)
-
-        print(cosine_i)
-        print(cosine_i.size())
-
-        exit()
+        # vec_i_norm = torch.nn.functional.normalize(torch.tensor(vec_i), 2, dim=0)
+        # vec_i_norm_t = vec_i_norm.t()
+        # cosine_i = torch.tensor(norm_cluster_2) @ vec_i_norm_t
+        # cosine.append(cosine_i)
 
     exit()
 
