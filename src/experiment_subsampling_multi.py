@@ -465,14 +465,6 @@ def compare_clusters(cluster1, cluster2):
     cluster1 = torch.tensor(cluster1, dtype=torch.float16)
     cluster2 = torch.tensor(cluster2, dtype=torch.float16)
 
-    # print(cluster1)
-    # print(cluster2)
-
-    # exit()
-
-    # cluster1 = torch.randn(cluster1.size())
-    cluster2 = torch.randn(cluster1.size(), dtype=torch.float16)
-
     l1 = []
     l2 = []
     cosine = []
@@ -519,15 +511,12 @@ def compare_clusters(cluster1, cluster2):
         cost_matrix = la_params.pop("cost_matrix")
         cost_matrix = torch.stack(cost_matrix)
 
-        print(cost_matrix.size())
-        print(cost_matrix.dtype)
-
         start_time = time()
 
         row_ind, col_ind = linear_sum_assignment(cost_matrix, **la_params)
 
         total_time = time() - start_time
-        total_time * 60
+        total_time = total_time / 60
 
         print(f"total time: {total_time}m")
 
