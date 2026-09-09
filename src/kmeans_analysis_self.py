@@ -127,7 +127,7 @@ def main():
 
     set_random_seeds(args.rng_seed)
 
-    sub_rate = args.subrate
+    sub_rate = args.sub_rate
     assert sub_rate in ["1.0", "0.8", "0.6", "0.4", "0.2", "0.05", "random"]
     number_of_trials = 5
 
