@@ -40,7 +40,7 @@ def parse_args():
 
     parser = ArgumentParser()
 
-    parser.add_argument("-sub_rate", "--sub_rate-seed", required=False, type=str)
+    parser.add_argument("-sub_rate", "--sub_rate", required=False, type=str)
 
     parser.add_argument("-seed", "--rng-seed", required=False, default=4321, type=int)
 
