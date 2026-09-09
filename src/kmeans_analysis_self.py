@@ -4,13 +4,13 @@ a single thread
 
 functioning this out so i can run each rate + random in parallel
 
-python kmeans_analysis_self.py -sub_rate 1.0
-python kmeans_analysis_self.py -sub_rate 0.8
-python kmeans_analysis_self.py -sub_rate 0.6
-python kmeans_analysis_self.py -sub_rate 0.4
-python kmeans_analysis_self.py -sub_rate 0.2
-python kmeans_analysis_self.py -sub_rate 0.05
-python kmeans_analysis_self.py -sub_rate random
+python src/kmeans_analysis_self.py -sub_rate 1.0
+python src/kmeans_analysis_self.py -sub_rate 0.8
+python src/kmeans_analysis_self.py -sub_rate 0.6
+python src/kmeans_analysis_self.py -sub_rate 0.4
+python src/kmeans_analysis_self.py -sub_rate 0.2
+python src/kmeans_analysis_self.py -sub_rate 0.05
+python src/kmeans_analysis_self.py -sub_rate random
 
 [1.0, 0.8, 0.6, 0.4, 0.2, 0.05]
 
@@ -40,7 +40,7 @@ def parse_args():
 
     parser = ArgumentParser()
 
-    parser.add_argument("-sub_rate", "--rng-seed", required=False, type=str)
+    parser.add_argument("-sub_rate", "--sub_rate-seed", required=False, type=str)
 
     parser.add_argument("-seed", "--rng-seed", required=False, default=4321, type=int)
 
