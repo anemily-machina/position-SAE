@@ -170,6 +170,7 @@ def main():
                 print()
                 print("file exists skipping")
                 print()
+                continue
 
             scores = compare_clusters(cluster1=clusters_i, cluster2=cluster_j)
             save_pickle(scores, stats_fname)
