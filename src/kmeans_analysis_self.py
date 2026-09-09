@@ -10,7 +10,7 @@ python kmeans_analysis_self.py -sub_rate 0.6
 python kmeans_analysis_self.py -sub_rate 0.4
 python kmeans_analysis_self.py -sub_rate 0.2
 python kmeans_analysis_self.py -sub_rate 0.05
-python kmeans_analysis_self.py -sub_rate rand
+python kmeans_analysis_self.py -sub_rate random
 
 [1.0, 0.8, 0.6, 0.4, 0.2, 0.05]
 
@@ -40,7 +40,7 @@ def parse_args():
 
     parser = ArgumentParser()
 
-    parser.add_argument("-sub_rate", "--rng-seed", required=False, type=float)
+    parser.add_argument("-sub_rate", "--rng-seed", required=False, type=str)
 
     parser.add_argument("-seed", "--rng-seed", required=False, default=4321, type=int)
 
@@ -128,6 +128,7 @@ def main():
     set_random_seeds(args.rng_seed)
 
     sub_rate = args.subrate
+    assert sub_rate in ["1.0", "0.8", "0.6", "0.4", "0.2", "0.05", "random"]
     number_of_trials = 5
 
     exp_key = "kmeans_exp_multi"
