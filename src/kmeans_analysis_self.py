@@ -174,8 +174,6 @@ def calc_scores(sub_rate):
                 continue
 
             scores = compare_clusters(cluster1=clusters_i, cluster2=clusters_j)
-            print(scores)
-            exit()
             save_pickle(scores, stats_fname)
 
 
