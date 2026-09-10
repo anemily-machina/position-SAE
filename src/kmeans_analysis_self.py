@@ -68,12 +68,15 @@ def compare_clusters(cluster1, cluster2):
         diff = cluster2 - vec_i
 
         abs = torch.abs(diff)
+        # L1 amoratized across dimensions
         l1_i = torch.mean(abs, dim=1)
         l1.append(l1_i)
 
         sqr = torch.pow(abs, 2)
-        sqr_mean = torch.mean(sqr, dim=1)
-        l2_i = torch.sqrt(sqr_mean)
+        sqr_sum = torch.sum(sqr, dim=1)
+        l2_i = torch.sqrt(sqr_sum)
+        # L2 amoratized across dimensions
+        l2_i = l2_i / len(vec_i)
         l2.append(l2_i)
 
         vec_i_norm = torch.nn.functional.normalize(vec_i, 2, dim=0)
