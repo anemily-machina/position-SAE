@@ -34,6 +34,7 @@ import torch
 from tqdm import tqdm
 
 OUTPUT_FOLDER = "../data/positional-SAE/experiments_subsampling"
+NUMBER_OF_TRIALS = 5
 
 
 def parse_args():
@@ -121,15 +122,7 @@ def compare_clusters(cluster1, cluster2):
         scores[score_key] = score
 
 
-def main():
-
-    args = parse_args()
-
-    set_random_seeds(args.rng_seed)
-
-    sub_rate = args.sub_rate
-    assert sub_rate in ["1.0", "0.8", "0.6", "0.4", "0.2", "0.05", "random"]
-    number_of_trials = 5
+def calc_scores(sub_rate):
 
     exp_key = "kmeans_exp_multi"
     exp_folder = os.path.join(OUTPUT_FOLDER, exp_key)
@@ -141,7 +134,7 @@ def main():
         fake_vectors = torch.randn((5, 32000, 512))
 
     # compute stability for each sub rate
-    for t_i in range(number_of_trials - 1):
+    for t_i in range(NUMBER_OF_TRIALS - 1):
 
         if sub_rate != "random":
             trial_file_name_i = f"{sub_rate}_{t_i}.pkl"
@@ -152,7 +145,7 @@ def main():
         else:
             clusters_i = fake_vectors[t_i]
 
-        for t_j in range(t_i + 1, number_of_trials):
+        for t_j in range(t_i + 1, NUMBER_OF_TRIALS):
 
             if sub_rate != "random":
                 trial_file_name_j = f"{sub_rate}_{t_j}.pkl"
@@ -177,6 +170,45 @@ def main():
 
             scores = compare_clusters(cluster1=clusters_i, cluster2=clusters_j)
             save_pickle(scores, stats_fname)
+
+
+def display_scores():
+
+    stats_folder = "kmeans_exp_multi_stats_self"
+
+    scores = {}
+    for sub_rate in ["1.0", "0.8", "0.6", "0.4", "0.2", "0.05", "random"]:
+
+        scores[sub_rate] = {}
+
+        for t_i in range(NUMBER_OF_TRIALS - 1):
+            for t_j in range(t_i + 1, NUMBER_OF_TRIALS):
+
+                stats_file_name = f"{sub_rate}_{t_i}_{t_j}.pkl"
+                stats_fname = os.path.join(stats_folder, stats_file_name)
+
+                stats = load_pickle(stats_fname)
+
+                for score_key, score in stats.items():
+                    if score_key not in scores[sub_rate]:
+                        scores[sub_rate][score] = []
+
+                    scores[sub_rate][score].append(score)
+
+    print(scores)
+
+
+def main():
+    args = parse_args()
+
+    set_random_seeds(args.rng_seed)
+
+    sub_rate = args.sub_rate
+    assert sub_rate in ["1.0", "0.8", "0.6", "0.4", "0.2", "0.05", "random"]
+
+    # calc_scores(sub_rate)
+
+    display_scores()
 
 
 if __name__ == "__main__":
