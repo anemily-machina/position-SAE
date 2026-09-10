@@ -33,7 +33,7 @@ from scipy.optimize import linear_sum_assignment
 import torch
 from tqdm import tqdm
 
-OUTPUT_FOLDER = "../data/positional-SAE/experiments_subsampling"
+OUTPUT_FOLDER = "../data/positional-SAE/"
 NUMBER_OF_TRIALS = 5
 
 
@@ -121,6 +121,8 @@ def compare_clusters(cluster1, cluster2):
 
         scores[score_key] = score
 
+    return scores
+
 
 def calc_scores(sub_rate):
 
@@ -129,6 +131,10 @@ def calc_scores(sub_rate):
 
     stats_folder = "kmeans_exp_multi_stats_self"
     make_folder(stats_folder)
+
+    print(stats_folder)
+
+    exit()
 
     if sub_rate == "random":
         fake_vectors = torch.randn((5, 32000, 512))
@@ -169,6 +175,8 @@ def calc_scores(sub_rate):
                 continue
 
             scores = compare_clusters(cluster1=clusters_i, cluster2=clusters_j)
+            print(scores)
+            exit()
             save_pickle(scores, stats_fname)
 
 
@@ -206,9 +214,9 @@ def main():
     sub_rate = args.sub_rate
     assert sub_rate in ["1.0", "0.8", "0.6", "0.4", "0.2", "0.05", "random"]
 
-    # calc_scores(sub_rate)
+    calc_scores(sub_rate)
 
-    display_scores()
+    # display_scores()
 
 
 if __name__ == "__main__":
