@@ -78,6 +78,7 @@ def compare_clusters(cluster1, cluster2):
 
         sqr_sum = torch.sum(sqr, dim=1)
         print(sqr_sum[0])
+        print(sqr_sum.size())
         l2_i = torch.sqrt(sqr_sum)
         print(l2_i[0])
         # L2 amoratized across dimensions
