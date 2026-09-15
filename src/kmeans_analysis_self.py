@@ -154,7 +154,7 @@ def compare_clusters(cluster1, cluster2):
 
 
 @torch.no_grad()
-def calc_scores(sub_rate):
+def calc_scores_self(sub_rate):
 
     exp_key = "kmeans_exp_multi"
     exp_folder = os.path.join(OUTPUT_FOLDER, exp_key)
@@ -205,7 +205,7 @@ def calc_scores(sub_rate):
             save_pickle(scores, stats_fname)
 
 
-def display_scores():
+def display_scores_self():
 
     stats_folder = "kmeans_exp_multi_stats_self"
 
@@ -239,9 +239,9 @@ def main():
     sub_rate = args.sub_rate
     assert sub_rate in ["1.0", "0.8", "0.6", "0.4", "0.2", "0.05", "random"]
 
-    calc_scores(sub_rate)
+    # calc_scores_self(sub_rate)
 
-    # display_scores()
+    display_scores_self()
 
 
 if __name__ == "__main__":
