@@ -223,6 +223,10 @@ def display_scores_self():
 
                 stats = load_pickle(stats_fname)
 
+                print(stats)
+
+                exit()
+
                 for score_key, score in stats.items():
                     if score_key not in scores[sub_rate]:
                         scores[sub_rate][score] = []
