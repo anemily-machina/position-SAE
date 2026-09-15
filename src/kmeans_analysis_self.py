@@ -65,19 +65,19 @@ def compare_clusters(cluster1, cluster2):
     norm_cluster_1 = torch.nn.functional.normalize(cluster1, 2, dim=1)
     norm_cluster_2 = torch.nn.functional.normalize(cluster2, 2, dim=1)
 
-    # print()
-    # print("calc L1")
-    # print()
+    print()
+    print("calc L1")
+    print()
 
-    # for v_i, vec_i in tqdm(enumerate(cluster1), total=len(cluster1), ncols=50):
+    for v_i, vec_i in tqdm(enumerate(cluster1), total=len(cluster1), ncols=50):
 
-    #     diff = cluster2 - vec_i
+        diff = cluster2 - vec_i
 
-    #     abs = torch.abs(diff)
-    #     # L1 amoratized across dimensions
-    #     l1_i = torch.mean(abs, dim=1)
-    #     l1_i = l1_i.clone()
-    #     l1.append(l1_i)
+        abs = torch.abs(diff)
+        # L1 amoratized across dimensions
+        l1_i = torch.mean(abs, dim=1)
+        l1_i = l1_i.clone()
+        l1.append(l1_i)
 
     print()
     print("calc L2")
@@ -91,17 +91,6 @@ def compare_clusters(cluster1, cluster2):
 
         sqr = abs * abs
         sqr_sum = torch.sum(sqr, dim=1)
-
-        print(sqr_sum)
-        print(sqr_sum.size())
-
-        sqr = torch.pow(abs, 2)
-        sqr_sum = torch.sum(sqr, dim=1)
-
-        print(sqr_sum)
-        print(sqr_sum.size())
-        exit()
-
         l2_i = torch.sqrt(sqr_sum)
         # L2 amoratized across dimensions
         l2_i = l2_i / len(vec_i)
