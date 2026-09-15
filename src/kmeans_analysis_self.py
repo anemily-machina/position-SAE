@@ -60,12 +60,11 @@ def compare_clusters(cluster1, cluster2):
 
     l1 = []
     l2 = []
-    cosine = []
 
     norm_cluster_1 = torch.nn.functional.normalize(cluster1, 2, dim=1)
     norm_cluster_2 = torch.nn.functional.normalize(cluster2, 2, dim=1)
 
-    cosine_all = norm_cluster_1 @ norm_cluster_2.t()
+    cosine = norm_cluster_1 @ norm_cluster_2.t()
 
     for v_i, vec_i in tqdm(enumerate(cluster1), total=len(cluster1), ncols=50):
 
@@ -84,17 +83,6 @@ def compare_clusters(cluster1, cluster2):
         l2_i = l2_i / len(vec_i)
         l2_i = l2_i.clone()
         l2.append(l2_i)
-
-        vec_i_norm = norm_cluster_1[v_i]
-        vec_i_norm_t = torch.t(vec_i_norm)
-        cosine_i = norm_cluster_2 @ vec_i_norm_t
-        cosine_i = cosine_i.clone()
-        cosine.append(cosine_i)
-
-        print(cosine_i)
-        print(cosine_all[v_i])
-
-        exit()
 
     score_info = {
         "L1": {
