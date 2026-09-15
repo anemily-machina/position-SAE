@@ -231,14 +231,14 @@ def display_scores_self():
                     raw_scores[score_key].append(score)
 
         scores[sub_rate] = {}
-        for score_key, scores in raw_scores.items():
+        for score_key, raw_scores in raw_scores.items():
 
-            sum_s = sum(scores)
-            mean_s = sum_s / len(scores)
+            sum_s = sum(raw_scores)
+            mean_s = sum_s / len(raw_scores)
 
-            std_v = [(s - mean_s) ** 2 for s in scores]
+            std_v = [(s - mean_s) ** 2 for s in raw_scores]
             std_sum = sum(std_v)
-            std_avg = std_sum / len(scores)
+            std_avg = std_sum / len(raw_scores)
             std_s = math.sqrt(std_avg)
 
             score_entry = {"mean": mean_s, "std": std_s}
