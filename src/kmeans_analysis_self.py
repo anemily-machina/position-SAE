@@ -25,6 +25,7 @@ from utils import (
 
 
 from argparse import ArgumentParser
+import math
 import os
 from time import time
 
@@ -213,7 +214,7 @@ def display_scores_self():
     scores = {}
     for sub_rate in ["1.0", "0.8", "0.6", "0.4", "0.2", "0.05", "random"]:
 
-        scores[sub_rate] = {}
+        raw_scores = {}
 
         for t_i in range(NUMBER_OF_TRIALS - 1):
             for t_j in range(t_i + 1, NUMBER_OF_TRIALS):
@@ -224,10 +225,25 @@ def display_scores_self():
                 stats = load_pickle(stats_fname)
 
                 for score_key, score in stats.items():
-                    if score_key not in scores[sub_rate]:
-                        scores[sub_rate][score_key] = []
+                    if score_key not in raw_scores:
+                        raw_scores[score_key] = []
 
-                    scores[sub_rate][score_key].append(score)
+                    raw_scores[score_key].append(score)
+
+        scores[sub_rate] = {}
+        for score_key, scores in raw_scores.items():
+
+            sum_s = sum(scores)
+            mean_s = sum_s / len(scores)
+
+            std_v = [(s - mean_s) ** 2 for s in scores]
+            std_sum = sum(std_v)
+            std_avg = std_sum / len(scores)
+            std_s = math.sqrt(std_avg)
+
+            score_entry = {"mean": mean_s, "std": std_s}
+
+            scores[sub_rate][score_key] = score_entry
 
     print(scores)
 
