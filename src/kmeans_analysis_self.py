@@ -76,7 +76,7 @@ def compare_clusters(cluster1, cluster2):
         abs = torch.abs(diff)
         # L1 amoratized across dimensions
         l1_i = torch.mean(abs, dim=1)
-        l1_i = l1_i.detach().clone()
+        l1_i = l1_i.clone()
         l1.append(l1_i)
 
     print()
@@ -89,12 +89,24 @@ def compare_clusters(cluster1, cluster2):
 
         abs = torch.abs(diff)
 
+        abs_t = torch.t(abs)
+
+        sqr_sum = abs @ abs_t
+
+        print(sqr_sum)
+        print(sqr_sum.size())
+
         sqr = torch.pow(abs, 2)
         sqr_sum = torch.sum(sqr, dim=1)
+
+        print(sqr_sum)
+        print(sqr_sum.size())
+        exit()
+
         l2_i = torch.sqrt(sqr_sum)
         # L2 amoratized across dimensions
         l2_i = l2_i / len(vec_i)
-        l2_i = l2_i.detach().clone()
+        l2_i = l2_i.clone()
         l2.append(l2_i)
 
     print()
@@ -106,7 +118,7 @@ def compare_clusters(cluster1, cluster2):
         vec_i_norm = norm_cluster_1[v_i]
         vec_i_norm_t = torch.t(vec_i_norm)
         cosine_i = norm_cluster_2 @ vec_i_norm_t
-        cosine_i = cosine_i.detach().clone()
+        cosine_i = cosine_i.clone()
         cosine.append(cosine_i)
 
     score_info = {
@@ -248,6 +260,53 @@ def display_scores_self():
     print(scores)
 
 
+def calc_scores_baseline(sub_rate):
+
+    exp_key = "kmeans_exp_multi"
+    exp_folder = os.path.join(OUTPUT_FOLDER, exp_key)
+
+    stats_key = "kmeans_exp_multi_stats_baseline"
+    stats_folder = os.path.join(OUTPUT_FOLDER, stats_key)
+    make_folder(stats_folder)
+
+    if sub_rate == "random":
+        fake_vectors = torch.randn((5, 32000, 512))
+
+    # compute stability for each sub rate
+    for t_i in range(NUMBER_OF_TRIALS):
+
+        trial_file_name_i = f"1.0_{t_i}.pkl"
+        trial_fname_i = os.path.join(exp_folder, trial_file_name_i)
+        kmeans_i = load_pickle(trial_fname_i)
+        clusters_i = kmeans_i.cluster_centers_
+
+        for t_j in range(NUMBER_OF_TRIALS):
+
+            if sub_rate != "random":
+                trial_file_name_j = f"{sub_rate}_{t_j}.pkl"
+                trial_fname_j = os.path.join(exp_folder, trial_file_name_j)
+                kmeans_j = load_pickle(trial_fname_j)
+                clusters_j = kmeans_j.cluster_centers_
+            else:
+                clusters_j = fake_vectors[t_j]
+
+            stats_file_name = f"1.0_{sub_rate}_{t_i}_{t_j}.pkl"
+            stats_fname = os.path.join(stats_folder, stats_file_name)
+
+            print()
+            print(stats_file_name)
+            print()
+
+            if os.path.isfile(stats_fname):
+                print()
+                print("file exists skipping")
+                print()
+                continue
+
+            scores = compare_clusters(cluster1=clusters_i, cluster2=clusters_j)
+            save_pickle(scores, stats_fname)
+
+
 def main():
     args = parse_args()
 
@@ -258,7 +317,9 @@ def main():
 
     # calc_scores_self(sub_rate)
 
-    display_scores_self()
+    # display_scores_self()
+
+    calc_scores_baseline(sub_rate)
 
 
 if __name__ == "__main__":
