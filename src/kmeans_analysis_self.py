@@ -65,7 +65,7 @@ def compare_clusters(cluster1, cluster2):
     norm_cluster_1 = torch.nn.functional.normalize(cluster1, 2, dim=1)
     norm_cluster_2 = torch.nn.functional.normalize(cluster2, 2, dim=1)
 
-    cosine = norm_cluster_2 @ norm_cluster_1.t()
+    cosine_all = norm_cluster_2 @ norm_cluster_1.t()
 
     for v_i, vec_i in tqdm(enumerate(cluster1), total=len(cluster1), ncols=50):
 
@@ -92,7 +92,7 @@ def compare_clusters(cluster1, cluster2):
         cosine.append(cosine_i)
 
         print(cosine_i)
-        print(cosine[v_i])
+        print(cosine_all[v_i])
 
         exit()
 
