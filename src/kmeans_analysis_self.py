@@ -66,7 +66,7 @@ def compare_clusters(cluster1, cluster2):
 
     cosine = norm_cluster_1 @ norm_cluster_2.t()
 
-    for v_i, vec_i in tqdm(enumerate(cluster1), total=len(cluster1), ncols=50):
+    for vec_i in tqdm(cluster1, total=len(cluster1), ncols=50):
 
         diff = cluster2 - vec_i
 
@@ -99,14 +99,19 @@ def compare_clusters(cluster1, cluster2):
         },
     }
 
+    for score_key in ["L1", "L2"]:
+
+        la_params = score_info[score_key]
+
+        cost_matrix = la_params.pop("cost_matrix")
+        cost_matrix = torch.stack(cost_matrix)
+        la_params["cost_matrix"] = cost_matrix
+
     scores = {}
     for score_key, la_params in score_info.items():
 
         print()
         print(score_key)
-
-        cost_matrix = la_params.pop("cost_matrix")
-        cost_matrix = torch.stack(cost_matrix)
 
         start_time = time()
 
@@ -120,6 +125,7 @@ def compare_clusters(cluster1, cluster2):
         best_match_costs = cost_matrix[row_ind, col_ind]
         score = best_match_costs.sum() / len(row_ind)
         score = float(score)
+
         print()
         print(score)
         print()
