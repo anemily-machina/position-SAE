@@ -89,9 +89,8 @@ def compare_clusters(cluster1, cluster2):
 
         abs = torch.abs(diff)
 
-        abs_t = torch.t(abs)
-
-        sqr_sum = abs @ abs_t
+        sqr = abs * abs
+        sqr_sum = torch.sum(sqr, dim=1)
 
         print(sqr_sum)
         print(sqr_sum.size())
