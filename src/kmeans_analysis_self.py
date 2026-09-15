@@ -207,7 +207,8 @@ def calc_scores_self(sub_rate):
 
 def display_scores_self():
 
-    stats_folder = "kmeans_exp_multi_stats_self"
+    stats_key = "kmeans_exp_multi_stats_self"
+    stats_folder = os.path.join(OUTPUT_FOLDER, stats_key)
 
     scores = {}
     for sub_rate in ["1.0", "0.8", "0.6", "0.4", "0.2", "0.05", "random"]:
