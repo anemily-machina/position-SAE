@@ -115,7 +115,7 @@ def compare_clusters(cluster1, cluster2):
 
         start_time = time()
 
-        row_ind, col_ind = linear_sum_assignment(cost_matrix, **la_params)
+        row_ind, col_ind = linear_sum_assignment(**la_params)
 
         total_time = time() - start_time
         total_time = total_time / 60
