@@ -25,6 +25,7 @@ from utils import (
 
 
 from argparse import ArgumentParser
+import gc
 import math
 import os
 from time import time
@@ -87,6 +88,9 @@ def compare_clusters(cluster1, cluster2):
         l2_i = l2_i / len(vec_i)
         l2_i = l2_i.clone()
         l2.append(l2_i)
+
+    # who the fuck knows, memory sometimes ballons sometimes is fine
+    gc.collect()
 
     score_info = {
         "L1": {
