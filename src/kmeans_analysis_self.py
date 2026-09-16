@@ -55,8 +55,12 @@ def parse_args():
 def compare_clusters(cluster1, cluster2):
 
     # tested and torch was faster than numpy (30 vs 28)
-    cluster1 = torch.tensor(cluster1, dtype=torch.float16)
-    cluster2 = torch.tensor(cluster2, dtype=torch.float16)
+    if isinstance(cluster1, torch.Tensor):
+        cluster1 = cluster1.clone()
+        cluster2 = cluster2.clone()
+    else:
+        cluster1 = torch.from_numpy(cluster1).half()
+        cluster2 = torch.from_numpy(cluster2).half()
 
     l1 = []
     l2 = []
