@@ -284,6 +284,48 @@ def calc_scores_baseline(sub_rate):
             save_pickle(scores, stats_fname)
 
 
+def display_scores_baseline():
+
+    stats_key = "kmeans_exp_multi_stats_baseline"
+    stats_folder = os.path.join(OUTPUT_FOLDER, stats_key)
+
+    scores = {}
+    for sub_rate in ["0.8", "0.6", "0.4", "0.2", "0.05", "random"]:
+
+        raw_scores = {}
+
+        for t_i in range(NUMBER_OF_TRIALS):
+            for t_j in range(NUMBER_OF_TRIALS):
+
+                stats_file_name = f"1.0_{sub_rate}_{t_i}_{t_j}.pkl"
+                stats_fname = os.path.join(stats_folder, stats_file_name)
+
+                stats = load_pickle(stats_fname)
+
+                for score_key, score in stats.items():
+                    if score_key not in raw_scores:
+                        raw_scores[score_key] = []
+
+                    raw_scores[score_key].append(score)
+
+        scores[sub_rate] = {}
+        for score_key, raw_scores in raw_scores.items():
+
+            sum_s = sum(raw_scores)
+            mean_s = sum_s / len(raw_scores)
+
+            std_v = [(s - mean_s) ** 2 for s in raw_scores]
+            std_sum = sum(std_v)
+            std_avg = std_sum / len(raw_scores)
+            std_s = math.sqrt(std_avg)
+
+            score_entry = {"mean": mean_s, "std": std_s}
+
+            scores[sub_rate][score_key] = score_entry
+
+    print(scores)
+
+
 def main():
     args = parse_args()
 
@@ -294,9 +336,10 @@ def main():
 
     # calc_scores_self(sub_rate)
 
-    # display_scores_self()
+    # calc_scores_baseline(sub_rate)
 
-    calc_scores_baseline(sub_rate)
+    display_scores_self()
+    display_scores_baseline()
 
 
 if __name__ == "__main__":
