@@ -89,9 +89,6 @@ def compare_clusters(cluster1, cluster2):
         l2_i = l2_i.clone()
         l2.append(l2_i)
 
-    # who the fuck knows, memory sometimes ballons sometimes is fine
-    gc.collect()
-
     score_info = {
         "L1": {
             "cost_matrix": l1,
