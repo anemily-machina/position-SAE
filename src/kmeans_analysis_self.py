@@ -145,9 +145,9 @@ def compare_clusters(cluster1, cluster2, file_prefix=None):
         start_time = time()
 
         score = None
-        if temp_file_prefix is not None:
+        if file_prefix is not None:
 
-            temp_fname = f"{temp_file_prefix}_{score_key}.pkl"
+            temp_fname = f"{file_prefix}_{score_key}.pkl"
 
             if os.path.isfile(temp_fname):
 
