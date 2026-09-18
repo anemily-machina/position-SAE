@@ -84,7 +84,7 @@ def _compute_L1(cluster1, cluster2):
 
         diff = cluster2 - vec_i
 
-        abs = torch.abs(diff)
+        abs = torch.abs_(diff)
 
         # L1 amoratized across dimensions
         l1_i = torch.mean(abs, dim=1)
