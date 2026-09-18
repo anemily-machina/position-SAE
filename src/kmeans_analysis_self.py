@@ -92,6 +92,12 @@ def _compute_L1(cluster1, cluster2):
 
         l1_i = l1_i / len(vec_i)
 
+        mean = torch.mean(diff)
+        print(l1_i[0])
+        print(mean[0])
+
+        exit()
+
         l1.append(l1_i)
 
     # cost_matrix = torch.stack(l1)
