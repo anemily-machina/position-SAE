@@ -98,9 +98,9 @@ def _compute_L1(cluster1: torch.Tensor, cluster2: torch.Tensor):
         torch.sum(diff_matrix, dim=1, out=sum_vec)
         cost_matrix[v_i] = sum_vec / vec_size
 
-    # score = _linear_sum_score(cost_matrix=cost_matrix, maximize=False)
+    score = _linear_sum_score(cost_matrix=cost_matrix, maximize=False)
 
-    # return score
+    return score
 
 
 def _compute_L2(cluster1, cluster2):
@@ -126,11 +126,9 @@ def _compute_L2(cluster1, cluster2):
         torch.sum(abs_matrix, dim=1, out=sum_vec)
         cost_matrix[v_i] = sum_vec / vec_size
 
-    # score = _linear_sum_score(cost_matrix=cost_matrix, maximize=False)
+    score = _linear_sum_score(cost_matrix=cost_matrix, maximize=False)
 
-    # return score
-
-    exit()
+    return score
 
 
 def compare_clusters(cluster1, cluster2, file_prefix):
@@ -175,13 +173,13 @@ def compare_clusters(cluster1, cluster2, file_prefix):
         if score is None:
             score = score_fn(cluster1, cluster2)
 
-        #     save_pickle(score, temp_fname)
+            save_pickle(score, temp_fname)
 
-        # total_time = time() - start_time
-        # total_time = total_time / 60
+        total_time = time() - start_time
+        total_time = total_time / 60
 
-        # print(f"score: {score}")
-        # print(f"total time: {total_time}m")
+        print(f"score: {score}")
+        print(f"total time: {total_time}m")
 
 
 def calc_scores_self(sub_rate):
