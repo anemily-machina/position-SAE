@@ -108,6 +108,8 @@ def _compute_L1(cluster1: torch.Tensor, cluster2: torch.Tensor):
 
         l1.append(l1_i)
 
+    print(l1)
+
     # cost_matrix = torch.stack(l1)
 
     # score = _linear_sum_score(cost_matrix=cost_matrix, maximize=False)
