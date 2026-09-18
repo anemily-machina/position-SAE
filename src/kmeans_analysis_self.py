@@ -52,23 +52,79 @@ def parse_args():
     return args
 
 
-def compare_clusters(cluster1, cluster2):
+def _linear_sum_score(cost_matrix, maximize):
 
-    # tested and torch was faster than numpy (30 vs 28)
-    if isinstance(cluster1, torch.Tensor):
-        cluster1 = cluster1.clone()
-        cluster2 = cluster2.clone()
-    else:
-        cluster1 = torch.from_numpy(cluster1).half()
-        cluster2 = torch.from_numpy(cluster2).half()
+    row_ind, col_ind = linear_sum_assignment(cost_matrix=cost_matrix, maximize=True)
 
-    l1 = []
-    l2 = []
+    best_match_costs = cost_matrix[row_ind, col_ind]
+
+    score = best_match_costs.sum() / len(row_ind)
+
+    score = float(score)
+
+    return score
+
+
+def _compute_cosine(cluster1, cluster2):
 
     norm_cluster_1 = torch.nn.functional.normalize(cluster1, 2, dim=1)
     norm_cluster_2 = torch.nn.functional.normalize(cluster2, 2, dim=1)
 
-    cosine = norm_cluster_1 @ norm_cluster_2.t()
+    cost_matrix = norm_cluster_1 @ norm_cluster_2.t()
+
+    score = _linear_sum_score(cost_matrix=cost_matrix, maximize=True)
+
+    return score
+
+
+def compare_clusters(cluster1, cluster2, temp_file_prefix=None):
+
+    # tested and torch was faster than numpy (30 vs 28)
+    if isinstance(cluster1, torch.Tensor):
+        cluster1 = cluster1.clone()
+    else:
+        cluster1 = torch.from_numpy(cluster1).half().clone()
+
+    if isinstance(cluster2, torch.Tensor):
+        cluster2 = cluster2.clone()
+    else:
+        cluster2 = torch.from_numpy(cluster2).half().clone()
+
+    score2fn = {
+        "cosine": _compute_cosine,
+    }
+    for score_key, score_fn in score2fn.items():
+
+        print()
+        print(score_key)
+
+        start_time = time()
+
+        score = None
+        if temp_file_prefix is not None:
+
+            temp_fname = f"{temp_file_prefix}_{score_key}.pkl"
+
+            if os.path.isfile(temp_fname):
+
+                print("score exists")
+
+                score = load_pickle(temp_fname)
+
+        if score is None:
+            score = score_fn(cluster1, cluster2)
+
+            save_pickle(score, temp_fname)
+
+        total_time = time() - start_time
+        total_time = total_time / 60
+
+        print(f"total time: {total_time}m")
+
+    exit()
+
+    l1 = []
+    l2 = []
 
     for vec_i in tqdm(cluster1, total=len(cluster1), ncols=50):
 
@@ -114,27 +170,18 @@ def compare_clusters(cluster1, cluster2):
     scores = {}
     for score_key, la_params in score_info.items():
 
-        print()
-        print(score_key)
-
-        start_time = time()
-
         row_ind, col_ind = linear_sum_assignment(**la_params)
 
-        total_time = time() - start_time
-        total_time = total_time / 60
-
-        print(f"total time: {total_time}m")
-
+        cost_matrix = la_params["cost_matrix"]
         best_match_costs = cost_matrix[row_ind, col_ind]
-        score = best_match_costs.sum() / len(row_ind)
-        score = float(score)
+        score_key = best_match_costs.sum() / len(row_ind)
+        score_key = float(score_key)
 
         print()
-        print(score)
+        print(score_key)
         print()
 
-        scores[score_key] = score
+        scores[score_key] = score_key
 
     return scores
 
@@ -266,7 +313,8 @@ def calc_scores_baseline(sub_rate):
             else:
                 clusters_j = fake_vectors[t_j]
 
-            stats_file_name = f"1.0_{sub_rate}_{t_i}_{t_j}.pkl"
+            stats_file_prefix = f"1.0_{sub_rate}_{t_i}_{t_j}"
+            stats_file_name = f"{stats_file_prefix}.pkl"
             stats_fname = os.path.join(stats_folder, stats_file_name)
 
             print()
@@ -279,7 +327,11 @@ def calc_scores_baseline(sub_rate):
                 print()
                 continue
 
-            scores = compare_clusters(cluster1=clusters_i, cluster2=clusters_j)
+            scores = compare_clusters(
+                cluster1=clusters_i,
+                cluster2=clusters_j,
+                tmp_file_prefix=stats_file_prefix,
+            )
             save_pickle(scores, stats_fname)
 
 
@@ -339,10 +391,10 @@ def main():
 
     # calc_scores_self(sub_rate)
 
-    # calc_scores_baseline(sub_rate)
+    calc_scores_baseline(sub_rate)
 
-    display_scores_self()
-    display_scores_baseline()
+    # display_scores_self()
+    # display_scores_baseline()
 
 
 if __name__ == "__main__":
