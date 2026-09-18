@@ -52,7 +52,6 @@ def parse_args():
     return args
 
 
-@torch.no_grad()
 def compare_clusters(cluster1, cluster2):
 
     # tested and torch was faster than numpy (30 vs 28)
@@ -140,7 +139,6 @@ def compare_clusters(cluster1, cluster2):
     return scores
 
 
-@torch.no_grad()
 def calc_scores_self(sub_rate):
 
     exp_key = "kmeans_exp_multi"
@@ -231,7 +229,11 @@ def display_scores_self():
 
             scores[sub_rate][score_key] = score_entry
 
+    print()
+    print()
     print(scores)
+    print()
+    print()
 
 
 def calc_scores_baseline(sub_rate):
@@ -320,7 +322,11 @@ def display_scores_baseline():
 
             scores[sub_rate][score_key] = score_entry
 
+    print()
+    print()
     print(scores)
+    print()
+    print()
 
 
 def main():
