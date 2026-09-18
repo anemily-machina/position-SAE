@@ -142,12 +142,12 @@ def compare_clusters(cluster1, cluster2, fname_prefix):
     print()
 
     if isinstance(cluster1, torch.Tensor):
-        cluster1 = cluster1.clone()
+        cluster1 = cluster1.half().clone()
     else:
         cluster1 = torch.from_numpy(cluster1).half().clone()
 
     if isinstance(cluster2, torch.Tensor):
-        cluster2 = cluster2.clone()
+        cluster2 = cluster2.half().clone()
     else:
         cluster2 = torch.from_numpy(cluster2).half().clone()
 
