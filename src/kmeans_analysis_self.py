@@ -119,7 +119,11 @@ def _compute_L2(cluster1, cluster2):
     return score
 
 
-def compare_clusters(cluster1, cluster2, file_prefix=None):
+def compare_clusters(cluster1, cluster2, file_prefix):
+
+    print()
+    print(file_prefix)
+    print()
 
     # tested and torch was faster than numpy (30 vs 28)
     if isinstance(cluster1, torch.Tensor):
