@@ -131,10 +131,10 @@ def _compute_L2(cluster1, cluster2):
     return score
 
 
-def compare_clusters(cluster1, cluster2, file_prefix):
+def compare_clusters(cluster1, cluster2, fname_prefix):
 
     print()
-    print(file_prefix)
+    print(fname_prefix)
     print()
 
     if isinstance(cluster1, torch.Tensor):
@@ -160,9 +160,9 @@ def compare_clusters(cluster1, cluster2, file_prefix):
         start_time = time()
 
         score = None
-        if file_prefix is not None:
+        if fname_prefix is not None:
 
-            temp_fname = f"{file_prefix}_{score_key}.pkl"
+            temp_fname = f"{fname_prefix}_{score_key}.pkl"
 
             if os.path.isfile(temp_fname):
 
@@ -309,12 +309,13 @@ def calc_scores_baseline(sub_rate):
             else:
                 clusters_j = fake_vectors[t_j]
 
-            stats_file_prefix = f"1.0_{sub_rate}_{t_i}_{t_j}"
+            stats_file_name_prefix = f"1.0_{sub_rate}_{t_i}_{t_j}"
+            stats_fname_prefix = os.path.join(stats_folder, stats_file_name_prefix)
 
             compare_clusters(
                 cluster1=clusters_i,
                 cluster2=clusters_j,
-                file_prefix=stats_file_prefix,
+                fname_prefix=stats_fname_prefix,
             )
 
 
