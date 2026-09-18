@@ -119,7 +119,7 @@ def _compute_L2(cluster1, cluster2):
     return score
 
 
-def compare_clusters(cluster1, cluster2, temp_file_prefix=None):
+def compare_clusters(cluster1, cluster2, file_prefix=None):
 
     # tested and torch was faster than numpy (30 vs 28)
     if isinstance(cluster1, torch.Tensor):
@@ -134,6 +134,8 @@ def compare_clusters(cluster1, cluster2, temp_file_prefix=None):
 
     score2fn = {
         "cosine": _compute_cosine,
+        "L1": _compute_L1,
+        "L2": _compute_L2,
     }
     for score_key, score_fn in score2fn.items():
 
@@ -163,70 +165,6 @@ def compare_clusters(cluster1, cluster2, temp_file_prefix=None):
 
         print(f"score: {score}")
         print(f"total time: {total_time}m")
-
-    exit()
-
-    l1 = []
-    l2 = []
-
-    for vec_i in tqdm(cluster1, total=len(cluster1), ncols=50):
-
-        diff = cluster2 - vec_i
-
-        abs = torch.abs(diff)
-        # L1 amoratized across dimensions
-        l1_i = torch.mean(abs, dim=1)
-        l1_i = l1_i.clone()
-        l1.append(l1_i)
-
-        sqr = abs * abs
-        sqr_sum = torch.sum(sqr, dim=1)
-        l2_i = torch.sqrt(sqr_sum)
-        # L2 amoratized across dimensions
-        l2_i = l2_i / len(vec_i)
-        l2_i = l2_i.clone()
-        l2.append(l2_i)
-
-    score_info = {
-        "L1": {
-            "cost_matrix": l1,
-            "maximize": False,
-        },
-        "L2": {
-            "cost_matrix": l2,
-            "maximize": False,
-        },
-        "cosine_sim": {
-            "cost_matrix": cosine,
-            "maximize": True,
-        },
-    }
-
-    for score_key in ["L1", "L2"]:
-
-        la_params = score_info[score_key]
-
-        cost_matrix = la_params.pop("cost_matrix")
-        cost_matrix = torch.stack(cost_matrix)
-        la_params["cost_matrix"] = cost_matrix
-
-    scores = {}
-    for score_key, la_params in score_info.items():
-
-        row_ind, col_ind = linear_sum_assignment(**la_params)
-
-        cost_matrix = la_params["cost_matrix"]
-        best_match_costs = cost_matrix[row_ind, col_ind]
-        score_key = best_match_costs.sum() / len(row_ind)
-        score_key = float(score_key)
-
-        print()
-        print(score_key)
-        print()
-
-        scores[score_key] = score_key
-
-    return scores
 
 
 def calc_scores_self(sub_rate):
@@ -357,25 +295,12 @@ def calc_scores_baseline(sub_rate):
                 clusters_j = fake_vectors[t_j]
 
             stats_file_prefix = f"1.0_{sub_rate}_{t_i}_{t_j}"
-            stats_file_name = f"{stats_file_prefix}.pkl"
-            stats_fname = os.path.join(stats_folder, stats_file_name)
 
-            print()
-            print(stats_file_name)
-            print()
-
-            if os.path.isfile(stats_fname):
-                print()
-                print("file exists skipping")
-                print()
-                continue
-
-            scores = compare_clusters(
+            compare_clusters(
                 cluster1=clusters_i,
                 cluster2=clusters_j,
-                temp_file_prefix=stats_file_prefix,
+                file_prefix=stats_file_prefix,
             )
-            save_pickle(scores, stats_fname)
 
 
 def display_scores_baseline():
