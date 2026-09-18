@@ -85,16 +85,16 @@ def _compute_L1(cluster1, cluster2):
         diff = cluster2 - vec_i
 
         abs = torch.abs(diff)
+
         # L1 amoratized across dimensions
         l1_i = torch.mean(abs, dim=1)
-        l1_i = l1_i.clone()
         l1.append(l1_i)
 
-    cost_matrix = torch.stack(l1)
+    # cost_matrix = torch.stack(l1)
 
-    score = _linear_sum_score(cost_matrix=cost_matrix, maximize=False)
+    # score = _linear_sum_score(cost_matrix=cost_matrix, maximize=False)
 
-    return score
+    # return score
 
 
 def _compute_L2(cluster1, cluster2):
@@ -107,16 +107,18 @@ def _compute_L2(cluster1, cluster2):
         sqr = diff * diff
         sqr_sum = torch.sum(sqr, dim=1)
         l2_i = torch.sqrt(sqr_sum)
+
         # L2 amoratized across dimensions
         l2_i = l2_i / len(vec_i)
-        l2_i = l2_i.clone()
         l2.append(l2_i)
 
-    cost_matrix = torch.stack(l2)
+    # cost_matrix = torch.stack(l2)
 
-    score = _linear_sum_score(cost_matrix=cost_matrix, maximize=False)
+    # score = _linear_sum_score(cost_matrix=cost_matrix, maximize=False)
 
-    return score
+    # return score
+
+    exit()
 
 
 def compare_clusters(cluster1, cluster2, file_prefix):
@@ -161,13 +163,13 @@ def compare_clusters(cluster1, cluster2, file_prefix):
         if score is None:
             score = score_fn(cluster1, cluster2)
 
-            save_pickle(score, temp_fname)
+        #     save_pickle(score, temp_fname)
 
-        total_time = time() - start_time
-        total_time = total_time / 60
+        # total_time = time() - start_time
+        # total_time = total_time / 60
 
-        print(f"score: {score}")
-        print(f"total time: {total_time}m")
+        # print(f"score: {score}")
+        # print(f"total time: {total_time}m")
 
 
 def calc_scores_self(sub_rate):
