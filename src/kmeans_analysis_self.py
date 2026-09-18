@@ -330,7 +330,7 @@ def calc_scores_baseline(sub_rate):
             scores = compare_clusters(
                 cluster1=clusters_i,
                 cluster2=clusters_j,
-                tmp_file_prefix=stats_file_prefix,
+                temp_file_prefix=stats_file_prefix,
             )
             save_pickle(scores, stats_fname)
 
