@@ -86,9 +86,10 @@ def _compute_L1(cluster1: torch.Tensor, cluster2: torch.Tensor):
     diff_matrix = torch.zeros(
         cluster2.size(), dtype=cluster1.dtype, device=cluster1.device
     )
-    sum_vec = torch.zeros((len(cluster1)), dtype=cluster1.dtype, device=cluster1.device)
+    sum_vec = torch.zeros((len(cluster2)), dtype=cluster1.dtype, device=cluster1.device)
+    cost_matrix = torch.zeros((len(cluster1), len(cluster2)))
 
-    for vec_i in tqdm(cluster1, total=len(cluster1), ncols=50):
+    for v_i, vec_i in tqdm(enumerate(cluster1), total=len(cluster1), ncols=50):
 
         torch.subtract(cluster2, vec_i, out=diff_matrix)
 
@@ -97,15 +98,11 @@ def _compute_L1(cluster1: torch.Tensor, cluster2: torch.Tensor):
         # L1 amoratized across dimensions
         # why is this so much faster than using torch.mean 150it/s vs 450it/s?
         torch.sum(diff_matrix, dim=1, out=sum_vec)
-        l1_i = sum_vec / vec_size
+        cost_matrix[v_i] = sum_vec / vec_size
 
-        l1.append(l1_i)
+    score = _linear_sum_score(cost_matrix=cost_matrix, maximize=False)
 
-    # cost_matrix = torch.stack(l1)
-
-    # score = _linear_sum_score(cost_matrix=cost_matrix, maximize=False)
-
-    # return score
+    return score
 
 
 def _compute_L2(cluster1, cluster2):
