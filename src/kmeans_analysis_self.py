@@ -77,9 +77,12 @@ def _compute_cosine(cluster1, cluster2):
     return score
 
 
-def _compute_L1(cluster1, cluster2):
+def _compute_L1(cluster1: torch.Tensor, cluster2: torch.Tensor):
 
     l1 = []
+    sum_vec = torch.zeros(
+        cluster1[0].size(), dtype=cluster1.dtype, device=cluster1.device
+    )
     for vec_i in tqdm(cluster1, total=len(cluster1), ncols=50):
 
         diff = cluster2 - vec_i
@@ -87,11 +90,18 @@ def _compute_L1(cluster1, cluster2):
         torch.abs_(diff)
 
         # L1 amoratized across dimensions
-        # why is this so much faster than using torch.mean 30s vs 5 mins?
+        # why is this so much faster than using torch.mean 150it/s vs 450it/s?
         l1_i = torch.sum(diff, dim=1)
         l1_i = l1_i / len(vec_i)
 
+        torch.sum(diff, dim=1, out=sum_vec)
+
+        print(l1_i)
+        print(sum_vec)
+
         l1.append(l1_i)
+
+        exit()
 
     # cost_matrix = torch.stack(l1)
 
