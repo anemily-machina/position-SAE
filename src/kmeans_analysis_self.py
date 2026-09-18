@@ -84,6 +84,8 @@ def _compute_L1(cluster1, cluster2):
 
         diff = cluster2 - vec_i
 
+        print(diff[0])
+
         abs = torch.abs(diff)
         torch.abs_(diff)
 
