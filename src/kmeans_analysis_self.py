@@ -103,7 +103,7 @@ def _compute_L1(cluster1: torch.Tensor, cluster2: torch.Tensor):
     return score
 
 
-def _compute_L2(cluster1, cluster2):
+def _compute_L2(cluster1: torch.Tensor, cluster2: torch.Tensor):
 
     vec_size = len(cluster1[0])
 
@@ -114,6 +114,9 @@ def _compute_L2(cluster1, cluster2):
         cluster2.size(), dtype=cluster1.dtype, device=cluster1.device
     )
     sum_vec = torch.zeros((len(cluster2)), dtype=cluster1.dtype, device=cluster1.device)
+    sqrt_vec = torch.zeros(
+        (len(cluster2)), dtype=cluster1.dtype, device=cluster1.device
+    )
     cost_matrix = torch.zeros((len(cluster1), len(cluster2)))
 
     for v_i, vec_i in tqdm(enumerate(cluster1), total=len(cluster1), ncols=50):
@@ -124,7 +127,8 @@ def _compute_L2(cluster1, cluster2):
         # L1 amoratized across dimensions
         # why is this so much faster than using torch.mean 150it/s vs 450it/s?
         torch.sum(abs_matrix, dim=1, out=sum_vec)
-        cost_matrix[v_i] = sum_vec / vec_size
+        torch.sqrt(sum_vec, out=sqrt_vec)
+        cost_matrix[v_i] = sqrt_vec / vec_size
 
     score = _linear_sum_score(cost_matrix=cost_matrix, maximize=False)
 
