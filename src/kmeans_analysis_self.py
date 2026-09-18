@@ -93,8 +93,8 @@ def _compute_L1(cluster1, cluster2):
         l1_i = l1_i / len(vec_i)
 
         m = torch.mean(diff, dim=1)
-        print(l1_i[0])
-        print(m[0])
+        print(l1_i)
+        print(m)
 
         exit()
 
