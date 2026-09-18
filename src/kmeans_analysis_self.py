@@ -119,6 +119,8 @@ def _compute_L2(cluster1, cluster2):
 
     # return score
 
+    exit()
+
 
 def compare_clusters(cluster1, cluster2, file_prefix):
 
@@ -169,8 +171,6 @@ def compare_clusters(cluster1, cluster2, file_prefix):
 
         # print(f"score: {score}")
         # print(f"total time: {total_time}m")
-
-        exit()
 
 
 def calc_scores_self(sub_rate):
