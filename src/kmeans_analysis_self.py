@@ -82,11 +82,23 @@ def _compute_L1(cluster1: torch.Tensor, cluster2: torch.Tensor):
     vec_size = len(cluster1[0])
 
     l1 = []
+
+    diff_matrix = torch.zeros(
+        cluster2.size(), dtype=cluster1.dtype, device=cluster1.device
+    )
     sum_vec = torch.zeros((len(cluster1)), dtype=cluster1.dtype, device=cluster1.device)
 
+    c = 1
     for vec_i in tqdm(cluster1, total=len(cluster1), ncols=50):
+        c += 1
+        if c == 10:
+            exit()
 
         diff = cluster2 - vec_i
+        torch.subtract(cluster2, vec_i, out=diff_matrix)
+
+        print(diff[0])
+        print(diff_matrix[0])
 
         torch.abs_(diff)
 
