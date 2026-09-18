@@ -92,7 +92,7 @@ def _compute_L1(cluster1: torch.Tensor, cluster2: torch.Tensor):
         # L1 amoratized across dimensions
         # why is this so much faster than using torch.mean 150it/s vs 450it/s?
         l1_i = torch.sum(diff, dim=1)
-        l1_i = l1_i / len(vec_i)
+        # l1_i = l1_i / len(vec_i)
 
         torch.sum(diff, dim=1, out=sum_vec)
 
