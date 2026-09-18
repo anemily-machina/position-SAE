@@ -125,7 +125,6 @@ def compare_clusters(cluster1, cluster2, file_prefix):
     print(file_prefix)
     print()
 
-    # tested and torch was faster than numpy (30 vs 28)
     if isinstance(cluster1, torch.Tensor):
         cluster1 = cluster1.clone()
     else:
