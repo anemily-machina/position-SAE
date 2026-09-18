@@ -77,6 +77,48 @@ def _compute_cosine(cluster1, cluster2):
     return score
 
 
+def _compute_L1(cluster1, cluster2):
+
+    l1 = []
+    for vec_i in tqdm(cluster1, total=len(cluster1), ncols=50):
+
+        diff = cluster2 - vec_i
+
+        abs = torch.abs(diff)
+        # L1 amoratized across dimensions
+        l1_i = torch.mean(abs, dim=1)
+        l1_i = l1_i.clone()
+        l1.append(l1_i)
+
+    cost_matrix = torch.stack(l1)
+
+    score = _linear_sum_score(cost_matrix=cost_matrix, maximize=False)
+
+    return score
+
+
+def _compute_L2(cluster1, cluster2):
+
+    l2 = []
+    for vec_i in tqdm(cluster1, total=len(cluster1), ncols=50):
+
+        diff = cluster2 - vec_i
+
+        sqr = diff * diff
+        sqr_sum = torch.sum(sqr, dim=1)
+        l2_i = torch.sqrt(sqr_sum)
+        # L2 amoratized across dimensions
+        l2_i = l2_i / len(vec_i)
+        l2_i = l2_i.clone()
+        l2.append(l2_i)
+
+    cost_matrix = torch.stack(l2)
+
+    score = _linear_sum_score(cost_matrix=cost_matrix, maximize=False)
+
+    return score
+
+
 def compare_clusters(cluster1, cluster2, temp_file_prefix=None):
 
     # tested and torch was faster than numpy (30 vs 28)
@@ -119,6 +161,7 @@ def compare_clusters(cluster1, cluster2, temp_file_prefix=None):
         total_time = time() - start_time
         total_time = total_time / 60
 
+        print(f"score: {score}")
         print(f"total time: {total_time}m")
 
     exit()
