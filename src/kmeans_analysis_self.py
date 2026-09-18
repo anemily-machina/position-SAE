@@ -97,8 +97,8 @@ def _compute_L1(cluster1: torch.Tensor, cluster2: torch.Tensor):
         diff = cluster2 - vec_i
         torch.subtract(cluster2, vec_i, out=diff_matrix)
 
-        print(diff[0])
-        print(diff_matrix[0])
+        print(diff[0][:30])
+        print(diff_matrix[0][:30])
 
         torch.abs_(diff)
 
