@@ -94,7 +94,7 @@ def _compute_L1(cluster1: torch.Tensor, cluster2: torch.Tensor):
         torch.abs_(diff_matrix)
 
         # L1 amoratized across dimensions
-        # why is this so much faster than using torch.mean 150it/s vs 450it/s?
+        # why is this so much faster than using torch.mean 3x faster?
         torch.sum(diff_matrix, dim=1, out=sum_vec)
         cost_matrix[v_i] = sum_vec / vec_size
 
@@ -124,10 +124,10 @@ def _compute_L2(cluster1: torch.Tensor, cluster2: torch.Tensor):
         torch.subtract(cluster2, vec_i, out=diff_matrix)
         torch.mul(diff_matrix, diff_matrix, out=abs_matrix)
 
-        # L1 amoratized across dimensions
-        # why is this so much faster than using torch.mean 150it/s vs 450it/s?
         torch.sum(abs_matrix, dim=1, out=sum_vec)
         torch.sqrt(sum_vec, out=sqrt_vec)
+
+        # amoratize across dimension size
         cost_matrix[v_i] = sqrt_vec / vec_size
 
     score = _linear_sum_score(cost_matrix=cost_matrix, maximize=False)
