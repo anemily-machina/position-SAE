@@ -82,7 +82,9 @@ def _compute_L1(cluster1: torch.Tensor, cluster2: torch.Tensor):
     vec_size = len(cluster1[0])
 
     l1 = []
-    sum_vec = torch.zeros((vec_size), dtype=cluster1.dtype, device=cluster1.device)
+    sum_vec = torch.zeros(
+        cluster1[0].size(), dtype=cluster1.dtype, device=cluster1.device
+    )
     c = 1
 
     for vec_i in tqdm(cluster1, total=len(cluster1), ncols=50):
