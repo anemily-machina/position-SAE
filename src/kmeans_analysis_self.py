@@ -87,16 +87,9 @@ def _compute_L1(cluster1, cluster2):
         torch.abs_(diff)
 
         # L1 amoratized across dimensions
-        # why is this so much faster than using torch.mean?
+        # why is this so much faster than using torch.mean 30s vs 5 mins?
         l1_i = torch.sum(diff, dim=1)
-
         l1_i = l1_i / len(vec_i)
-
-        m = torch.mean(diff, dim=1)
-        print(l1_i)
-        print(m)
-
-        exit()
 
         l1.append(l1_i)
 
