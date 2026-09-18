@@ -86,10 +86,10 @@ def _compute_L1(cluster1, cluster2):
 
         torch.abs_(diff)
 
-        # L1 amoratized across dimensions
-        l1_i = torch.mean(diff, dim=1)
+        # # L1 amoratized across dimensions
+        # l1_i = torch.mean(diff, dim=1)
 
-        l1.append(l1_i)
+        # l1.append(l1_i)
 
     # cost_matrix = torch.stack(l1)
 
