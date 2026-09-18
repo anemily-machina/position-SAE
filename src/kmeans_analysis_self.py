@@ -54,7 +54,7 @@ def parse_args():
 
 def _linear_sum_score(cost_matrix, maximize):
 
-    row_ind, col_ind = linear_sum_assignment(cost_matrix=cost_matrix, maximize=True)
+    row_ind, col_ind = linear_sum_assignment(cost_matrix=cost_matrix, maximize=maximize)
 
     best_match_costs = cost_matrix[row_ind, col_ind]
 
@@ -88,6 +88,7 @@ def _compute_L1(cluster1, cluster2):
 
         # L1 amoratized across dimensions
         l1_i = torch.mean(abs, dim=1)
+
         l1.append(l1_i)
 
     # cost_matrix = torch.stack(l1)
@@ -117,8 +118,6 @@ def _compute_L2(cluster1, cluster2):
     # score = _linear_sum_score(cost_matrix=cost_matrix, maximize=False)
 
     # return score
-
-    exit()
 
 
 def compare_clusters(cluster1, cluster2, file_prefix):
@@ -170,6 +169,8 @@ def compare_clusters(cluster1, cluster2, file_prefix):
 
         # print(f"score: {score}")
         # print(f"total time: {total_time}m")
+
+        exit()
 
 
 def calc_scores_self(sub_rate):
