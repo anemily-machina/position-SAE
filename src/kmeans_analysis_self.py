@@ -89,7 +89,7 @@ def _compute_L1(cluster1: torch.Tensor, cluster2: torch.Tensor):
 
         c += 1
         if c == 10:
-            exit()
+            break
 
         diff = cluster2 - vec_i
 
