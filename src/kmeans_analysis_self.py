@@ -386,5 +386,27 @@ def main():
 
 
 if __name__ == "__main__":
+
+    stats_key = "kmeans_exp_multi_stats_self"
+    stats_folder = os.path.join(OUTPUT_FOLDER, stats_key)
+
+    for sub_rate in ["1.0", "0.8", "0.6", "0.4", "0.2", "0.05", "random"]:
+
+        for t_i in range(NUMBER_OF_TRIALS - 1):
+
+            for t_j in range(t_i + 1, NUMBER_OF_TRIALS):
+
+                stats_file_name_prefix = f"{sub_rate}_{t_i}_{t_j}"
+                stats_file_name = f"{stats_file_name_prefix}.pkl"
+                stats_fname = os.path.join(stats_folder, stats_file_name)
+
+                stats = load_pickle(stats_fname)
+
+                for score_key, score in stats.items():
+
+                    print()
+                    print(score_key, score)
+
+    exit()
     with torch.no_grad():
         main()
