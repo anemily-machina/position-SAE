@@ -413,7 +413,9 @@ if __name__ == "__main__":
                     score_file_name = f"{stats_file_name_prefix}_{score_key}.pkl"
                     score_fname = os.path.join(stats_folder, score_file_name)
 
-                    save_pickle(score, score_fname)
+                    score2 = load_pickle(score, score_fname)
+
+                    print(score_key, score, score2)
 
     exit()
     with torch.no_grad():
