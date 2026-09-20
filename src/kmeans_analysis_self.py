@@ -404,8 +404,10 @@ if __name__ == "__main__":
 
                 for score_key, score in stats.items():
 
-                    print()
-                    print(score_key, score)
+                    score_file_name = f"{stats_file_name_prefix}_{score_key}.pkl"
+                    score_fname = os.path.join(stats_folder, score_file_name)
+
+                    save_pickle(score, score_fname)
 
     exit()
     with torch.no_grad():
