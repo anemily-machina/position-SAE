@@ -297,7 +297,7 @@ def display_scores_self():
         for t_i in range(NUMBER_OF_TRIALS - 1):
             for t_j in range(t_i + 1, NUMBER_OF_TRIALS):
 
-                stats_file_name_prefix = f"{sub_rate}_{t_i}_{t_j}.pkl"
+                stats_file_name_prefix = f"{sub_rate}_{t_i}_{t_j}"
 
                 for score_key in score_keys:
 
