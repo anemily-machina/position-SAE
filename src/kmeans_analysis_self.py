@@ -340,29 +340,37 @@ def display_scores_self():
 
 def display_scores_baseline():
 
+    print()
+    print("Baseline stability scores")
+    print()
+
     stats_key = "kmeans_exp_multi_stats_baseline"
     stats_folder = os.path.join(OUTPUT_FOLDER, stats_key)
 
-    scores = {}
-    for sub_rate in ["0.8", "0.6", "0.4", "0.2", "0.05", "random"]:
+    sub_rates = ["1.0", "0.8", "0.6", "0.4", "0.2", "0.05", "random"]
+    score_keys = ["L1", "L2", "cosine"]
 
-        raw_scores = {}
+    scores = {}
+    score_strs = {k: [] for k in score_keys}
+    for sub_rate in sub_rates:
+
+        raw_scores = {k: [] for k in score_keys}
 
         for t_i in range(NUMBER_OF_TRIALS):
             for t_j in range(NUMBER_OF_TRIALS):
 
-                stats_file_name = f"1.0_{sub_rate}_{t_i}_{t_j}.pkl"
-                stats_fname = os.path.join(stats_folder, stats_file_name)
+                stats_file_name_prefix = f"{sub_rate}_{t_i}_{t_j}"
 
-                stats = load_pickle(stats_fname)
+                for score_key in score_keys:
 
-                for score_key, score in stats.items():
-                    if score_key not in raw_scores:
-                        raw_scores[score_key] = []
+                    score_file_name = f"{stats_file_name_prefix}_{score_key}.pkl"
+                    score_fname = os.path.join(stats_folder, score_file_name)
+                    score = load_pickle(score_fname)
 
                     raw_scores[score_key].append(score)
 
         scores[sub_rate] = {}
+
         for score_key, raw_scores in raw_scores.items():
 
             sum_s = sum(raw_scores)
@@ -371,18 +379,24 @@ def display_scores_baseline():
             std_v = [(s - mean_s) ** 2 for s in raw_scores]
             std_sum = sum(std_v)
             std_avg = std_sum / len(raw_scores)
-
             std_s = math.sqrt(std_avg)
+
+            score_s = f"{sub_rate:4.4}: {mean_s:5.5f} +/- {std_s:5.5f}"
+            score_strs[score_key].append(score_s)
 
             score_entry = {"mean": mean_s, "std": std_s}
 
             scores[sub_rate][score_key] = score_entry
 
-    print()
-    print()
-    print(scores)
-    print()
-    print()
+    for score_key in score_strs.keys():
+        strings = score_strs[score_key]
+
+        combined = "\n".join(strings)
+
+        print()
+        print(score_key)
+        print(combined)
+        print()
 
 
 def main():
@@ -398,7 +412,7 @@ def main():
     # calc_scores_baseline(sub_rate)
 
     display_scores_self()
-    # display_scores_baseline()
+    display_scores_baseline()
 
 
 if __name__ == "__main__":
