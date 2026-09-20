@@ -303,7 +303,7 @@ def display_scores_self():
 
                     score_file_name = f"{stats_file_name_prefix}_{score_key}.pkl"
                     score_fname = os.path.join(stats_folder, score_file_name)
-                    score = load_pickle(score_file_name)
+                    score = load_pickle(score_fname)
 
                     raw_scores[score_key].append(score)
 
