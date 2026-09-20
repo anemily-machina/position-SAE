@@ -417,6 +417,8 @@ if __name__ == "__main__":
 
                     print(score_key, score, score2)
 
+                os.remove(stats_fname)
+
     exit()
     with torch.no_grad():
         main()
