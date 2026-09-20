@@ -327,11 +327,15 @@ def display_scores_self():
 
             scores[sub_rate][score_key] = score_entry
 
-    print()
-    print()
-    print(score_strs)
-    print()
-    print()
+    for score_key in score_strs.keys():
+        strings = score_strs[score_key]
+
+        combined = "\n".join(strings)
+
+        print()
+        print(score_key)
+        print(combined)
+        print()
 
 
 def display_scores_baseline():
