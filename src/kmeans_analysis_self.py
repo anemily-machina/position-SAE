@@ -329,7 +329,7 @@ def display_scores_self():
 
     print()
     print()
-    print(score_s)
+    print(score_strs)
     print()
     print()
 
