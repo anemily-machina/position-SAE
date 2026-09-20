@@ -347,7 +347,7 @@ def display_scores_baseline():
     stats_key = "kmeans_exp_multi_stats_baseline"
     stats_folder = os.path.join(OUTPUT_FOLDER, stats_key)
 
-    sub_rates = ["1.0", "0.8", "0.6", "0.4", "0.2", "0.05", "random"]
+    sub_rates = ["0.8", "0.6", "0.4", "0.2", "0.05", "random"]
     score_keys = ["L1", "L2", "cosine"]
 
     scores = {}
