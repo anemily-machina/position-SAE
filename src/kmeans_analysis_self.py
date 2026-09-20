@@ -390,7 +390,10 @@ if __name__ == "__main__":
     stats_key = "kmeans_exp_multi_stats_self"
     stats_folder = os.path.join(OUTPUT_FOLDER, stats_key)
 
-    for sub_rate in ["1.0", "0.8", "0.6", "0.4", "0.2", "0.05", "random"]:
+    sub_rates = ["1.0", "0.8", "0.6", "0.4", "0.2", "0.05", "random"]
+    score_keys = ["L1", "L2", "cosine"]
+
+    for sub_rate in sub_rates:
 
         for t_i in range(NUMBER_OF_TRIALS - 1):
 
