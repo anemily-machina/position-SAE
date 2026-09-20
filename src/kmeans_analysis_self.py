@@ -290,6 +290,7 @@ def display_scores_self():
     score_keys = ["L1", "L2", "cosine"]
 
     scores = {}
+    score_strs = {k: [] for k in score_keys}
     for sub_rate in sub_rates:
 
         raw_scores = {k: [] for k in score_keys}
@@ -308,7 +309,7 @@ def display_scores_self():
                     raw_scores[score_key].append(score)
 
         scores[sub_rate] = {}
-        scores_strs = {k: [] for k in score_keys}
+
         for score_key, raw_scores in raw_scores.items():
 
             sum_s = sum(raw_scores)
@@ -319,8 +320,8 @@ def display_scores_self():
             std_avg = std_sum / len(raw_scores)
             std_s = math.sqrt(std_avg)
 
-            score_s = f"{mean_s:5.3f} +/- {std_s:5.3f}"
-            scores_strs[score_key] = score_s
+            score_s = f"{sub_rate:.2}: {mean_s:5.3f} +/- {std_s:5.3f}"
+            score_strs[score_key].append(score_s)
 
             score_entry = {"mean": mean_s, "std": std_s}
 
@@ -328,7 +329,7 @@ def display_scores_self():
 
     print()
     print()
-    print(scores)
+    print(score_s)
     print()
     print()
 
@@ -366,6 +367,7 @@ def display_scores_baseline():
             std_v = [(s - mean_s) ** 2 for s in raw_scores]
             std_sum = sum(std_v)
             std_avg = std_sum / len(raw_scores)
+
             std_s = math.sqrt(std_avg)
 
             score_entry = {"mean": mean_s, "std": std_s}
