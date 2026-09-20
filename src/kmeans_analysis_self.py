@@ -237,52 +237,6 @@ def calc_scores_self(sub_rate):
             save_pickle(scores, stats_fname)
 
 
-def display_scores_self():
-
-    stats_key = "kmeans_exp_multi_stats_self"
-    stats_folder = os.path.join(OUTPUT_FOLDER, stats_key)
-
-    scores = {}
-    for sub_rate in ["1.0", "0.8", "0.6", "0.4", "0.2", "0.05", "random"]:
-
-        raw_scores = {}
-
-        for t_i in range(NUMBER_OF_TRIALS - 1):
-            for t_j in range(t_i + 1, NUMBER_OF_TRIALS):
-
-                stats_file_name = f"{sub_rate}_{t_i}_{t_j}.pkl"
-                stats_fname = os.path.join(stats_folder, stats_file_name)
-
-                stats = load_pickle(stats_fname)
-
-                for score_key, score in stats.items():
-                    if score_key not in raw_scores:
-                        raw_scores[score_key] = []
-
-                    raw_scores[score_key].append(score)
-
-        scores[sub_rate] = {}
-        for score_key, raw_scores in raw_scores.items():
-
-            sum_s = sum(raw_scores)
-            mean_s = sum_s / len(raw_scores)
-
-            std_v = [(s - mean_s) ** 2 for s in raw_scores]
-            std_sum = sum(std_v)
-            std_avg = std_sum / len(raw_scores)
-            std_s = math.sqrt(std_avg)
-
-            score_entry = {"mean": mean_s, "std": std_s}
-
-            scores[sub_rate][score_key] = score_entry
-
-    print()
-    print()
-    print(scores)
-    print()
-    print()
-
-
 def calc_scores_baseline(sub_rate):
 
     exp_key = "kmeans_exp_multi"
@@ -321,6 +275,61 @@ def calc_scores_baseline(sub_rate):
                 cluster2=clusters_j,
                 fname_prefix=stats_fname_prefix,
             )
+
+
+def display_scores_self():
+
+    print()
+    print("Self stability scores")
+    print()
+
+    stats_key = "kmeans_exp_multi_stats_self"
+    stats_folder = os.path.join(OUTPUT_FOLDER, stats_key)
+
+    sub_rates = ["1.0", "0.8", "0.6", "0.4", "0.2", "0.05", "random"]
+    score_keys = ["L1", "L2", "cosine"]
+
+    scores = {}
+    for sub_rate in sub_rates:
+
+        raw_scores = {k: [] for k in score_keys}
+
+        for t_i in range(NUMBER_OF_TRIALS - 1):
+            for t_j in range(t_i + 1, NUMBER_OF_TRIALS):
+
+                stats_file_name_prefix = f"{sub_rate}_{t_i}_{t_j}.pkl"
+
+                for score_key in score_keys:
+
+                    score_file_name = f"{stats_file_name_prefix}_{score_key}.pkl"
+                    score = load_pickle(score_file_name)
+
+                    raw_scores[score_key].append(score)
+
+        scores[sub_rate] = {}
+        scores_strs = {k: [] for k in score_keys}
+        for score_key, raw_scores in raw_scores.items():
+
+            sum_s = sum(raw_scores)
+            mean_s = sum_s / len(raw_scores)
+
+            std_v = [(s - mean_s) ** 2 for s in raw_scores]
+            std_sum = sum(std_v)
+            std_avg = std_sum / len(raw_scores)
+            std_s = math.sqrt(std_avg)
+
+            score_s = f"{mean_s:5.3f} +/- {std_s:5.3f}"
+            scores_strs[score_key] = score_s
+
+            score_entry = {"mean": mean_s, "std": std_s}
+
+            scores[sub_rate][score_key] = score_entry
+
+    print()
+    print()
+    print(scores)
+    print()
+    print()
 
 
 def display_scores_baseline():
@@ -379,46 +388,13 @@ def main():
 
     # calc_scores_self(sub_rate)
 
-    calc_scores_baseline(sub_rate)
+    # calc_scores_baseline(sub_rate)
 
-    # display_scores_self()
+    display_scores_self()
     # display_scores_baseline()
 
 
 if __name__ == "__main__":
 
-    stats_key = "kmeans_exp_multi_stats_self"
-    stats_folder = os.path.join(OUTPUT_FOLDER, stats_key)
-
-    sub_rates = ["1.0", "0.8", "0.6", "0.4", "0.2", "0.05", "random"]
-    score_keys = ["L1", "L2", "cosine"]
-
-    for sub_rate in sub_rates:
-
-        for t_i in range(NUMBER_OF_TRIALS - 1):
-
-            for t_j in range(t_i + 1, NUMBER_OF_TRIALS):
-
-                stats_file_name_prefix = f"{sub_rate}_{t_i}_{t_j}"
-                stats_file_name = f"{stats_file_name_prefix}.pkl"
-                stats_fname = os.path.join(stats_folder, stats_file_name)
-
-                stats = load_pickle(stats_fname)
-
-                for score_key, score in stats.items():
-
-                    if score_key == "cosine_sim":
-                        score_key = "cosine"
-
-                    score_file_name = f"{stats_file_name_prefix}_{score_key}.pkl"
-                    score_fname = os.path.join(stats_folder, score_file_name)
-
-                    score2 = load_pickle(score_fname)
-
-                    print(score_key, score, score2)
-
-                os.remove(stats_fname)
-
-    exit()
     with torch.no_grad():
         main()
