@@ -407,6 +407,9 @@ if __name__ == "__main__":
 
                 for score_key, score in stats.items():
 
+                    if score_key == "cosine_sim":
+                        score_key = "cosine"
+
                     score_file_name = f"{stats_file_name_prefix}_{score_key}.pkl"
                     score_fname = os.path.join(stats_folder, score_file_name)
 
