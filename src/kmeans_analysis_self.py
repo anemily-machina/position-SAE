@@ -320,7 +320,7 @@ def display_scores_self():
             std_avg = std_sum / len(raw_scores)
             std_s = math.sqrt(std_avg)
 
-            score_s = f"{sub_rate:.4}: {mean_s:5.3f} +/- {std_s:5.3f}"
+            score_s = f"{sub_rate:4.4}: {mean_s:5.3f} +/- {std_s:5.3f}"
             score_strs[score_key].append(score_s)
 
             score_entry = {"mean": mean_s, "std": std_s}
