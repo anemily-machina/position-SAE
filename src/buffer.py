@@ -351,13 +351,15 @@ def _main():
         tokenizer,
         pipe,
         buffer_size=4096,
-        out_batch_size=64,
+        out_batch_size=256,
         refresh_batch_size=32,
         tokenizer_kwargs=tokenizer_kwargs,
         device=device,
     )
 
-    stop = 4096 * 2 / 64
+    import time
+
+    stop = 4096 * 2 / 256
     for batch in buffer:
 
         stop -= 1
@@ -365,7 +367,11 @@ def _main():
         if stop == 0:
             break
 
+        print()
         print(batch.size())
+        print()
+
+        time.sleep(0.25)
 
 
 if __name__ == "__main__":
