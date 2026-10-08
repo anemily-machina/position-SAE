@@ -356,16 +356,12 @@ def _main():
             standardized_activations = []
             for activations in all_activations:
 
-                print(activations)
-
-                exit()
-
                 _dtype = activations.dtype
 
                 sub_embs = activations - mean
                 sub_embs = sub_embs * inv_std
 
-                sub_embs.to(_dtype)
+                sub_embs = sub_embs.to(_dtype)
 
                 standardized_activations.append(sub_embs)
 
