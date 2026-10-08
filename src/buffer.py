@@ -4,6 +4,7 @@ Large parts of this are inspired of borrowed from the dictionary_learning
 
 from config import DEBUG
 
+import math
 
 from nnsight.modeling.transformers import TransformersModel
 import torch
@@ -202,6 +203,58 @@ class ActivationBuffer:
         )
 
 
+def make_subsample_activations_fn(sub_rate):
+
+    assert 0 < sub_rate and sub_rate <= 1.0
+
+    def subsample_activations(all_activations):
+
+        subsampled_actiavtions = []
+        for activations in all_activations:
+
+            num_embs = math.ceil(activations.size(0) * sub_rate)
+            rand_idx = torch.randperm(num_embs, device=activations[0].device)
+            rand_idx = rand_idx[:num_embs]
+            activations = activations[rand_idx]
+
+            subsampled_actiavtions.append(activations)
+
+        return subsampled_actiavtions
+
+    return subsample_activations
+
+
+def make_tokenizer_fn(tokenizer, model_device):
+    def tokenizer_fn(text_batch, **kwargs):
+
+        tokenized_batch = tokenizer(text_batch, **kwargs)
+
+        tokenized_batch = {k: v.to(model_device) for k, v in tokenized_batch.items()}
+
+        return tokenized_batch
+
+    return tokenizer_fn
+
+
+def make_standardize_activations_fn(mean, std):
+
+    inv_std = std.reciprocal()
+
+    def standardize_activations(all_activations):
+
+        standardized_activations = []
+        for activations in all_activations:
+
+            sub_embs = activations - mean
+            sub_embs = sub_embs * inv_std
+
+            standardized_activations.append(sub_embs)
+
+        return standardized_activations
+
+    return standardize_activations
+
+
 @torch.no_grad()
 def _main():
     """
@@ -212,8 +265,6 @@ def _main():
 
     from ai_models import load_tokenizer
     from utils import load_json, set_random_seeds, load_torch
-
-    import math
 
     from datasets import load_dataset
     from transformers import AutoModelForCausalLM
@@ -238,6 +289,8 @@ def _main():
 
     device = torch.device("cpu")
 
+    tokenizer_fn = make_tokenizer_fn(tokenizer, model_device)
+
     tokenizer_kwargs = {
         "return_tensors": "pt",
         "max_length": 128,
@@ -255,14 +308,6 @@ def _main():
     }
 
     nn_model = TransformersModel(**model_kwargs)
-
-    def tokenizer_fn(text_batch, **kwargs):
-
-        tokenized_batch = tokenizer(text_batch, **kwargs)
-
-        tokenized_batch = {k: v.to(model_device) for k, v in tokenized_batch.items()}
-
-        return tokenized_batch
 
     def save_activation_fn(model: TransformersModel, batch):
 
@@ -297,26 +342,6 @@ def _main():
 
         return all_activations
 
-    def make_subsample_activations_fn(sub_rate):
-
-        assert 0 < sub_rate and sub_rate <= 1.0
-
-        def subsample_activations(all_activations):
-
-            subsampled_actiavtions = []
-            for activations in all_activations:
-
-                num_embs = math.ceil(activations.size(0) * sub_rate)
-                rand_idx = torch.randperm(num_embs, device=activations[0].device)
-                rand_idx = rand_idx[:num_embs]
-                activations = activations[rand_idx]
-
-                subsampled_actiavtions.append(activations)
-
-            return subsampled_actiavtions
-
-        return subsample_activations
-
     subsample_activations_fn = make_subsample_activations_fn(0.2)
 
     fname = "../data/positional-SAE/experiments_subsampling/mean_std_exp_multi/0.2_0.pt"
@@ -326,24 +351,6 @@ def _main():
     mean = mean.to(model_device)
     std = mean_std["std"]
     std = std.to(model_device)
-
-    def make_standardize_activations_fn(mean, std):
-
-        inv_std = std.reciprocal()
-
-        def standardize_activations(all_activations):
-
-            standardized_activations = []
-            for activations in all_activations:
-
-                sub_embs = activations - mean
-                sub_embs = sub_embs * inv_std
-
-                standardized_activations.append(sub_embs)
-
-            return standardized_activations
-
-        return standardize_activations
 
     standardize_activations_fn = make_standardize_activations_fn(mean, std)
 
