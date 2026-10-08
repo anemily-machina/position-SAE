@@ -169,15 +169,15 @@ class ActivationBuffer:
             for fn in pipe:
                 result = fn(result)
 
-            all_activations = []
+            batch_activations = []
             for activations in result:
                 activations = activations.to(self.device)
-                all_activations.append(activations)
+                batch_activations.append(activations)
 
-            update_size = sum([len(b) for b in all_activations])
+            update_size = sum([len(b) for b in batch_activations])
             cur_buffer_size += update_size
 
-            new_buffer += all_activations
+            new_buffer += batch_activations
 
             if self.verbose:
                 pbar.update(update_size)
@@ -186,9 +186,9 @@ class ActivationBuffer:
             pbar.close()
 
         if self.activations is not None:
-            all_activations += [self.activations]
+            new_buffer += [self.activations]
 
-        self.activations = torch.cat(all_activations, dim=0)
+        self.activations = torch.cat(new_buffer, dim=0)
 
         print(self.activations.size())
 
