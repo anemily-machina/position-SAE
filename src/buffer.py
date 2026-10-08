@@ -351,8 +351,14 @@ def _main():
 
         def standardize_activations(all_activations):
 
-            sub_embs = sub_embs - mean
-            sub_embs = sub_embs * inv_std
+            standardized_activations = []
+            for activations in all_activations:
+                sub_embs = activations - mean
+                sub_embs = sub_embs * inv_std
+
+                standardized_activations.append(standardized_activations)
+
+            return standardized_activations
 
         return standardize_activations
 
