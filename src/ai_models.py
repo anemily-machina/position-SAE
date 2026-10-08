@@ -27,7 +27,7 @@ def _process_config_for_loading(config):
     return loading_params
 
 
-def _load_basic_tokenizer(config, tokenizer_class, **kwargs) -> PreTrainedTokenizer:
+def _load_basic_tokenizer(config, tokenizer_class) -> PreTrainedTokenizer:
     """
     basic tokenizer_class.from_pretrained
 
@@ -35,6 +35,7 @@ def _load_basic_tokenizer(config, tokenizer_class, **kwargs) -> PreTrainedTokeni
     """
 
     loading_params = _process_config_for_loading(config)
+    kwargs = config.get("tokenizer_kwargs", {})
 
     for k in kwargs:
         if k in loading_params:
