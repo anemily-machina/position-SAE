@@ -323,9 +323,9 @@ def _main():
 
     mean_std = load_torch(fname)
     mean = mean_std["mean"]
-    mean = mean.to(device)
+    mean = mean.to(model_device)
     std = mean_std["std"]
-    std = std.to(device)
+    std = std.to(model_device)
 
     def make_standardize_activations_fn(mean, std):
 
