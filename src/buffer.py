@@ -245,16 +245,24 @@ def _main():
         "truncation": True,
     }
 
+    model_device = torch.device("cuda:1")
     model_kwargs = {
         "repo_id": model_name,
         "automodel": AutoModelForCausalLM,
         "revision": revision,
         "cache_dir": cache_dir,
-        "device_map": "cuda:1",
+        "device_map": model_device,
     }
 
     nn_model = TransformersModel(**model_kwargs)
-    print(nn_model)
+
+    def tokenizer_fn(text_batch, **kwargs):
+
+        tokenized_batch = tokenizer(text_batch, **kwargs)
+
+        tokenized_batch = {k: v.to(model_device) for k, v in tokenized_batch.items()}
+
+        return tokenized_batch
 
     def save_activation_fn(model: TransformersModel, batch):
 
@@ -349,7 +357,7 @@ def _main():
     buffer = ActivationBuffer(
         data,
         nn_model,
-        tokenizer,
+        tokenizer_fn,
         pipe,
         buffer_size=4096,
         out_batch_size=256,
