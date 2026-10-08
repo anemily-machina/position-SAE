@@ -250,6 +250,7 @@ def _main():
         "automodel": AutoModelForCausalLM,
         "revision": revision,
         "cache_dir": cache_dir,
+        "device_map": "cuda:1",
     }
 
     nn_model = TransformersModel(**model_kwargs)
@@ -356,22 +357,6 @@ def _main():
         tokenizer_kwargs=tokenizer_kwargs,
         device=device,
     )
-
-    import time
-
-    stop = 4096 * 2 / 256
-    for batch in buffer:
-
-        stop -= 1
-
-        if stop == 0:
-            break
-
-        print()
-        print(batch.size())
-        print()
-
-        time.sleep(0.25)
 
 
 if __name__ == "__main__":
