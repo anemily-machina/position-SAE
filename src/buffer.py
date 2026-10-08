@@ -341,16 +341,15 @@ def _main():
 
     mean_std = load_torch(fname)
     mean = mean_std["mean"]
+    mean = mean.to(nn_model.device)
     std = mean_std["std"]
+    std = std.to(nn_model.device)
 
     def make_standardize_activations_fn(mean, std):
 
         inv_std = std.reciprocal()
 
         def standardize_activations(all_activations):
-
-            mean = mean.to(all_activations[0].device)
-            inv_std = mean.to(all_activations[0].device)
 
             sub_embs = sub_embs - mean
             sub_embs = sub_embs * inv_std
