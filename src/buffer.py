@@ -185,6 +185,13 @@ class ActivationBuffer:
         if self.verbose:
             pbar.close()
 
+        if self.activations is not None:
+            all_activations += [self.activations]
+
+        self.activations = torch.cat(all_activations, dim=0)
+
+        print(self.activations.size())
+
         exit()
 
         self.read = torch.zeros(
