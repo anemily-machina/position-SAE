@@ -267,6 +267,8 @@ def _main():
     revision = "main"
     cache_dir = f"./.cache/{model_name_f}_{revision}"
 
+    device = torch.device("cpu")
+
     tokenizer_kwargs = {
         "return_tensors": "pt",
         "max_length": 128,
@@ -282,7 +284,6 @@ def _main():
     }
 
     nn_model = TransformersModel(**model_kwargs)
-    nn_model.to("cpu")
     print(nn_model)
 
     def save_activation_fn(model: TransformersModel, batch):
@@ -342,9 +343,9 @@ def _main():
 
     mean_std = load_torch(fname)
     mean = mean_std["mean"]
-    mean = mean.to(nn_model.device)
+    mean = mean.to(device)
     std = mean_std["std"]
-    std = std.to(nn_model.device)
+    std = std.to(device)
 
     def make_standardize_activations_fn(mean, std):
 
