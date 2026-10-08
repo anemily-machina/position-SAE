@@ -386,7 +386,7 @@ def _main():
     for fn in pipe:
         result = fn(result)
 
-    buffer = torch.cat(buffer, dim=0)
+    buffer = torch.cat(result, dim=0)
 
     print(buffer.size())
 
