@@ -335,7 +335,8 @@ def _main():
         nn_model,
         tokenizer,
         pipe,
-        buffer_size=2e5,
+        buffer_size=2048,
+        out_batch_size=64,
         refresh_batch_size=32,
         tokenizer_kwargs=tokenizer_kwargs,
     )
