@@ -385,6 +385,8 @@ def _main():
     for fn in pipe:
         result = fn(result)
 
+    print(result)
+
 
 if __name__ == "__main__":
     _main()
