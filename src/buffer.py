@@ -282,6 +282,7 @@ def _main():
     }
 
     nn_model = TransformersModel(**model_kwargs)
+    nn_model.to("cpu")
     print(nn_model)
 
     def save_activation_fn(model: TransformersModel, batch):
