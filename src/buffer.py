@@ -358,6 +358,13 @@ def _main():
         device=device,
     )
 
+    for batch in buffer:
+
+        print(batch)
+        print(batch.size())
+
+        exit()
+
 
 if __name__ == "__main__":
     _main()
