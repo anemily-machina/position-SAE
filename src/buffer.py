@@ -273,7 +273,8 @@ def _main():
     set_random_seeds(54321)
 
     data = load_dataset("monology/pile-uncopyrighted", split="train", streaming=True)
-    data_iter = iter(data)
+
+    model_device = torch.device("cuda:1")
 
     config_fname = "configs/ai/pythia-70m.json"
     config = load_json(config_fname)
@@ -298,7 +299,6 @@ def _main():
         "truncation": True,
     }
 
-    model_device = torch.device("cuda:1")
     model_kwargs = {
         "repo_id": model_name,
         "automodel": AutoModelForCausalLM,
