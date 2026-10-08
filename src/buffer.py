@@ -94,7 +94,7 @@ class ActivationBuffer:
         # get random sample of indexes of unread activations
         rand_idx = torch.randperm(unread_i.size(0), device=self.device)
         rand_idx = rand_idx[: self.out_batch_size]
-        batch_i = unread_i[batch_i]
+        batch_i = unread_i[rand_idx]
 
         # create an actvivation batch
         activation_batch = self.activations[batch_i]
@@ -104,6 +104,7 @@ class ActivationBuffer:
 
         return activation_batch
 
+    @torch.no_grad()
     def _get_text_batch(self):
         """
         Return a batch of text sentences
@@ -124,6 +125,7 @@ class ActivationBuffer:
 
         return text_batch
 
+    @torch.no_grad()
     def _get_tokenized_batch(self):
         """
         Return a batch of tokenized inputs.
@@ -160,6 +162,7 @@ class ActivationBuffer:
         new_buffer = []
         while cur_buffer_size < self.buffer_size:
 
+            # process a text batch
             tokenized_batch = self._get_tokenized_batch()
 
             fn1 = self.get_activations_fns[0]
@@ -169,11 +172,13 @@ class ActivationBuffer:
             for fn in pipe:
                 result = fn(result)
 
+            # puch activations to the correct device
             batch_activations = []
             for activations in result:
                 activations = activations.to(self.device)
                 batch_activations.append(activations)
 
+            # update loop
             update_size = sum([len(b) for b in batch_activations])
             cur_buffer_size += update_size
 
@@ -185,11 +190,13 @@ class ActivationBuffer:
         if self.verbose:
             pbar.close()
 
+        # make one buffer
         if self.activations is not None:
             new_buffer += [self.activations]
 
         self.activations = torch.cat(new_buffer, dim=0)
 
+        # reset tracking
         self.read = torch.zeros(
             len(self.activations), dtype=torch.bool, device=self.device
         )
