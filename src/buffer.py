@@ -160,8 +160,6 @@ class ActivationBuffer:
         new_buffer = []
         while cur_buffer_size < self.buffer_size:
 
-            print(cur_buffer_size, self.buffer_size)
-
             tokenized_batch = self._get_tokenized_batch()
 
             fn1 = self.get_activations_fns[0]
