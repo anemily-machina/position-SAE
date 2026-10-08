@@ -177,7 +177,7 @@ class ActivationBuffer:
             new_buffer += result
 
             if self.verbose:
-                pbar.update(cur_buffer_size)
+                pbar.update(update_size)
 
         if self.verbose:
             pbar.close()
