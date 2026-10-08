@@ -386,7 +386,9 @@ def _main():
     for fn in pipe:
         result = fn(result)
 
-    print(result)
+    buffer = torch.cat(buffer, dim=0)
+
+    print(buffer.size())
 
 
 if __name__ == "__main__":
