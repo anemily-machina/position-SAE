@@ -339,7 +339,9 @@ def _main():
 
     fname = "../data/positional-SAE/experiments_subsampling/mean_std_exp_multi/0.2_0.pt"
 
-    mean, std = load_torch(fname)
+    mean_std = load_torch(fname)
+    mean = mean_std["mean"]
+    std = mean_std["std"]
 
     def make_standardize_activations_fn(mean, std):
 
