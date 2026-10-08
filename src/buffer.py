@@ -357,11 +357,15 @@ def _main():
         device=device,
     )
 
+    stop = 4096 * 2 / 64
     for batch in buffer:
 
-        print(batch.size())
+        stop -= 1
 
-        exit()
+        if stop == 0:
+            break
+
+        print(batch.size())
 
 
 if __name__ == "__main__":
