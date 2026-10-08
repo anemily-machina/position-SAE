@@ -358,7 +358,7 @@ def _main():
                 sub_embs = activations - mean
                 sub_embs = sub_embs * inv_std
 
-                standardized_activations.append(standardized_activations)
+                standardized_activations.append(sub_embs)
 
             return standardized_activations
 
