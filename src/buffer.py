@@ -169,10 +169,15 @@ class ActivationBuffer:
             for fn in pipe:
                 result = fn(result)
 
-            update_size = sum([len(b) for b in result])
+            all_activations = []
+            for activations in result:
+                activations = activations.to(self.device)
+                all_activations.append(activations)
+
+            update_size = sum([len(b) for b in all_activations])
             cur_buffer_size += update_size
 
-            new_buffer += result
+            new_buffer += all_activations
 
             if self.verbose:
                 pbar.update(update_size)
@@ -335,10 +340,11 @@ def _main():
         nn_model,
         tokenizer,
         pipe,
-        buffer_size=2048,
+        buffer_size=4096,
         out_batch_size=64,
         refresh_batch_size=32,
         tokenizer_kwargs=tokenizer_kwargs,
+        device=device,
     )
 
     for batch in buffer:
