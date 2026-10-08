@@ -159,78 +159,23 @@ class ActivationBuffer:
 
         while cur_buffer_size < self.buffer_size:
 
-            text_batch = self.text_batch()
+            tokenized_batch = self._get_tokenized_batch()
 
-            with self.model.trace(
-                text_batch,
-                **tracer_kwargs,
-                # invoker_args={"truncation": True, "max_length": self.ctx_len},
-            ):
-                if self.io == "in":
-                    hidden_states = self.submodule.inputs[0].save()
-                else:
-                    hidden_states = self.submodule.output.save()
+            fn1 = self.get_activations_fns[0]
+            pipe = self.get_activations_fns[1:]
 
-                input = self.model.inputs.save()
+            result = fn1(self.model, tokenized_batch)
+            for fn in pipe:
+                result = fn(result)
 
-                self.submodule.output.stop()
+            if self.verbose:
+                pbar.update(len(cur_buffer_size))
 
-            attn_mask = input.value[1]["attention_mask"]
-            hidden_states = hidden_states.value
-            if isinstance(hidden_states, tuple):
-                hidden_states = hidden_states[0]
-
-            if self.remove_bos:
-                hidden_states = hidden_states[:, 1:, :]
-                attn_mask = attn_mask[:, 1:]
-
-            if self.temporal == "p":
-                hidden_states_curr = hidden_states[:, 1:]
-                attn_mask_curr = attn_mask[:, 1:]
-                hidden_states_curr = hidden_states_curr[attn_mask_curr != 0]
-
-                hidden_states_prev = hidden_states[:, :-1]
-                attn_mask_prev = attn_mask[:, 1:]
-                hidden_states_prev = hidden_states_prev[attn_mask_prev != 0]
-
-                hidden_states = t.stack([hidden_states_curr, hidden_states_prev], dim=1)
-                attn_mask = t.stack([attn_mask_curr, attn_mask_prev], dim=1)
-
-            elif self.temporal == "r":
-                hidden_states_curr = hidden_states[:, 1:]
-                attn_mask_curr = attn_mask[:, 1:]
-                hidden_states_curr = hidden_states_curr[attn_mask_curr != 0]
-
-                # random choice from previous hidden states
-                rand_prev_indices = t.cat(
-                    [
-                        t.randint(0, t.arange(1, hidden_states.shape[1])[i], (1,))
-                        for i in range(hidden_states.shape[1] - 1)
-                    ]
-                )
-                hidden_states_prev = hidden_states[:, rand_prev_indices]
-                attn_mask_prev = attn_mask[:, 1:]
-                hidden_states_prev = hidden_states_prev[attn_mask_prev != 0]
-
-                hidden_states = t.stack([hidden_states_curr, hidden_states_prev], dim=1)
-                attn_mask = t.stack([attn_mask_curr, attn_mask_prev], dim=1)
-
-            else:
-                hidden_states = hidden_states[attn_mask != 0]
-
-            remaining_space = self.activation_buffer_size - current_idx
-            assert remaining_space > 0
-            hidden_states = hidden_states[:remaining_space]
-
-            self.activations[current_idx : current_idx + len(hidden_states)] = (
-                hidden_states.to(self.device)
-            )
-            current_idx += len(hidden_states)
-
-            # pbar.update(len(hidden_states))
-
-        # pbar.close()
-        self.read = t.zeros(len(self.activations), dtype=t.bool, device=self.device)
+        if self.verbose:
+            pbar.close()
+        self.read = torch.zeros(
+            len(self.activations), dtype=torch.bool, device=self.device
+        )
 
 
 @torch.no_grad()
@@ -376,19 +321,14 @@ def _main():
         standardize_activations_fn,
     ]
 
-    text_batch = [next(data_iter)["text"] for _ in range(4)]
-
-    batch = tokenizer(text_batch, **tokenizer_kwargs)
-
-    fn1 = pipe[0]
-    pipe = pipe[1:]
-    result = fn1(nn_model, batch)
-    for fn in pipe:
-        result = fn(result)
-
-    buffer = torch.cat(result, dim=0)
-
-    print(buffer.size())
+    buffer = ActivationBuffer(
+        data,
+        nn_model,
+        tokenizer,
+        pipe,
+        refresh_batch_size=32,
+        tokenizer_kwargs=tokenizer_kwargs,
+    )
 
 
 if __name__ == "__main__":
