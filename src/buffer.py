@@ -190,10 +190,6 @@ class ActivationBuffer:
 
         self.activations = torch.cat(new_buffer, dim=0)
 
-        print(self.activations.size())
-
-        exit()
-
         self.read = torch.zeros(
             len(self.activations), dtype=torch.bool, device=self.device
         )
@@ -307,39 +303,39 @@ def _main():
 
     subsample_activations_fn = make_subsample_activations_fn(0.2)
 
-    # fname = "../data/positional-SAE/experiments_subsampling/mean_std_exp_multi/0.2_0.pt"
+    fname = "../data/positional-SAE/experiments_subsampling/mean_std_exp_multi/0.2_0.pt"
 
-    # mean_std = load_torch(fname)
-    # mean = mean_std["mean"]
-    # mean = mean.to(device)
-    # std = mean_std["std"]
-    # std = std.to(device)
+    mean_std = load_torch(fname)
+    mean = mean_std["mean"]
+    mean = mean.to(device)
+    std = mean_std["std"]
+    std = std.to(device)
 
-    # def make_standardize_activations_fn(mean, std):
+    def make_standardize_activations_fn(mean, std):
 
-    #     inv_std = std.reciprocal()
+        inv_std = std.reciprocal()
 
-    #     def standardize_activations(all_activations):
+        def standardize_activations(all_activations):
 
-    #         standardized_activations = []
-    #         for activations in all_activations:
+            standardized_activations = []
+            for activations in all_activations:
 
-    #             sub_embs = activations - mean
-    #             sub_embs = sub_embs * inv_std
+                sub_embs = activations - mean
+                sub_embs = sub_embs * inv_std
 
-    #             standardized_activations.append(sub_embs)
+                standardized_activations.append(sub_embs)
 
-    #         return standardized_activations
+            return standardized_activations
 
-    #     return standardize_activations
+        return standardize_activations
 
-    # standardize_activations_fn = make_standardize_activations_fn(mean, std)
+    standardize_activations_fn = make_standardize_activations_fn(mean, std)
 
     pipe = [
         save_activation_fn,
         process_activations_fn,
         subsample_activations_fn,
-        # standardize_activations_fn,
+        standardize_activations_fn,
     ]
 
     buffer = ActivationBuffer(
