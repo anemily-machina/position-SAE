@@ -157,6 +157,7 @@ class ActivationBuffer:
                 desc="Refreshing activations",
             )
 
+        new_buffer = []
         while cur_buffer_size < self.buffer_size:
 
             tokenized_batch = self._get_tokenized_batch()
@@ -168,11 +169,19 @@ class ActivationBuffer:
             for fn in pipe:
                 result = fn(result)
 
+            update_size = sum([len(b) for b in result])
+            cur_buffer_size += update_size
+
+            new_buffer += result
+
             if self.verbose:
-                pbar.update(len(cur_buffer_size))
+                pbar.update(cur_buffer_size)
 
         if self.verbose:
             pbar.close()
+
+        exit()
+
         self.read = torch.zeros(
             len(self.activations), dtype=torch.bool, device=self.device
         )
@@ -284,41 +293,41 @@ def _main():
 
         return subsample_activations
 
-    fname = "../data/positional-SAE/experiments_subsampling/mean_std_exp_multi/0.2_0.pt"
-
-    mean_std = load_torch(fname)
-    mean = mean_std["mean"]
-    mean = mean.to(device)
-    std = mean_std["std"]
-    std = std.to(device)
-
-    def make_standardize_activations_fn(mean, std):
-
-        inv_std = std.reciprocal()
-
-        def standardize_activations(all_activations):
-
-            standardized_activations = []
-            for activations in all_activations:
-
-                sub_embs = activations - mean
-                sub_embs = sub_embs * inv_std
-
-                standardized_activations.append(sub_embs)
-
-            return standardized_activations
-
-        return standardize_activations
-
-    standardize_activations_fn = make_standardize_activations_fn(mean, std)
-
     subsample_activations_fn = make_subsample_activations_fn(0.2)
+
+    # fname = "../data/positional-SAE/experiments_subsampling/mean_std_exp_multi/0.2_0.pt"
+
+    # mean_std = load_torch(fname)
+    # mean = mean_std["mean"]
+    # mean = mean.to(device)
+    # std = mean_std["std"]
+    # std = std.to(device)
+
+    # def make_standardize_activations_fn(mean, std):
+
+    #     inv_std = std.reciprocal()
+
+    #     def standardize_activations(all_activations):
+
+    #         standardized_activations = []
+    #         for activations in all_activations:
+
+    #             sub_embs = activations - mean
+    #             sub_embs = sub_embs * inv_std
+
+    #             standardized_activations.append(sub_embs)
+
+    #         return standardized_activations
+
+    #     return standardize_activations
+
+    # standardize_activations_fn = make_standardize_activations_fn(mean, std)
 
     pipe = [
         save_activation_fn,
         process_activations_fn,
         subsample_activations_fn,
-        standardize_activations_fn,
+        # standardize_activations_fn,
     ]
 
     buffer = ActivationBuffer(
@@ -329,6 +338,12 @@ def _main():
         refresh_batch_size=32,
         tokenizer_kwargs=tokenizer_kwargs,
     )
+
+    for batch in buffer:
+
+        print(batch.size())
+
+        exit()
 
 
 if __name__ == "__main__":
