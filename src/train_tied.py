@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from buffer import make_subsampling_buffer
+from buffer import ActivationBuffer, make_subsampling_buffer
 from trainers.tied import TiedAutoencoder
 from utils import make_folder, set_random_seeds
 
@@ -38,7 +38,7 @@ def parse_args():
 
 
 def train_autoencoder(
-    buffer,
+    buffer: ActivationBuffer,
     batch_size=512,
     learning_rate=1e-3,
     num_epochs=100,

@@ -88,7 +88,7 @@ class ActivationBuffer:
         return self
 
     @torch.no_grad()
-    def __next__(self):
+    def __next__(self) -> torch.Tensor:
         """
         Return a batch of activations
         """
