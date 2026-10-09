@@ -29,7 +29,6 @@ def parse_args():
     parser = argparse.ArgumentParser(
         description="Train TiedAutoencoder with sparse coding"
     )
-    parser.add_argument("--batch_size", type=int, default=8192)
     parser.add_argument("--learning_rate", type=float, default=1e-3)
     parser.add_argument("--num_epochs", type=int, default=5)
     parser.add_argument("--hidden_size", type=int, default=30000)
@@ -126,7 +125,6 @@ if __name__ == "__main__":
 
     model, losses = train_autoencoder(
         buffer=buffer,
-        batch_size=args.batch_size,
         learning_rate=args.learning_rate,
         num_epochs=args.num_epochs,
         hidden_size=args.hidden_size,
