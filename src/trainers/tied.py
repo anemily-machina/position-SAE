@@ -53,7 +53,7 @@ def train_autoencoder(
     R=100,
     alpha=1e-5,
 ):
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
     n_chunks = len(os.listdir(dataset_dir))
 
