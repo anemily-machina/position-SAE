@@ -224,18 +224,6 @@ def make_subsample_activations_fn(sub_rate):
     return subsample_activations
 
 
-def make_tokenizer_fn(tokenizer, model_device):
-    def tokenizer_fn(text_batch, **kwargs):
-
-        tokenized_batch = tokenizer(text_batch, **kwargs)
-
-        tokenized_batch = {k: v.to(model_device) for k, v in tokenized_batch.items()}
-
-        return tokenized_batch
-
-    return tokenizer_fn
-
-
 def make_standardize_activations_fn(mean, std):
 
     inv_std = std.reciprocal()
@@ -288,9 +276,7 @@ def _main():
     revision = "main"
     cache_dir = f"./.cache/{model_name_f}_{revision}"
 
-    auto_encoder_device = torch.device("cpu")
-
-    tokenizer_fn = make_tokenizer_fn(tokenizer, model_device)
+    acitvations_device = torch.device("cpu")
 
     tokenizer_kwargs = {
         "return_tensors": "pt",
@@ -310,6 +296,8 @@ def _main():
     nn_model = TransformersModel(**model_kwargs)
 
     def save_activation_fn(model: TransformersModel, batch):
+
+        batch = {k: v.to(model_device) for k, v in batch.items()}
 
         with model.trace(**batch, **tracer_kwargs) as tracer:
 
@@ -364,10 +352,10 @@ def _main():
     buffer = ActivationBuffer(
         data,
         nn_model,
-        tokenizer_fn,
+        tokenizer,
         pipe,
         tokenizer_kwargs=tokenizer_kwargs,
-        device=auto_encoder_device,
+        device=acitvations_device,
     )
 
     for batch in buffer:
