@@ -63,11 +63,16 @@ def train_autoencoder(
         "sparsity_losses": [],
     }
 
+    epoch_size = 8192 * 32
+
     for epoch in range(num_epochs):
+
         epoch_reconstruction_loss = 0.0
         epoch_sparsity_loss = 0.0
         epoch_loss = 0.0
         total_batches = 0
+
+        end_epoch = epoch_size
 
         for batch in buffer:
 
@@ -91,6 +96,11 @@ def train_autoencoder(
             epoch_sparsity_loss += sparsity_loss.item()
             epoch_loss += loss.item()
             total_batches += 1
+
+            end_epoch -= len(batch)
+
+            if end_epoch <= 0:
+                break
 
         avg_epoch_loss = epoch_loss / total_batches
         avg_epoch_reconstruction_loss = epoch_reconstruction_loss / total_batches
