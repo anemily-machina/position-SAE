@@ -11,6 +11,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+from buffer import make_subsampling_buffer
 from trainers.tied import TiedAutoencoder
 from utils import make_folder, set_random_seeds
 
@@ -28,40 +29,32 @@ def parse_args():
     parser = argparse.ArgumentParser(
         description="Train TiedAutoencoder with sparse coding"
     )
-    parser.add_argument("--batch_size", type=int, default=512)
+    parser.add_argument("--batch_size", type=int, default=8192)
     parser.add_argument("--learning_rate", type=float, default=1e-3)
     parser.add_argument("--num_epochs", type=int, default=5)
-    parser.add_argument("--R", type=int, default=4)
+    parser.add_argument("--hidden_size", type=int, default=30000)
     parser.add_argument("--alpha", type=float, default=1e-5)
-    parser.add_argument(
-        "--dataset_dir", type=str, default="../data/positional-SAE/trained_models/"
-    )
     return parser.parse_args()
 
 
 def train_autoencoder(
-    dataset_dir,
+    buffer,
     batch_size=512,
     learning_rate=1e-3,
     num_epochs=100,
-    R=100,
+    hidden_size=30000,
     alpha=1e-5,
 ):
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-    n_chunks = len(os.listdir(dataset_dir))
+    first_batch = next(buffer)
+    input_dim = first_batch.size(1)
 
-    first_chunk = torch.load(os.path.join(dataset_dir, "layer_2_chunk_0.pt")).to(
-        dtype=torch.float32
-    )
-    input_dim = first_chunk.shape[-1]
-    latent_dim = input_dim * R
-
-    model = TiedAutoencoder(input_dim, latent_dim).to(device)
+    model = TiedAutoencoder(input_dim, hidden_size).to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
     criterion = nn.MSELoss()
 
-    print(f"input_dim={input_dim}, latent_dim={latent_dim}")
+    print(f"input_dim={input_dim}, latent_dim={hidden_size}")
 
     losses = {
         "epoch_losses": [],
@@ -75,37 +68,27 @@ def train_autoencoder(
         epoch_loss = 0.0
         total_batches = 0
 
-        for chunk_idx in range(n_chunks):
-            dataset = torch.load(
-                os.path.join(dataset_dir, f"layer_2_chunk_{chunk_idx}.pt")
-            ).to(dtype=torch.float32)
-            dataset = dataset.view(-1, dataset.shape[-1])
+        for batch in buffer:
 
-            dataset = (dataset - dataset.mean()) / dataset.std()
+            batch = batch.to(device)
 
-            dataloader = torch.utils.data.DataLoader(
-                dataset, batch_size=batch_size, shuffle=False, drop_last=True
-            )
+            optimizer.zero_grad()
+            reconstructed, latent = model(batch)
 
-            for batch in dataloader:
+            reconstruction_loss = criterion(reconstructed, batch)
+            sparsity_loss = alpha * torch.abs(latent).mean()
 
-                optimizer.zero_grad()
-                reconstructed, latent = model(batch)
+            # sparsity_loss = alpha * model.get_latent_sum()
 
-                reconstruction_loss = criterion(reconstructed, batch)
-                sparsity_loss = alpha * torch.abs(latent).mean()
+            loss = reconstruction_loss + sparsity_loss
 
-                # sparsity_loss = alpha * model.get_latent_sum()
+            loss.backward()
+            optimizer.step()
 
-                loss = reconstruction_loss + sparsity_loss
-
-                loss.backward()
-                optimizer.step()
-
-                epoch_reconstruction_loss += reconstruction_loss.item()
-                epoch_sparsity_loss += sparsity_loss.item()
-                epoch_loss += loss.item()
-                total_batches += 1
+            epoch_reconstruction_loss += reconstruction_loss.item()
+            epoch_sparsity_loss += sparsity_loss.item()
+            epoch_loss += loss.item()
+            total_batches += 1
 
         avg_epoch_loss = epoch_loss / total_batches
         avg_epoch_reconstruction_loss = epoch_reconstruction_loss / total_batches
@@ -125,16 +108,17 @@ def train_autoencoder(
 if __name__ == "__main__":
 
     set_random_seeds(4321)
-    # torch.manual_seed(42)
+
+    buffer = make_subsampling_buffer(0.2)
 
     args = parse_args()
 
     model, losses = train_autoencoder(
-        dataset_dir=args.dataset_dir,
+        buffer=buffer,
         batch_size=args.batch_size,
         learning_rate=args.learning_rate,
         num_epochs=args.num_epochs,
-        R=args.R,
+        hidden_size=args.hidden_size,
         alpha=args.alpha,
     )
 
