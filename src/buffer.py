@@ -288,7 +288,7 @@ def _main():
     revision = "main"
     cache_dir = f"./.cache/{model_name_f}_{revision}"
 
-    device = torch.device("cpu")
+    auto_encoder_device = torch.device("cpu")
 
     tokenizer_fn = make_tokenizer_fn(tokenizer, model_device)
 
@@ -367,7 +367,7 @@ def _main():
         tokenizer_fn,
         pipe,
         tokenizer_kwargs=tokenizer_kwargs,
-        device=device,
+        device=auto_encoder_device,
     )
 
     for batch in buffer:
