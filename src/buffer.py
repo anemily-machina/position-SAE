@@ -2,14 +2,23 @@
 Large parts of this are inspired of borrowed from the dictionary_learning
 """
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
 from config import DEBUG
 
 import math
 
+from datasets import load_dataset
 from nnsight.modeling.transformers import TransformersModel
 import torch
 from tqdm import tqdm
-from transformers import PreTrainedTokenizer
+from transformers import AutoModelForCausalLM, PreTrainedTokenizer
+
+
+from ai_models import load_tokenizer
+from utils import load_json, set_random_seeds, load_torch
 
 if DEBUG:
     tracer_kwargs = {"scan": True, "validate": True}
@@ -243,22 +252,11 @@ def make_standardize_activations_fn(mean, std):
     return standardize_activations
 
 
-@torch.no_grad()
-def _main():
-    """
-    Test Activation Buffer
-    """
+# TODO make this better
+def make_subsampling_buffer(sub_rate):
 
-    from dotenv import load_dotenv
-
-    from ai_models import load_tokenizer
-    from utils import load_json, set_random_seeds, load_torch
-
-    from datasets import load_dataset
-    from transformers import AutoModelForCausalLM
-
-    load_dotenv()
-    set_random_seeds(54321)
+    assert isinstance(sub_rate, float)
+    assert 0 < sub_rate and sub_rate <= 1.0
 
     data = load_dataset("monology/pile-uncopyrighted", split="train", streaming=True)
 
@@ -330,7 +328,7 @@ def _main():
 
         return all_activations
 
-    subsample_activations_fn = make_subsample_activations_fn(0.2)
+    subsample_activations_fn = make_subsample_activations_fn(sub_rate)
 
     fname = "../data/positional-SAE/experiments_subsampling/mean_std_exp_multi/0.2_0.pt"
 
@@ -358,11 +356,22 @@ def _main():
         device=acitvations_device,
     )
 
-    for batch in buffer:
+    return buffer
 
+
+@torch.no_grad()
+def _main():
+    """
+    Test Activation Buffer
+    """
+
+    set_random_seeds(54321)
+
+    buffer = make_subsampling_buffer(0.2)
+
+    for batch in buffer:
         print(batch)
         print(batch.size())
-
         exit()
 
 

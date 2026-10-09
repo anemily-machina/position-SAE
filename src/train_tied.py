@@ -7,6 +7,10 @@ SPARSE AUTOENCODERS FIND HIGHLY INTER-
 PRETABLE FEATURES IN LANGUAGE MODELS
 """
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
 from trainers.tied import TiedAutoencoder
 from utils import make_folder, set_random_seeds
 
