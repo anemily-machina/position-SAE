@@ -221,6 +221,9 @@ def make_subsample_activations_fn(sub_rate):
         subsampled_actiavtions = []
         for activations in all_activations:
 
+            if len(activations) == 0:
+                continue
+
             num_embs = math.ceil(activations.size(0) * sub_rate)
             rand_idx = torch.randperm(num_embs, device=activations[0].device)
             rand_idx = rand_idx[:num_embs]
@@ -352,6 +355,7 @@ def make_subsampling_buffer(sub_rate):
         nn_model,
         tokenizer,
         pipe,
+        buffer_size=1048576,
         tokenizer_kwargs=tokenizer_kwargs,
         device=acitvations_device,
     )

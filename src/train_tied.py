@@ -39,7 +39,6 @@ def parse_args():
 
 def train_autoencoder(
     buffer: ActivationBuffer,
-    batch_size=512,
     learning_rate=1e-3,
     num_epochs=100,
     hidden_size=30000,
