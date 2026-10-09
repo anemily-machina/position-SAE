@@ -50,7 +50,8 @@ def train_autoencoder(
     first_batch = next(buffer)
     input_dim = first_batch.size(1)
 
-    model = TiedAutoencoder(input_dim, hidden_size).to(device)
+    model = TiedAutoencoder(input_dim, hidden_size)
+    model.to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
     criterion = nn.MSELoss()
 
@@ -71,6 +72,7 @@ def train_autoencoder(
         for batch in buffer:
 
             batch = batch.to(device)
+            batch = batch.float()
 
             optimizer.zero_grad()
             reconstructed, latent = model(batch)
