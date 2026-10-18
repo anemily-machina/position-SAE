@@ -303,6 +303,7 @@ def make_subsampling_buffer(sub_rate):
     from ai_models import load_model
 
     ai_model = load_model(config)
+    ai_model.to(model_device)
 
     def save_activation_fn(model: TransformersModel, batch):
 
