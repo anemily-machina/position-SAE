@@ -255,9 +255,10 @@ def make_subsample_activations_fn(num_embs):
 
             if len(activations) == 0:
                 continue
-            num_embs = max(num_embs, len(activations))
-            rand_idx = torch.randperm(num_embs, device=activations[0].device)
-            rand_idx = rand_idx[:num_embs]
+
+            _num_embs = max(num_embs, len(activations))
+            rand_idx = torch.randperm(_num_embs, device=activations[0].device)
+            rand_idx = rand_idx[:_num_embs]
             activations = activations[rand_idx]
 
             subsampled_actiavtions.append(activations)
