@@ -306,10 +306,6 @@ def make_subsampling_buffer(sub_rate):
     nn_model = nn_model.gpt_neox
     nn_model.to(model_device)
 
-    print(nn_model)
-
-    exit()
-
     def save_activation_fn(model: TransformersModel, batch):
 
         batch = {k: v.to(model_device) for k, v in batch.items()}
@@ -332,7 +328,12 @@ def make_subsampling_buffer(sub_rate):
 
         batch = {k: v.to(model_device) for k, v in batch.items()}
 
-        output = model(**batch, output_hidden_states=True)
+        output = model(**batch)
+
+        print(output)
+
+        exit()
+
         hidden_states = output.hidden_states
 
         output = hidden_states[-1]
