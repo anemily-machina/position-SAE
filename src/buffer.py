@@ -38,6 +38,7 @@ class ActivationBuffer:
         model,
         tokenizer: PreTrainedTokenizer,
         get_activations_fns: list[callable],
+        post_processing_fns: list[callable] = None,
         buffer_size: int = 65536,
         refresh_size: int = None,
         refresh_batch_size: int = 32,
@@ -52,7 +53,8 @@ class ActivationBuffer:
             data (iterable): of "sentences". will be iterated over to generate text batches. Note that this is not an iterator as in dictionary_learning. Each entry should be a dictionary with a "text" key.
             model (TransformersModel): The NNSight Transfomer model that processes the text batches, or a hugging face model, pytroch model etc.
             tokenizer (PreTrainedTokenizer): The Tokenizer for the model, should be callable tokenizer(batch, **tokenizer_kwargs)
-            get_activations_fns (list[callable]): Iteratively processes a tokenized batch of text. Must have at least one function. The first function will be called fn1(self.model, self.tokenizer(text_batch, self.tokenizer_kwargs)). Each other call will be fn_i(out_fn_i-1). The final result  is expected that this is a list containing tensors of activations, one for each sentence in the batch. They will be passed as torch.cat((existing_buffer,*result), dim=0)) so anything compatible with that works.
+            get_activations_fns (list[callable]): Iteratively processes a tokenized batch of text. Must have at least one function. The first function will be called fn1(self.model, self.tokenizer(text_batch, self.tokenizer_kwargs)). Each other call will be fn_i(out_fn_i-1). The final result  is expected that this is a list containing tensors of activations, one for each sentence in the batch. They will be passed as torch.cat(result, dim=0)) so anything compatible with that works.
+            post_processing_fns (list[callable], optional): if not None iteratively applied to the output of the the get_activations_fns step. deafult=None
             buffer_size (int, optional): The soft cap on activations. If we have at least this many we stop making more. Defaults to 65536.
             refresh_size (int, optional): If we have less than this many activations left, make more. Default to buffer_size//2
             refresh_batch_size (int, optional): The sentence batch size when making new activations. Defaults to 32.
@@ -67,6 +69,7 @@ class ActivationBuffer:
         self.model = model
         self.tokenizer = tokenizer
         self.get_activations_fns = get_activations_fns
+        self.post_processing_fns = post_processing_fns
         self.buffer_size = buffer_size
         if refresh_size is None:
             self.refresh_size = self.buffer_size // 2
@@ -183,10 +186,12 @@ class ActivationBuffer:
                 result = fn(result)
 
             # puch activations to the correct device
-            batch_activations = []
-            for activations in result:
-                activations = activations.to(self.device)
-                batch_activations.append(activations)
+            # batch_activations = []
+            # for activations in result:
+            #     activations = activations.to(self.device)
+            #     batch_activations.append(activations)
+
+            batch_activations = result
 
             # update loop
             update_size = sum([len(b) for b in batch_activations])
@@ -200,11 +205,14 @@ class ActivationBuffer:
         if self.verbose:
             pbar.close()
 
+        new_buffer = torch.cat(new_buffer, dim=0)
+        new_buffer = new_buffer.to(self.device)
+
         # make one buffer
         if self.activations is not None:
-            new_buffer += [self.activations]
-
-        self.activations = torch.cat(new_buffer, dim=0)
+            self.activations = torch.cat((new_buffer, self.self.activations), dim=0)
+        else:
+            self.activations = new_buffer
 
         # reset tracking
         self.read = torch.zeros(
