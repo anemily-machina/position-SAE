@@ -328,7 +328,7 @@ def make_subsampling_buffer(sub_rate):
 
         batch = {k: v.to(model_device) for k, v in batch.items()}
 
-        output = model(**batch)
+        output = model(**batch, use_cache=False)
 
         print(output)
 
