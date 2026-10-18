@@ -8,7 +8,11 @@ load_dotenv()
 
 from config import DEBUG
 
+
 import math
+import os
+import shutil
+import time
 
 from datasets import load_dataset
 from nnsight.modeling.transformers import TransformersModel
@@ -18,7 +22,7 @@ from transformers import AutoModelForCausalLM, PreTrainedTokenizer
 
 
 from ai_models import load_tokenizer
-from utils import load_json, set_random_seeds, load_torch
+from utils import load_json, load_torch, make_folder, save_torch, set_random_seeds
 
 if DEBUG:
     tracer_kwargs = {"scan": True, "validate": True}
@@ -99,7 +103,7 @@ class ActivationBuffer:
         # check if buffer needs refreshing
         do_refresh = self.read is None or (~self.read).sum() < self.refresh_size
         if do_refresh:
-            self._refresh()
+            self.refresh()
 
         # indexes of unread activations
         unread_i = (~self.read).nonzero().squeeze()
@@ -151,7 +155,7 @@ class ActivationBuffer:
         return tokenized_batch
 
     @torch.no_grad()
-    def _refresh(self):
+    def refresh(self):
 
         # commenting these out, I guess  I'll figure out why they are here later
         # gc.collect()
@@ -216,6 +220,74 @@ class ActivationBuffer:
         )
 
 
+class SaveActivationBuffer:
+
+    def __init__(
+        self,
+        data,
+        model,
+        tokenizer: PreTrainedTokenizer,
+        get_activations_fns: list[callable],
+        output_folder,
+        number_of_chunks=10,
+        post_processing_fns: list[callable] = None,
+        buffer_size: int = 65536,
+        refresh_size: int = None,
+        refresh_batch_size: int = 32,
+        out_batch_size=8192,
+        device="cpu",
+        tokenizer_kwargs: dict = {},
+        verbose: bool = True,
+    ):
+
+        self.buffer = ActivationBuffer(
+            data,
+            model,
+            tokenizer,
+            get_activations_fns,
+            post_processing_fns,
+            buffer_size,
+            refresh_size,
+            refresh_batch_size,
+            out_batch_size,
+            device,
+            tokenizer_kwargs,
+            verbose,
+        )
+
+        self.output_folder = output_folder
+        self.number_of_chunks = number_of_chunks
+
+        # clear file buffer
+        if os.path.isdir(output_folder):
+            shutil.rmtree(output_folder)
+
+        make_folder(output_folder)
+
+    def save_activations(self):
+
+        while True:
+
+            existing_chunks = os.listdir(self.output_folder)
+
+            if len(existing_chunks) < self.number_of_chunks:
+
+                self.buffer.refresh()
+
+                activations = self.buffer.activations
+
+                time = time.time()
+
+                file_name = f"{time}.pt"
+                fname = os.path.join(self.output_folder, file_name)
+
+                save_torch(activations, fname)
+
+                self.buffer.activations = None
+
+            time.sleep(1)
+
+
 def make_subsample_activations_fn(sub_rate, max_length):
 
     assert 0 < sub_rate and sub_rate <= 1.0
@@ -265,6 +337,8 @@ def make_subsampling_buffer(sub_rate):
     assert 0 < sub_rate and sub_rate <= 1.0
 
     data = load_dataset("monology/pile-uncopyrighted", split="train", streaming=True)
+
+    output_folder = "../data/positional-SAE/temp_activations"
 
     model_device = torch.device("cuda:1")
 
@@ -375,11 +449,12 @@ def make_subsampling_buffer(sub_rate):
         standardize_activations_fn,
     ]
 
-    buffer = ActivationBuffer(
+    buffer = SaveActivationBuffer(
         data,
         nn_model,
         tokenizer,
         pipe,
+        output_folder=output_folder,
         post_processing_fns=post_pipe,
         buffer_size=1048576,
         tokenizer_kwargs=tokenizer_kwargs,
@@ -399,10 +474,7 @@ def _main():
 
     buffer = make_subsampling_buffer(0.2)
 
-    for batch in buffer:
-        print(batch)
-        print(batch.size())
-        exit()
+    buffer.save_activations()
 
 
 if __name__ == "__main__":
