@@ -316,6 +316,28 @@ def make_subsampling_buffer(sub_rate):
 
         return result
 
+    def save_activation_fn2(model: TransformersModel, batch):
+
+        batch = {k: v.to(model_device) for k, v in batch.items()}
+
+        output = model(**batch)
+
+        print(output)
+
+        exit()
+
+        # with model.trace(**batch, **tracer_kwargs) as tracer:
+
+        #     input = model.gpt_neox.inputs.save()
+
+        #     output = model.gpt_neox.final_layer_norm.output.save()
+
+        #     tracer.stop()
+
+        # result = {"input": input, "output": output}
+
+        # return result
+
     def process_activations_fn(result):
 
         input = result["input"]
@@ -348,7 +370,7 @@ def make_subsampling_buffer(sub_rate):
     standardize_activations_fn = make_standardize_activations_fn(mean, std)
 
     pipe = [
-        save_activation_fn,
+        save_activation_fn2,
         process_activations_fn,
         subsample_activations_fn,
     ]
