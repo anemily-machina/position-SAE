@@ -317,6 +317,10 @@ def make_subsampling_buffer(sub_rate):
 
             tracer.stop()
 
+        print(output)
+
+        exit()
+
         result = {"input": input, "output": output}
 
         return result
@@ -364,7 +368,7 @@ def make_subsampling_buffer(sub_rate):
     standardize_activations_fn = make_standardize_activations_fn(mean, std)
 
     pipe = [
-        save_activation_fn2,
+        save_activation_fn,
         process_activations_fn,
         subsample_activations_fn,
     ]
