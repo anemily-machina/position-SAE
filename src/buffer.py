@@ -328,7 +328,7 @@ def make_subsampling_buffer(sub_rate):
         output = model(**batch, output_hidden_states=True)
         hidden_states = output.hidden_states
 
-        print(hidden_states.size())
+        print(hidden_states[-1])
 
         exit()
 
