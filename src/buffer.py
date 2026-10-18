@@ -369,7 +369,7 @@ class LoadActivationBuffer:
             fname = os.path.join(self.output_folder, files[0])
 
             new_activations = load_torch(fname)
-            new_activations.to(self.device)
+            new_activations = new_activations.to(self.device)
 
             new_buffer.append(new_activations)
             cur_buffer_size += len(new_activations)
