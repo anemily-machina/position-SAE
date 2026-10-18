@@ -577,15 +577,6 @@ def _main():
 
     output_folder = "../data/positional-SAE/temp_activations"
 
-    files = os.listdir(output_folder)
-
-    for f in files:
-        fname = os.path.join(output_folder, f)
-        start_time = time.time()
-        load_torch(fname)
-        total_time = time.time() - start_time
-        print(total_time)
-
     buffer = make_subsampling_save_buffer(0.2)
 
     buffer.save_activations()
