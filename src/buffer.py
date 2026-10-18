@@ -377,7 +377,7 @@ class LoadActivationBuffer:
         if self.activations is not None:
             new_buffer += [self.activations]
 
-        new_activations = torch.cat(new_buffer, dim=0)
+        self.activations = torch.cat(new_buffer, dim=0)
 
         # reset tracking
         self.read = torch.zeros(
