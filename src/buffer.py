@@ -229,7 +229,7 @@ class SaveActivationBuffer:
         tokenizer: PreTrainedTokenizer,
         get_activations_fns: list[callable],
         output_folder,
-        number_of_chunks=100,
+        number_of_chunks=20,
         post_processing_fns: list[callable] = None,
         buffer_size: int = 65536,
         refresh_size: int = None,

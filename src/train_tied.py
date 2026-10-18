@@ -121,9 +121,13 @@ if __name__ == "__main__":
 
     buffer = make_subsampling_load_buffer()
 
+    import time
+
     for batch in buffer:
 
         print(batch.size())
+
+        time.sleep(5)
 
     exit()
 
