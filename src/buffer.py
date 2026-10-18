@@ -483,7 +483,7 @@ def _main():
     for f in files:
         fname = os.path.join(output_folder, f)
         start_time = time.time()
-        load_torch(f)
+        load_torch(fname)
         total_time = time.time() - start_time
         print(total_time)
 
