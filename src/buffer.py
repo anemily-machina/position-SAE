@@ -330,13 +330,7 @@ def make_subsampling_buffer(sub_rate):
 
         output = model(**batch, use_cache=False)
 
-        print(output)
-
-        exit()
-
-        hidden_states = output.hidden_states
-
-        output = hidden_states[-1]
+        output = output.last_hidden_state
 
         attention_mask = batch["attention_mask"]
 
