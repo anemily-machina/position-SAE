@@ -377,7 +377,7 @@ def make_subsampling_buffer(sub_rate):
 
     buffer = ActivationBuffer(
         data,
-        nn_model,
+        ai_model,  # nn_model,
         tokenizer,
         pipe,
         post_processing_fns=post_pipe,
