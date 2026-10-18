@@ -290,21 +290,21 @@ def make_subsampling_buffer(sub_rate):
         "truncation": True,
     }
 
-    model_kwargs = {
-        "repo_id": model_name,
-        "automodel": AutoModelForCausalLM,
-        "revision": revision,
-        "cache_dir": cache_dir,
-        "device_map": model_device,
-    }
+    # model_kwargs = {
+    #     "repo_id": model_name,
+    #     "automodel": AutoModelForCausalLM,
+    #     "revision": revision,
+    #     "cache_dir": cache_dir,
+    #     "device_map": model_device,
+    # }
 
-    nn_model = TransformersModel(**model_kwargs)
+    # nn_model = TransformersModel(**model_kwargs)
 
-    # from ai_models import load_model
+    from ai_models import load_model
 
-    # nn_model = load_model(config)
-    # nn_model = nn_model.gpt_neox
-    # nn_model.to(model_device)
+    nn_model = load_model(config)
+    nn_model = nn_model.gpt_neox
+    nn_model.to(model_device)
 
     def save_activation_fn(model: TransformersModel, batch):
 
