@@ -229,7 +229,7 @@ class SaveActivationBuffer:
         tokenizer: PreTrainedTokenizer,
         get_activations_fns: list[callable],
         output_folder,
-        number_of_chunks=10,
+        number_of_chunks=100,
         post_processing_fns: list[callable] = None,
         buffer_size: int = 65536,
         refresh_size: int = None,
@@ -460,7 +460,7 @@ def make_subsampling_buffer(sub_rate):
         pipe,
         output_folder=output_folder,
         post_processing_fns=post_pipe,
-        buffer_size=1048576,
+        buffer_size=131072,
         tokenizer_kwargs=tokenizer_kwargs,
         device=acitvations_device,
     )
