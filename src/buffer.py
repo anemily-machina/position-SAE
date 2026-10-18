@@ -292,6 +292,96 @@ class SaveActivationBuffer:
             time.sleep(1)
 
 
+class LoadActivationBuffer:
+
+    def __init__(
+        self,
+        output_folder,
+        buffer_size: int = 65536,
+        refresh_size: int = None,
+        out_batch_size=8192,
+        device="cpu",
+    ):
+        self.output_folder = output_folder
+        self.buffer_size = buffer_size
+        if refresh_size is None:
+            self.refresh_size = self.buffer_size // 2
+        else:
+            self.refresh_size = refresh_size
+        self.out_batch_size = out_batch_size
+        self.device = torch.device(device)
+
+        self.activations = None
+        self.read = None
+
+    @torch.no_grad()
+    def __next__(self) -> torch.Tensor:
+        """
+        Return a batch of activations
+        """
+
+        # check if buffer needs refreshing
+        do_refresh = self.read is None or (~self.read).sum() < self.refresh_size
+        if do_refresh:
+            self.refresh()
+
+        # indexes of unread activations
+        unread_i = (~self.read).nonzero().squeeze()
+
+        # get random sample of indexes of unread activations
+        rand_idx = torch.randperm(unread_i.size(0), device=self.device)
+        rand_idx = rand_idx[: self.out_batch_size]
+        batch_i = unread_i[rand_idx]
+
+        # create an actvivation batch
+        activation_batch = self.activations[batch_i]
+
+        # mark activations as read
+        self.read[batch_i] = True
+
+        return activation_batch
+
+    @torch.no_grad()
+    def refresh(self):
+
+        # commenting these out, I guess  I'll figure out why they are here later
+        # gc.collect()
+        # t.cuda.empty_cache()
+
+        # compact remaining activations
+        if self.activations is not None:
+            self.activations = self.activations[~self.read]
+            cur_buffer_size = self.activations.size(0)
+        else:
+            cur_buffer_size = 0
+
+        new_buffer = []
+        while cur_buffer_size < self.buffer_size:
+
+            # load file when it exists
+            files = os.listdir(self.output_folder)
+            while len(files) == 0:
+                files = os.listdir(self.output_folder)
+
+            fname = os.path.join(self.output_folder, files[0])
+
+            new_activations = load_torch(fname)
+            new_activations.to(self.device)
+
+            new_buffer.append(new_activations)
+            cur_buffer_size += len(new_activations)
+
+        if self.activations is not None:
+            new_buffer += [self.activations]
+
+        new_activations = torch.cat(new_buffer, dim=0)
+
+        # reset tracking
+        self.read = torch.zeros(
+            len(self.activations), dtype=torch.bool, device=self.device
+        )
+
+
 def make_subsample_activations_fn(sub_rate, max_length):
 
     assert 0 < sub_rate and sub_rate <= 1.0
@@ -334,8 +424,17 @@ def make_standardize_activations_fn(mean, std):
     return standardize_activations
 
 
+def make_subsampling_load_buffer():
+
+    output_folder = "../data/positional-SAE/temp_activations"
+
+    buffer = LoadActivationBuffer(output_folder)
+
+    return buffer
+
+
 # TODO make this better
-def make_subsampling_buffer(sub_rate):
+def make_subsampling_save_buffer(sub_rate):
 
     assert isinstance(sub_rate, float)
     assert 0 < sub_rate and sub_rate <= 1.0
@@ -487,7 +586,7 @@ def _main():
         total_time = time.time() - start_time
         print(total_time)
 
-    buffer = make_subsampling_buffer(0.2)
+    buffer = make_subsampling_save_buffer(0.2)
 
     buffer.save_activations()
 

@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from buffer import ActivationBuffer, make_subsampling_buffer
+from buffer import ActivationBuffer, make_subsampling_load_buffer
 from trainers.tied import TiedAutoencoder
 from utils import make_folder, set_random_seeds
 
@@ -119,7 +119,13 @@ if __name__ == "__main__":
 
     set_random_seeds(4321)
 
-    buffer = make_subsampling_buffer(0.2)
+    buffer = make_subsampling_load_buffer()
+
+    for batch in buffer:
+
+        print(batch.size())
+
+    exit()
 
     args = parse_args()
 
