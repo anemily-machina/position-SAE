@@ -325,10 +325,10 @@ def make_subsampling_buffer(sub_rate):
 
         batch = {k: v.to(model_device) for k, v in batch.items()}
 
-        output = model(**batch)
-        last_hidden_state = output.last_hidden_state
+        output = model(**batch, output_hidden_states=True)
+        hidden_states = output.hidden_states
 
-        print(last_hidden_state.size())
+        print(hidden_states.size())
 
         exit()
 
