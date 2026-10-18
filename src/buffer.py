@@ -303,6 +303,7 @@ def make_subsampling_buffer(sub_rate):
     from ai_models import load_model
 
     nn_model = load_model(config)
+    nn_model = nn_model.gpt_neox
     nn_model.to(model_device)
 
     print(nn_model)
