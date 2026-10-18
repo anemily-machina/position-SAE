@@ -290,35 +290,33 @@ def make_subsampling_buffer(sub_rate):
         "truncation": True,
     }
 
-    # model_kwargs = {
-    #     "repo_id": model_name,
-    #     "automodel": AutoModelForCausalLM,
-    #     "revision": revision,
-    #     "cache_dir": cache_dir,
-    #     "device_map": model_device,
-    # }
+    model_kwargs = {
+        "repo_id": model_name,
+        "automodel": AutoModelForCausalLM,
+        "revision": revision,
+        "cache_dir": cache_dir,
+        "device_map": model_device,
+    }
 
-    # nn_model = TransformersModel(**model_kwargs)
+    nn_model = TransformersModel(**model_kwargs)
 
-    from ai_models import load_model
+    # from ai_models import load_model
 
-    nn_model = load_model(config)
-    nn_model = nn_model.gpt_neox
-    nn_model.to(model_device)
+    # nn_model = load_model(config)
+    # nn_model = nn_model.gpt_neox
+    # nn_model.to(model_device)
 
     def save_activation_fn(model: TransformersModel, batch):
 
         batch = {k: v.to(model_device) for k, v in batch.items()}
 
-        with model.trace(**batch, **tracer_kwargs) as tracer:
+        attention_mask = batch["attention_mask"]
 
-            input = model.gpt_neox.inputs.save()
+        with model.trace(**batch, **tracer_kwargs, use_cache=False) as tracer:
 
             output = model.gpt_neox.final_layer_norm.output.save()
 
             tracer.stop()
-
-        attention_mask = input[1]["attention_mask"]
 
         result = {"attention_mask": attention_mask, "output": output}
 
@@ -368,7 +366,7 @@ def make_subsampling_buffer(sub_rate):
     standardize_activations_fn = make_standardize_activations_fn(mean, std)
 
     pipe = [
-        save_activation_fn2,
+        save_activation_fn,
         process_activations_fn,
         subsample_activations_fn,
     ]
