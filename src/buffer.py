@@ -232,10 +232,11 @@ def make_subsample_activations_fn(sub_rate, max_length):
         subsampled_actiavtions = []
         for activations in all_activations:
 
-            if len(activations) == 0:
+            size_a = len(activations)
+            if size_a == 0:
                 continue
 
-            _num_embs = min(num_embs, len(activations))
+            _num_embs = min(num_embs, size_a)
             rand_idx = torch.randperm(_num_embs, device=activations[0].device)
             rand_idx = rand_idx[:_num_embs]
             activations = activations[rand_idx]
@@ -251,15 +252,10 @@ def make_standardize_activations_fn(mean, std):
 
     inv_std = std.reciprocal()
 
-    def standardize_activations(all_activations):
+    def standardize_activations(activations):
 
-        standardized_activations = []
-        for activations in all_activations:
-
-            sub_embs = activations - mean
-            sub_embs = sub_embs * inv_std
-
-            standardized_activations.append(sub_embs)
+        centered_activations = activations - mean
+        standardized_activations = centered_activations * inv_std
 
         return standardized_activations
 
@@ -359,6 +355,9 @@ def make_subsampling_buffer(sub_rate):
         save_activation_fn,
         process_activations_fn,
         subsample_activations_fn,
+    ]
+
+    post_pipe = [
         standardize_activations_fn,
     ]
 
@@ -367,6 +366,7 @@ def make_subsampling_buffer(sub_rate):
         nn_model,
         tokenizer,
         pipe,
+        post_processing_fns=post_pipe,
         buffer_size=1048576,
         tokenizer_kwargs=tokenizer_kwargs,
         device=acitvations_device,
