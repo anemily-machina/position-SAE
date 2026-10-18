@@ -314,6 +314,9 @@ class LoadActivationBuffer:
         self.activations = None
         self.read = None
 
+    def __iter__(self):
+        return self
+
     @torch.no_grad()
     def __next__(self) -> torch.Tensor:
         """
