@@ -304,10 +304,6 @@ def make_subsampling_buffer(sub_rate):
 
     ai_model = load_model(config)
 
-    print(ai_model)
-
-    exit()
-
     def save_activation_fn(model: TransformersModel, batch):
 
         batch = {k: v.to(model_device) for k, v in batch.items()}
