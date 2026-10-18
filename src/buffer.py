@@ -354,7 +354,7 @@ def make_subsampling_buffer(sub_rate):
     pipe = [
         save_activation_fn,
         process_activations_fn,
-        # subsample_activations_fn,
+        subsample_activations_fn,
         # standardize_activations_fn,
     ]
 
