@@ -244,6 +244,29 @@ def make_subsample_activations_fn(sub_rate):
     return subsample_activations
 
 
+def make_subsample_activations_fn(num_embs):
+
+    assert 0 < num_embs
+
+    def subsample_activations(all_activations):
+
+        subsampled_actiavtions = []
+        for activations in all_activations:
+
+            if len(activations) == 0:
+                continue
+
+            rand_idx = torch.randperm(num_embs, device=activations[0].device)
+            rand_idx = rand_idx[:num_embs]
+            activations = activations[rand_idx]
+
+            subsampled_actiavtions.append(activations)
+
+        return subsampled_actiavtions
+
+    return subsample_activations
+
+
 def make_standardize_activations_fn(mean, std):
 
     inv_std = std.reciprocal()
@@ -287,9 +310,10 @@ def make_subsampling_buffer(sub_rate):
 
     acitvations_device = torch.device("cpu")
 
+    max_length = 128
     tokenizer_kwargs = {
         "return_tensors": "pt",
-        "max_length": 128,
+        "max_length": max_length,
         "padding": True,
         "truncation": True,
     }
@@ -339,7 +363,10 @@ def make_subsampling_buffer(sub_rate):
 
         return all_activations
 
-    subsample_activations_fn = make_subsample_activations_fn(sub_rate)
+    num_embs = math.ceil(max_length * sub_rate)
+    subsample_activations_fn = make_subsample_activations_fn(num_embs)
+
+    # subsample_activations_fn = make_subsample_activations_fn(sub_rate)
 
     fname = "../data/positional-SAE/experiments_subsampling/mean_std_exp_multi/0.2_0.pt"
 
