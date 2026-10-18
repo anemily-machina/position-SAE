@@ -278,7 +278,7 @@ class SaveActivationBuffer:
 
                 start_time = time.time()
 
-                file_name = f"{start_time}.pt"
+                file_name = f"{start_time*10000000}.pt"
                 fname = os.path.join(self.output_folder, file_name)
 
                 save_torch(activations, fname)
@@ -365,6 +365,8 @@ class LoadActivationBuffer:
             files = os.listdir(self.output_folder)
             while len(files) == 0:
                 files = os.listdir(self.output_folder)
+
+            files = sorted(files)  # make it deterministic
 
             fname = os.path.join(self.output_folder, files[0])
 
