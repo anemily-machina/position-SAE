@@ -317,11 +317,9 @@ def make_subsampling_buffer(sub_rate):
 
             tracer.stop()
 
-        print(output)
+        attention_mask = input[1]["attention_mask"]
 
-        exit()
-
-        result = {"input": input, "output": output}
+        result = {"attention_mask": attention_mask, "output": output}
 
         return result
 
@@ -332,16 +330,18 @@ def make_subsampling_buffer(sub_rate):
         output = model(**batch, output_hidden_states=True)
         hidden_states = output.hidden_states
 
-        print(hidden_states[-1])
+        output = hidden_states[-1]
 
-        exit()
+        attention_mask = batch["attention_mask"]
+
+        result = {"attention_mask": attention_mask, "output": output}
+
+        return result
 
     def process_activations_fn(result):
 
-        input = result["input"]
+        attention_mask = result["attention_mask"]
         output = result["output"]
-
-        attention_mask = input[1]["attention_mask"]
 
         lengths = torch.sum(attention_mask, dim=1)
 
