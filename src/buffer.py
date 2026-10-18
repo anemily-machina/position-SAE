@@ -290,15 +290,23 @@ def make_subsampling_buffer(sub_rate):
         "truncation": True,
     }
 
-    model_kwargs = {
-        "repo_id": model_name,
-        "automodel": AutoModelForCausalLM,
-        "revision": revision,
-        "cache_dir": cache_dir,
-        "device_map": model_device,
-    }
+    # model_kwargs = {
+    #     "repo_id": model_name,
+    #     "automodel": AutoModelForCausalLM,
+    #     "revision": revision,
+    #     "cache_dir": cache_dir,
+    #     "device_map": model_device,
+    # }
 
-    nn_model = TransformersModel(**model_kwargs)
+    # nn_model = TransformersModel(**model_kwargs)
+
+    from ai_models import load_model
+
+    ai_model = load_model(config)
+
+    print(ai_model)
+
+    exit()
 
     def save_activation_fn(model: TransformersModel, batch):
 
@@ -325,18 +333,6 @@ def make_subsampling_buffer(sub_rate):
         print(output)
 
         exit()
-
-        # with model.trace(**batch, **tracer_kwargs) as tracer:
-
-        #     input = model.gpt_neox.inputs.save()
-
-        #     output = model.gpt_neox.final_layer_norm.output.save()
-
-        #     tracer.stop()
-
-        # result = {"input": input, "output": output}
-
-        # return result
 
     def process_activations_fn(result):
 
