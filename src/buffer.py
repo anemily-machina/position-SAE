@@ -220,9 +220,12 @@ class ActivationBuffer:
         )
 
 
-def make_subsample_activations_fn(sub_rate):
+def make_subsample_activations_fn(sub_rate, max_length):
 
     assert 0 < sub_rate and sub_rate <= 1.0
+    assert 0 < max_length
+
+    num_embs = math.ceil(max_length * sub_rate)
 
     def subsample_activations(all_activations):
 
@@ -232,8 +235,6 @@ def make_subsample_activations_fn(sub_rate):
             if len(activations) == 0:
                 continue
 
-            # num_embs = math.ceil(activations.size(0) * sub_rate)
-            num_embs = min(24, activations.size(0))
             rand_idx = torch.randperm(num_embs, device=activations[0].device)
             rand_idx = rand_idx[:num_embs]
             activations = activations[rand_idx]
@@ -341,7 +342,7 @@ def make_subsampling_buffer(sub_rate):
 
         return all_activations
 
-    subsample_activations_fn = make_subsample_activations_fn(sub_rate)
+    subsample_activations_fn = make_subsample_activations_fn(sub_rate, max_length)
 
     fname = "../data/positional-SAE/experiments_subsampling/mean_std_exp_multi/0.2_0.pt"
 
@@ -357,7 +358,7 @@ def make_subsampling_buffer(sub_rate):
         save_activation_fn,
         process_activations_fn,
         subsample_activations_fn,
-        # standardize_activations_fn,
+        standardize_activations_fn,
     ]
 
     buffer = ActivationBuffer(
