@@ -181,17 +181,9 @@ class ActivationBuffer:
             fn1 = self.get_activations_fns[0]
             pipe = self.get_activations_fns[1:]
 
-            result = fn1(self.model, tokenized_batch)
+            batch_activations = fn1(self.model, tokenized_batch)
             for fn in pipe:
-                result = fn(result)
-
-            # puch activations to the correct device
-            # batch_activations = []
-            # for activations in result:
-            #     activations = activations.to(self.device)
-            #     batch_activations.append(activations)
-
-            batch_activations = result
+                batch_activations = fn(batch_activations)
 
             # update loop
             update_size = sum([len(b) for b in batch_activations])
@@ -206,6 +198,10 @@ class ActivationBuffer:
             pbar.close()
 
         new_buffer = torch.cat(new_buffer, dim=0)
+
+        for fn in self.post_processing_fns:
+            new_buffer = fn(new_buffer)
+
         new_buffer = new_buffer.to(self.device)
 
         # make one buffer
