@@ -374,6 +374,8 @@ class LoadActivationBuffer:
             new_buffer.append(new_activations)
             cur_buffer_size += len(new_activations)
 
+            os.remove(fname)
+
         if self.activations is not None:
             new_buffer += [self.activations]
 
