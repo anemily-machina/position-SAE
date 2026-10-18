@@ -366,7 +366,7 @@ def make_subsampling_buffer(sub_rate):
     standardize_activations_fn = make_standardize_activations_fn(mean, std)
 
     pipe = [
-        save_activation_fn,
+        save_activation_fn2,
         process_activations_fn,
         subsample_activations_fn,
     ]
