@@ -268,7 +268,7 @@ class SaveActivationBuffer:
         if os.path.isdir(output_folder):
             shutil.rmtree(output_folder)
 
-        make_folder(output_folder)
+        make_folder(self.output_folder)
 
     @torch.no_grad()
     def save_activations(self):
