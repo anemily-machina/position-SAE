@@ -574,7 +574,7 @@ def make_subsampling_save_buffer(sub_rate):
         number_of_chunks=200,
         output_folder=output_folder,
         post_processing_fns=post_pipe,
-        buffer_size=524288,
+        buffer_size=131072,
         tokenizer_kwargs=tokenizer_kwargs,
         device=acitvations_device,
     )
