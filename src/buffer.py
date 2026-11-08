@@ -283,7 +283,7 @@ class SaveActivationBuffer:
 
         activations_n = 0
 
-        c_n = 10  # self.number_of_chunks
+        c_n = self.number_of_chunks
 
         for c_i in tqdm(range(c_n), total=c_n, ncols=50):
 
