@@ -21,7 +21,7 @@ from tqdm import tqdm
 from transformers import AutoModelForCausalLM, PreTrainedTokenizer
 
 
-from ai_models import load_tokenizer
+from ai_models import load_model, load_tokenizer
 from utils import load_json, load_torch, make_folder, save_torch, set_random_seeds
 
 if DEBUG:
@@ -36,6 +36,7 @@ class ActivationBuffer:
     yields them in batches, and refreshes them when the buffer is less than half full.
     """
 
+    @torch.no_grad()
     def __init__(
         self,
         data,
@@ -91,6 +92,8 @@ class ActivationBuffer:
         self.activations = None
         self.read = None
 
+        self.number_examples = 0
+
     def __iter__(self):
         return self
 
@@ -139,6 +142,8 @@ class ActivationBuffer:
                 text = next(self.data_iter)["text"]
 
             text_batch.append(text)
+
+        self.number_examples += len(text_batch)
 
         return text_batch
 
@@ -222,6 +227,7 @@ class ActivationBuffer:
 
 class SaveActivationBuffer:
 
+    @torch.no_grad()
     def __init__(
         self,
         data,
@@ -255,7 +261,7 @@ class SaveActivationBuffer:
             verbose,
         )
 
-        self.output_folder = output_folder
+        self.output_folder = os.path.join(output_folder, "activations/")
         self.number_of_chunks = number_of_chunks
 
         # clear file buffer
@@ -264,32 +270,33 @@ class SaveActivationBuffer:
 
         make_folder(output_folder)
 
+    @torch.no_grad()
     def save_activations(self):
 
-        while True:
+        c_n = self.number_of_chunks
 
-            existing_chunks = os.listdir(self.output_folder)
+        for c_i in tqdm(range(c_n), total=c_n, ncols=50):
 
-            if len(existing_chunks) < self.number_of_chunks:
+            self.buffer.refresh()
 
-                self.buffer.refresh()
+            activations = self.buffer.activations
 
-                activations = self.buffer.activations
+            start_time = time.time()
 
-                start_time = time.time()
+            file_name = f"{c_i}.pt"
+            fname = os.path.join(self.output_folder, file_name)
 
-                file_name = f"{start_time*10000000}.pt"
-                fname = os.path.join(self.output_folder, file_name)
+            save_torch(activations, fname)
 
-                save_torch(activations, fname)
+            total_time = time.time() - start_time
 
-                total_time = time.time() - start_time
+            print(total_time)
 
-                print(total_time)
+            self.buffer.activations = None
 
-                self.buffer.activations = None
+            print(self.buffer.number_examples)
 
-            time.sleep(1)
+            exit()
 
 
 class LoadActivationBuffer:
@@ -347,10 +354,6 @@ class LoadActivationBuffer:
     @torch.no_grad()
     def refresh(self):
 
-        # commenting these out, I guess  I'll figure out why they are here later
-        # gc.collect()
-        # t.cuda.empty_cache()
-
         # compact remaining activations
         if self.activations is not None:
             self.activations = self.activations[~self.read]
@@ -389,7 +392,8 @@ class LoadActivationBuffer:
         )
 
 
-def make_subsample_activations_fn(sub_rate, max_length):
+@torch.no_grad()
+def make_subsample_activations_fn(sub_rate, max_length) -> callable:
 
     assert 0 < sub_rate and sub_rate <= 1.0
     assert 0 < max_length
@@ -417,7 +421,8 @@ def make_subsample_activations_fn(sub_rate, max_length):
     return subsample_activations
 
 
-def make_standardize_activations_fn(mean, std):
+@torch.no_grad()
+def make_standardize_activations_fn(mean, std) -> callable:
 
     inv_std = std.reciprocal()
 
@@ -431,6 +436,7 @@ def make_standardize_activations_fn(mean, std):
     return standardize_activations
 
 
+@torch.no_grad()
 def make_subsampling_load_buffer():
 
     output_folder = "../data/positional-SAE/temp_activations"
@@ -441,6 +447,7 @@ def make_subsampling_load_buffer():
 
 
 # TODO make this better
+@torch.no_grad()
 def make_subsampling_save_buffer(sub_rate):
 
     assert isinstance(sub_rate, float)
@@ -448,7 +455,7 @@ def make_subsampling_save_buffer(sub_rate):
 
     data = load_dataset("monology/pile-uncopyrighted", split="train", streaming=True)
 
-    output_folder = "../data/positional-SAE/temp_activations"
+    output_folder = "../data/positional-SAE/activation_files"
 
     model_device = torch.device("cuda:1")
 
@@ -461,8 +468,8 @@ def make_subsampling_save_buffer(sub_rate):
     model_name = model_name.lower()
     model_name_f = model_name.replace("/", "_")
 
-    revision = "main"
-    cache_dir = f"./.cache/{model_name_f}_{revision}"
+    # revision = "main"
+    # cache_dir = f"./.cache/{model_name_f}_{revision}"
 
     acitvations_device = torch.device("cpu")
 
@@ -483,8 +490,6 @@ def make_subsampling_save_buffer(sub_rate):
     # }
 
     # nn_model = TransformersModel(**model_kwargs)
-
-    from ai_models import load_model
 
     nn_model = load_model(config)
     nn_model = nn_model.gpt_neox
@@ -539,7 +544,9 @@ def make_subsampling_save_buffer(sub_rate):
 
     subsample_activations_fn = make_subsample_activations_fn(sub_rate, max_length)
 
-    fname = "../data/positional-SAE/experiments_subsampling/mean_std_exp_multi/0.2_0.pt"
+    fname = (
+        "../data/positional-SAE/experiments_subsampling/mean_std_exp_multi/0.05_0.pt"
+    )
 
     mean_std = load_torch(fname)
     mean = mean_std["mean"]
@@ -564,9 +571,10 @@ def make_subsampling_save_buffer(sub_rate):
         nn_model,
         tokenizer,
         pipe,
+        number_of_chunks=200,
         output_folder=output_folder,
         post_processing_fns=post_pipe,
-        buffer_size=131072,
+        buffer_size=524288,
         tokenizer_kwargs=tokenizer_kwargs,
         device=acitvations_device,
     )
@@ -584,7 +592,7 @@ def _main():
 
     output_folder = "../data/positional-SAE/temp_activations"
 
-    buffer = make_subsampling_save_buffer(0.2)
+    buffer = make_subsampling_save_buffer(0.05)
 
     buffer.save_activations()
 
