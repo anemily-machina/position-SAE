@@ -280,17 +280,12 @@ class SaveActivationBuffer:
             self.buffer.refresh()
 
             activations = self.buffer.activations
-
-            start_time = time.time()
+            activations = activations.half()
 
             file_name = f"{c_i}.pt"
             fname = os.path.join(self.output_folder, file_name)
 
             save_torch(activations, fname)
-
-            total_time = time.time() - start_time
-
-            print(total_time)
 
             self.buffer.activations = None
 
