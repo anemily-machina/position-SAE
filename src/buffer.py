@@ -22,7 +22,14 @@ from transformers import AutoModelForCausalLM, PreTrainedTokenizer
 
 
 from ai_models import load_model, load_tokenizer
-from utils import load_json, load_torch, make_folder, save_torch, set_random_seeds
+from utils import (
+    load_json,
+    load_torch,
+    make_folder,
+    save_json,
+    save_torch,
+    set_random_seeds,
+)
 
 if DEBUG:
     tracer_kwargs = {"scan": True, "validate": True}
@@ -261,19 +268,22 @@ class SaveActivationBuffer:
             verbose,
         )
 
-        self.output_folder = os.path.join(output_folder, "activations/")
+        self.output_folder = output_folder
+        self.activation_folder = os.path.join(output_folder, "activations/")
         self.number_of_chunks = number_of_chunks
 
         # clear file buffer
         if os.path.isdir(output_folder):
             shutil.rmtree(output_folder)
 
-        make_folder(self.output_folder)
+        make_folder(self.activation_folder)
 
     @torch.no_grad()
     def save_activations(self):
 
-        c_n = self.number_of_chunks
+        activations_n = 0
+
+        c_n = 10  # self.number_of_chunks
 
         for c_i in tqdm(range(c_n), total=c_n, ncols=50):
 
@@ -282,16 +292,23 @@ class SaveActivationBuffer:
             activations = self.buffer.activations
             activations = activations.half()
 
+            activations_n += len(activations)
+
             file_name = f"{c_i}.pt"
-            fname = os.path.join(self.output_folder, file_name)
+            fname = os.path.join(self.activation_folder, file_name)
 
             save_torch(activations, fname)
 
             self.buffer.activations = None
 
-            print(self.buffer.number_examples)
+        stats = {
+            "number_of_activations": activations_n,
+            "numer_of_chunks": self.number_of_chunks,
+            "number_of_examples": self.buffer.number_examples,
+        }
 
-            exit()
+        stats_fname = os.path.join(self.output_folder, "stats.json")
+        save_json(stats, stats_fname)
 
 
 class LoadActivationBuffer:
