@@ -489,6 +489,7 @@ def make_subsampling_save_buffer(sub_rate):
     nn_model = load_model(config)
     nn_model = nn_model.gpt_neox
     nn_model.to(model_device)
+    nn_model.half()
 
     def save_activation_fn(model: TransformersModel, batch):
 
@@ -569,7 +570,7 @@ def make_subsampling_save_buffer(sub_rate):
         number_of_chunks=200,
         output_folder=output_folder,
         post_processing_fns=post_pipe,
-        buffer_size=131072,
+        buffer_size=524288,
         tokenizer_kwargs=tokenizer_kwargs,
         device=acitvations_device,
     )
